@@ -56,3 +56,4 @@ env/
 # 文本文件
 *.txt
 !APS.txt
+!requirements.txt
