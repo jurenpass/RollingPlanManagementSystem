@@ -1,6 +1,9 @@
 # 打包目录
 dist/
 build/
+build_new/
+other/build/
+test_pack/
 
 # Python 缓存
 __pycache__/
@@ -8,21 +11,18 @@ __pycache__/
 *.pyo
 *.pyd
 
-# PyInstaller
-*.spec
+# 临时文件
+*.tmp
+*.temp
 
 # 配置文件（包含用户自定义坐标）
 export_coordinates.json
 
 # 备份目录
-backup/
+计划号/backup/
 
 # 日志文件
 *.log
-
-# 临时文件
-*.tmp
-*.temp
 
 # 编辑器配置
 .vscode/
@@ -38,3 +38,21 @@ Desktop.ini
 # 虚拟环境
 venv/
 env/
+
+# Excel 文件
+*.xls
+*.xlsx
+
+# 数据库文件
+*.db
+
+# JSON 数据文件
+*.json
+!settings.json
+!default_settings.json
+!annotation_conditions.json
+!export_coordinates_default.json
+
+# 文本文件
+*.txt
+!APS.txt
