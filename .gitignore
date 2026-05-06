@@ -1,0 +1,40 @@
+# 打包目录
+dist/
+build/
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# PyInstaller
+*.spec
+
+# 配置文件（包含用户自定义坐标）
+export_coordinates.json
+
+# 备份目录
+backup/
+
+# 日志文件
+*.log
+
+# 临时文件
+*.tmp
+*.temp
+
+# 编辑器配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Windows 系统文件
+Thumbs.db
+Desktop.ini
+
+# 虚拟环境
+venv/
+env/

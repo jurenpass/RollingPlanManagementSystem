@@ -1,0 +1,189 @@
+以下是实现设置页面立即生效的代码和恢复默认值功能的代码：
+
+## 设置页面立即生效的代码
+
+### 1. 坐标输入框实时更新
+```python
+# 实时更新坐标
+def on_coord_change(*args):
+    coord = self.parse_coord(string_var.get())
+    if coord:
+        self.coordinates[coord_key] = coord
+        self.update_status(coord_key, coord)
+        # 立即保存到文件
+        self.save_coordinates()
+string_var.trace_add("write", on_coord_change)
+```
+
+### 2. 计划号间距实时更新
+```python
+# 实时更新计划号间距
+def on_spacing_change(*args):
+    try:
+        self.coordinates["plan_spacing"] = int(self.plan_spacing_var.get())
+        # 立即保存到文件
+        self.save_coordinates()
+    except:
+        pass
+self.plan_spacing_var.trace_add("write", on_spacing_change)
+```
+
+### 3. 纵坐标偏移量实时更新
+```python
+# 实时更新纵坐标偏移量
+def on_offset_change(*args):
+    try:
+        self.coordinates["first_plan_offset"] = int(self.first_plan_offset_var.get())
+        # 立即保存到文件
+        self.save_coordinates()
+    except:
+        pass
+self.first_plan_offset_var.trace_add("write", on_offset_change)
+```
+
+### 4. 自定义窗口名称实时更新
+```python
+# 实时更新自定义窗口名称
+def on_custom_window_change(*args):
+    self.coordinates["custom_window_title"] = self.custom_window_var.get().strip()
+    # 立即保存到文件
+    self.save_coordinates()
+self.custom_window_var.trace_add("write", on_custom_window_change)
+```
+
+### 5. 窗口选择实时更新
+```python
+for text, value in window_options:
+    ttk.Radiobutton(test_settings_frame, text=text, variable=self.test_window_var, value=value, 
+                  command=lambda v=value: (self.coordinates.update({"test_window": v}), 
+                                          self.log(f"测试窗口已设置为: {v}"),
+                                          self.save_coordinates())).pack(anchor=tk.W, padx=10, pady=2)
+```
+
+### 6. 速度设置实时更新
+```python
+for speed in speed_options:
+    ttk.Radiobutton(speed_frame, text=speed, variable=self.export_speed_var, value=speed, 
+                  command=lambda v=speed: (self.coordinates.update({"export_speed": v}),
+                                          self.save_coordinates())).pack(side=tk.LEFT, padx=15)
+```
+
+### 7. 操作提示设置实时更新
+```python
+def on_warning_changed(self):
+    """操作提示开关状态改变时的回调"""
+    self.coordinates["show_operation_warning"] = self.show_warning_var.get()
+    status = "启用" if self.show_warning_var.get() else "禁用"
+    self.log(f"操作提示已{status}")
+    
+    # 立即更新到MainApp的coordinates中
+    if self.main_app:
+        self.main_app.coordinates.update({"show_operation_warning": self.show_warning_var.get()})
+    
+    # 立即保存到文件
+    self.save_coordinates()
+```
+
+### 8. 自动处理设置实时更新
+```python
+def on_auto_process_changed(self):
+    """自动处理开关状态改变时的回调"""
+    self.coordinates["auto_process_after_export"] = self.auto_process_var.get()
+    status = "启用" if self.auto_process_var.get() else "禁用"
+    self.log(f"导出后自动处理已{status}")
+    
+    # 立即更新到MainApp的coordinates中
+    if self.main_app:
+        self.main_app.coordinates.update({"auto_process_after_export": self.auto_process_var.get()})
+    
+    # 立即保存到文件
+    self.save_coordinates()
+```
+
+### 9. 自动打印设置实时更新
+```python
+def on_auto_print_changed(self):
+    """自动打印开关状态改变时的回调"""
+    self.coordinates["auto_print_after_export"] = self.auto_print_var.get()
+    status = "启用" if self.auto_print_var.get() else "禁用"
+    self.log(f"处理后自动打印已{status}")
+    
+    # 立即更新到MainApp的coordinates中
+    if self.main_app:
+        self.main_app.coordinates.update({"auto_print_after_export": self.auto_print_var.get()})
+    
+    # 立即保存到文件
+    self.save_coordinates()
+```
+
+### 10. 调试模式设置实时更新
+```python
+def on_debug_mode_changed(self):
+    """调试模式开关状态改变时的回调"""
+    self.coordinates["debug_mode"] = self.debug_mode_var.get()
+    status = "启用" if self.debug_mode_var.get() else "禁用"
+    self.log(f"调试模式已{status}")
+    
+    # 立即更新到MainApp的coordinates中
+    if self.main_app:
+        self.main_app.coordinates.update({"debug_mode": self.debug_mode_var.get()})
+    
+    # 立即保存到文件
+    self.save_coordinates()
+```
+
+## 恢复默认值功能代码
+
+```python
+def restore_defaults(self):
+    """恢复默认值"""
+    print("restore_defaults方法被调用")
+    import tkinter.messagebox as messagebox
+    if self.custom_messagebox("确认", "确定要恢复默认值吗？", msg_type='yesno'):
+        print("用户确认恢复默认值")
+        
+        # 使用DEFAULT_COORDS中定义的默认值
+        default_coords = self.DEFAULT_COORDS.copy()
+        print(f"默认值: {default_coords}")
+        
+        # 直接更新UI变量
+        self.zhuanglu_tab_var.set(self.format_coord(default_coords["zhuanglu_tab"]))
+        self.zhuanglu_export_var.set(self.format_coord(default_coords["zhuanglu_export_btn"]))
+        self.zhizhi_tab_var.set(self.format_coord(default_coords["zhizhi_tab"]))
+        self.plan_select_var.set(self.format_coord(default_coords["plan_select"]))
+        self.zhizhi_export_var.set(self.format_coord(default_coords["zhizhi_export_btn"]))
+        self.first_plan_var.set(self.format_coord(default_coords["first_plan"]))
+        self.plan_spacing_var.set(str(default_coords["plan_spacing"]))
+        self.first_plan_offset_var.set(str(default_coords["first_plan_offset"]))
+        self.plan_detail_export_var.set(self.format_coord(default_coords["plan_detail_export"]))
+        self.test_window_var.set(default_coords["test_window"])
+        self.export_speed_var.set(default_coords["export_speed"])
+        self.show_warning_var.set(default_coords["show_operation_warning"])
+        self.auto_process_var.set(default_coords["auto_process_after_export"])
+        self.auto_print_var.set(default_coords["auto_print_after_export"])
+        self.debug_mode_var.set(default_coords["debug_mode"])
+        self.custom_window_var.set(default_coords["custom_window_title"])
+        
+        # 更新coordinates
+        self.coordinates = default_coords
+        print(f"已更新coordinates: {self.coordinates}")
+        
+        # 强制更新所有状态
+        for key, value in default_coords.items():
+            self.update_status(key, value)
+        
+        # 立即更新到MainApp
+        if self.main_app:
+            self.main_app.coordinates = default_coords
+            print("已更新主程序坐标")
+        
+        # 保存到文件
+        print(f"保存到文件: {self.config_file}")
+        self.save_coordinates()
+        print("保存完成")
+        
+        # 记录日志
+        self.log("✓ 已恢复默认值")
+```
+
+这些代码实现了设置页面的立即生效功能和恢复默认值功能。当用户修改任何设置时，系统会立即将更改保存到配置文件并更新到主程序中，而不需要点击保存按钮。当用户点击"恢复默认值"按钮时，系统会将所有设置恢复到默认值并保存到配置文件中。

@@ -1,0 +1,794 @@
+[
+  {
+    "coil_number": "62011886",
+    "sequence": 1,
+    "display_sequence": "1",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62011887",
+    "sequence": 2,
+    "display_sequence": "2",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62018373",
+    "sequence": 3,
+    "display_sequence": "3",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019465",
+    "sequence": 4,
+    "display_sequence": "4",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019466",
+    "sequence": 5,
+    "display_sequence": "5",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019523",
+    "sequence": 6,
+    "display_sequence": "6",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019467",
+    "sequence": 7,
+    "display_sequence": "7",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019468",
+    "sequence": 8,
+    "display_sequence": "8",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019469",
+    "sequence": 9,
+    "display_sequence": "9",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019470",
+    "sequence": 10,
+    "display_sequence": "10",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019471",
+    "sequence": 11,
+    "display_sequence": "11",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019472",
+    "sequence": 12,
+    "display_sequence": "12",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019473",
+    "sequence": 13,
+    "display_sequence": "13",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019474",
+    "sequence": 14,
+    "display_sequence": "14",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019475",
+    "sequence": 15,
+    "display_sequence": "15",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019476",
+    "sequence": 16,
+    "display_sequence": "16",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019477",
+    "sequence": 17,
+    "display_sequence": "17",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019478",
+    "sequence": 18,
+    "display_sequence": "18",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019479",
+    "sequence": 19,
+    "display_sequence": "19",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019480",
+    "sequence": 20,
+    "display_sequence": "20",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019481",
+    "sequence": 21,
+    "display_sequence": "21",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019482",
+    "sequence": 22,
+    "display_sequence": "22",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019483",
+    "sequence": 23,
+    "display_sequence": "23",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019484",
+    "sequence": 24,
+    "display_sequence": "24",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019485",
+    "sequence": 25,
+    "display_sequence": "25",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019486",
+    "sequence": 26,
+    "display_sequence": "26",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019487",
+    "sequence": 27,
+    "display_sequence": "27",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019488",
+    "sequence": 28,
+    "display_sequence": "28",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019489",
+    "sequence": 29,
+    "display_sequence": "29",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019490",
+    "sequence": 30,
+    "display_sequence": "30",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019491",
+    "sequence": 31,
+    "display_sequence": "31",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019492",
+    "sequence": 32,
+    "display_sequence": "32",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019493",
+    "sequence": 33,
+    "display_sequence": "33",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019494",
+    "sequence": 34,
+    "display_sequence": "34",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019495",
+    "sequence": 35,
+    "display_sequence": "35",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019496",
+    "sequence": 36,
+    "display_sequence": "36",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019497",
+    "sequence": 37,
+    "display_sequence": "37",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019498",
+    "sequence": 38,
+    "display_sequence": "38",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019499",
+    "sequence": 39,
+    "display_sequence": "39",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019500",
+    "sequence": 40,
+    "display_sequence": "40",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019501",
+    "sequence": 41,
+    "display_sequence": "41",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019502",
+    "sequence": 42,
+    "display_sequence": "42",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019503",
+    "sequence": 43,
+    "display_sequence": "43",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019504",
+    "sequence": 44,
+    "display_sequence": "44",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019505",
+    "sequence": 45,
+    "display_sequence": "45",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019506",
+    "sequence": 46,
+    "display_sequence": "46",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019507",
+    "sequence": 47,
+    "display_sequence": "47",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019508",
+    "sequence": 48,
+    "display_sequence": "48",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019509",
+    "sequence": 49,
+    "display_sequence": "49",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019510",
+    "sequence": 50,
+    "display_sequence": "50",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019511",
+    "sequence": 51,
+    "display_sequence": "51",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019512",
+    "sequence": 52,
+    "display_sequence": "52",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019513",
+    "sequence": 53,
+    "display_sequence": "53",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019514",
+    "sequence": 54,
+    "display_sequence": "54",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019515",
+    "sequence": 55,
+    "display_sequence": "55",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019516",
+    "sequence": 56,
+    "display_sequence": "56",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019517",
+    "sequence": 57,
+    "display_sequence": "57",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019518",
+    "sequence": 58,
+    "display_sequence": "58",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019519",
+    "sequence": 59,
+    "display_sequence": "59",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019524",
+    "sequence": 60,
+    "display_sequence": "60",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019525",
+    "sequence": 61,
+    "display_sequence": "61",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019526",
+    "sequence": 62,
+    "display_sequence": "62",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019527",
+    "sequence": 63,
+    "display_sequence": "63",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019528",
+    "sequence": 64,
+    "display_sequence": "64",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019529",
+    "sequence": 65,
+    "display_sequence": "65",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019530",
+    "sequence": 66,
+    "display_sequence": "66",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019531",
+    "sequence": 67,
+    "display_sequence": "67",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019532",
+    "sequence": 68,
+    "display_sequence": "68",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019533",
+    "sequence": 69,
+    "display_sequence": "69",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019534",
+    "sequence": 70,
+    "display_sequence": "70",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019535",
+    "sequence": 71,
+    "display_sequence": "71",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019536",
+    "sequence": 72,
+    "display_sequence": "72",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019537",
+    "sequence": 73,
+    "display_sequence": "73",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019538",
+    "sequence": 74,
+    "display_sequence": "74",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019539",
+    "sequence": 75,
+    "display_sequence": "75",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019540",
+    "sequence": 76,
+    "display_sequence": "76",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019541",
+    "sequence": 77,
+    "display_sequence": "77",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019542",
+    "sequence": 78,
+    "display_sequence": "78",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019543",
+    "sequence": 79,
+    "display_sequence": "79",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019544",
+    "sequence": 80,
+    "display_sequence": "80",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019545",
+    "sequence": 81,
+    "display_sequence": "81",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019546",
+    "sequence": 82,
+    "display_sequence": "82",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019547",
+    "sequence": 83,
+    "display_sequence": "83",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019548",
+    "sequence": 84,
+    "display_sequence": "84",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019549",
+    "sequence": 85,
+    "display_sequence": "85",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019550",
+    "sequence": 86,
+    "display_sequence": "86",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019583",
+    "sequence": 87,
+    "display_sequence": "87",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019584",
+    "sequence": 88,
+    "display_sequence": "88",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019592",
+    "sequence": 89,
+    "display_sequence": "89",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019588",
+    "sequence": 90,
+    "display_sequence": "90",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019589",
+    "sequence": 91,
+    "display_sequence": "91",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019593",
+    "sequence": 92,
+    "display_sequence": "92",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019594",
+    "sequence": 93,
+    "display_sequence": "93",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019595",
+    "sequence": 94,
+    "display_sequence": "94",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019551",
+    "sequence": 95,
+    "display_sequence": "95",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019552",
+    "sequence": 96,
+    "display_sequence": "96",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019553",
+    "sequence": 97,
+    "display_sequence": "97",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019585",
+    "sequence": 98,
+    "display_sequence": "98",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019586",
+    "sequence": 99,
+    "display_sequence": "99",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019587",
+    "sequence": 100,
+    "display_sequence": "100",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019557",
+    "sequence": 101,
+    "display_sequence": "101",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019590",
+    "sequence": 102,
+    "display_sequence": "102",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019591",
+    "sequence": 103,
+    "display_sequence": "103",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019554",
+    "sequence": 104,
+    "display_sequence": "104",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019555",
+    "sequence": 105,
+    "display_sequence": "105",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019556",
+    "sequence": 106,
+    "display_sequence": "106",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019596",
+    "sequence": 107,
+    "display_sequence": "107",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019558",
+    "sequence": 108,
+    "display_sequence": "108",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019559",
+    "sequence": 109,
+    "display_sequence": "109",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019560",
+    "sequence": 110,
+    "display_sequence": "110",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019561",
+    "sequence": 111,
+    "display_sequence": "111",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019562",
+    "sequence": 112,
+    "display_sequence": "112",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019563",
+    "sequence": 113,
+    "display_sequence": "113",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019564",
+    "sequence": 114,
+    "display_sequence": "114",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019565",
+    "sequence": 115,
+    "display_sequence": "115",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019566",
+    "sequence": 116,
+    "display_sequence": "116",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019567",
+    "sequence": 117,
+    "display_sequence": "117",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019568",
+    "sequence": 118,
+    "display_sequence": "118",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019569",
+    "sequence": 119,
+    "display_sequence": "119",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019570",
+    "sequence": 120,
+    "display_sequence": "120",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019571",
+    "sequence": 121,
+    "display_sequence": "121",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019572",
+    "sequence": 122,
+    "display_sequence": "122",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019573",
+    "sequence": 123,
+    "display_sequence": "123",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019574",
+    "sequence": 124,
+    "display_sequence": "124",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019575",
+    "sequence": 125,
+    "display_sequence": "125",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019576",
+    "sequence": 126,
+    "display_sequence": "126",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019577",
+    "sequence": 127,
+    "display_sequence": "127",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019578",
+    "sequence": 128,
+    "display_sequence": "128",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019579",
+    "sequence": 129,
+    "display_sequence": "129",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019580",
+    "sequence": 130,
+    "display_sequence": "130",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019581",
+    "sequence": 131,
+    "display_sequence": "131",
+    "insert_position": "全部打印"
+  },
+  {
+    "coil_number": "62019582",
+    "sequence": 132,
+    "display_sequence": "132",
+    "insert_position": "全部打印"
+  }
+]

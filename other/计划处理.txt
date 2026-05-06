@@ -1,0 +1,205 @@
+def run_excel_macro(self, file_path, move_to_backup=False):
+    """直接在Python中实现与宏相同的功能，避免与Excel的VBE交互
+    
+    Args:
+        file_path: 文件路径
+        move_to_backup: 是否将处理后的文件移动到backup文件夹
+    """
+    try:
+        import xlwt
+        from xlutils.copy import copy
+        
+        # 打开Excel文件
+        success, result = self.safe_read_excel(file_path, max_retries=3, retry_delay=0.5)
+        if not success:
+            print(f"读取文件失败: {result}")
+            return False
+        workbook = result
+        sheet = workbook.sheet_by_index(0)
+        
+        # 创建一个可写的副本
+        writable_workbook = copy(workbook)
+        writable_sheet = writable_workbook.get_sheet(0)
+        
+        # 定义目标列顺序（包含"轧宽+（余量）"和"装炉顺序号"字段）
+        target_columns = [
+            "顺序号", "钢卷号", "牌号（钢级）", "层号", "去向", "坯厚", "坯宽", "坯长",
+            "中间坯厚度设定值", "轧厚", "轧宽+（余量）", "订货宽度", "切边方式",
+            "板坯宽度调宽标记", "侧压量", "碳", "RT2目标值", "硬度组", "粗轧报信",
+            "装炉顺序号", "板坯头部宽度", "板坯尾部宽度", "计划号", "热轧产品分类",
+            "炼钢钢种", "宽度负公差", "宽度正公差", "板坯炉后拒收次数", "轧宽"
+        ]
+        
+        # 定义字段名映射
+        字段名映射 = {
+            "顺序号": "序号",
+            "钢卷号": "钢卷号",
+            "坯长": "坯长",
+            "坯宽": "坯宽",
+            "轧宽": "原轧宽",
+            "坯厚": "坯厚",
+            "轧厚": "轧厚",
+            "中间坯厚度设定值": "中厚",
+            "板坯宽度调宽标记": "调宽",
+            "侧压量": "减宽",
+            "宽度负公差": "负公差",
+            "宽度正公差": "正公差",
+            "RT2目标值": "RT2",
+            "硬度组": "强度",
+            "订货宽度": "订宽",
+            "切边方式": "切边",
+            "碳": "公差带",
+            "粗轧报信": "粗轧报信",
+            "板坯炉后拒收次数": "回炉坯",
+            "层号": "除鳞",
+            "轧宽+（余量）": "轧宽",
+            "装炉顺序号": "装炉顺"
+        }
+        
+        # 1. 加载装炉顺序.xls文件，构建钢卷号到装炉顺序号和轧宽余量的映射
+        装炉顺序映射 = {}
+        轧宽余量映射 = {}
+        装炉顺序文件 = os.path.join(self.plan_dir, "装炉顺序.xls")
+        
+        # 读取装炉顺序文件
+        if os.path.exists(装炉顺序文件):
+            result = self.read_excel_file(装炉顺序文件)
+            if result is not None:
+                headers, data_rows = result
+                
+                # 查找相关列
+                装炉钢卷号列 = headers.index("钢卷号") if "钢卷号" in headers else -1
+                装炉顺序号列 = headers.index("装炉顺序号") if "装炉顺序号" in headers else -1
+                轧宽余量列 = -1
+                if "轧宽（+余量）" in headers:
+                    轧宽余量列 = headers.index("轧宽（+余量）")
+                elif "轧宽+（余量）" in headers:
+                    轧宽余量列 = headers.index("轧宽+（余量）")
+                
+                # 构建映射
+                if 装炉钢卷号列 != -1:
+                    for row_data in data_rows:
+                        if 装炉钢卷号列 < len(row_data):
+                            钢卷号 = row_data[装炉钢卷号列]
+                            if 钢卷号:
+                                钢卷号字符串 = str(钢卷号)
+                                原装炉顺序号 = None
+                                轧宽余量值 = None
+                                
+                                if 装炉顺序号列 != -1 and 装炉顺序号列 < len(row_data):
+                                    try:
+                                        原装炉顺序号 = int(row_data[装炉顺序号列])
+                                    except (ValueError, TypeError):
+                                        原装炉顺序号 = 0
+                                
+                                if 轧宽余量列 != -1 and 轧宽余量列 < len(row_data):
+                                    轧宽余量值 = row_data[轧宽余量列]
+                                
+                                # 构建映射
+                                装炉顺序映射[钢卷号字符串] = 原装炉顺序号
+                                if 轧宽余量值 is not None:
+                                    轧宽余量映射[钢卷号字符串] = 轧宽余量值
+        
+        # 2. 查找当前列名
+        current_columns = []
+        for i in range(sheet.ncols):
+            current_columns.append(sheet.cell_value(0, i))
+        
+        # 3. 创建新的工作簿
+        new_workbook = xlwt.Workbook()
+        new_sheet = new_workbook.add_sheet(sheet.name)
+        
+        # 预留3行给表头
+        表头行数 = 3
+        数据起始行 = 表头行数
+        
+        # 用于存储处理后的数据
+        处理后的数据列表 = []
+        
+        # 创建各种样式
+        # ... 样式创建代码 ...
+        
+        # 4. 设置列宽
+        # ... 列宽设置代码 ...
+        
+        # 5. 遍历数据行进行处理
+        for row_idx in range(1, sheet.nrows):
+            # 构建当前行的数据映射
+            row_data = {}
+            for col_idx, col_name in enumerate(current_columns):
+                row_data[col_name] = sheet.cell_value(row_idx, col_idx)
+            
+            # 重置减宽超标标记
+            row_data["减宽超标"] = False
+            row_data["需标注"] = False
+            
+            # 检查坯厚是否>230
+            # ... 坯厚检查代码 ...
+            
+            # 填充"装炉顺序号"字段
+            if "钢卷号" in row_data and "装炉顺序号" in target_columns:
+                钢卷号值 = row_data["钢卷号"]
+                if 钢卷号值:
+                    钢卷号字符串 = str(钢卷号值)
+                    if 钢卷号字符串 in 装炉顺序映射:
+                        row_data["装炉顺序号"] = 装炉顺序映射[钢卷号字符串]
+            
+            # 从装炉顺序.xls中获取"轧宽+（余量）"字段的值
+            if "钢卷号" in row_data and "轧宽+（余量）" in target_columns:
+                钢卷号值 = row_data["钢卷号"]
+                if 钢卷号值:
+                    钢卷号字符串 = str(钢卷号值)
+                    if 钢卷号字符串 in 轧宽余量映射:
+                        row_data["轧宽+（余量）"] = 轧宽余量映射[钢卷号字符串]
+            
+            # 1. 钢种转换功能
+            # ... 钢种转换代码 ...
+            
+            # 2. 填充除鳞字段
+            # ... 除鳞字段填充代码 ...
+            
+            # 2.5. 检查牌号是否在APS列表中
+            # ... APS检查代码 ...
+            
+            # 3. 填充去向字段
+            # ... 去向字段填充代码 ...
+            
+            # 4. 硬度组字段转换
+            # ... 硬度组转换代码 ...
+            
+            # 4.5. 比较轧宽+（余量）和轧宽
+            # ... 公差调整代码 ...
+            
+            # 5. 填充公差带字段
+            # ... 公差带填充代码 ...
+            
+            # 6. 处理调宽字段
+            # ... 调宽处理代码 ...
+            
+            # 7. 处理切边字段
+            # ... 切边字段处理代码 ...
+            
+            # 8. 检查轧宽+（余量）是否<=930
+            # ... 低轧宽检查代码 ...
+            
+            # 将处理后的数据添加到列表
+            处理后的数据列表.append(row_data)
+        
+        # 6. 添加表头
+        # ... 表头添加代码 ...
+        
+        # 7. 设置页面打印参数
+        # ... 页面打印参数设置代码 ...
+        
+        # 8. 保存新文件
+        new_workbook.save(file_path)
+        
+        # 9. 使用win32com设置打印标题行
+        # ... 打印标题行设置代码 ...
+        
+        # 10. 将处理完成的文件剪切到backup文件夹（如果需要）
+        if move_to_backup:
+            shutil.move(file_path, os.path.join(self.plan_dir, "backup", os.path.basename(file_path)))
+        
+    except Exception as e:
+        raise e

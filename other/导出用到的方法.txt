@@ -1,0 +1,868 @@
+toolName: search_by_regex
+            
+status: success
+          
+query: def export_zhuanglu_shunxu|def export_zhizhi_plan_list|def read_zhizhi_plan_list_with_coords|def export_single_plan_detail|def refresh_plan_list|def mark_plan_as_exported
+          
+
+        
+            
+toolName: view_files
+            
+status: success
+          
+            
+filePath: g:\自动轧制计划打印\main_app.py
+          
+
+        
+            
+toolName: view_files
+            
+status: success
+          
+            
+filePath: g:\自动轧制计划打印\main_app.py
+          
+
+        
+            
+toolName: view_files
+            
+status: success
+          
+            
+filePath: g:\自动轧制计划打印\main_app.py
+          
+
+        
+            
+toolName: view_files
+            
+status: success
+          
+            
+filePath: g:\自动轧制计划打印\main_app.py
+          
+
+        
+            
+toolName: view_files
+            
+status: success
+          
+            
+filePath: g:\自动轧制计划打印\main_app.py
+          
+
+        
+            
+toolName: view_files
+            
+status: success
+          
+            
+filePath: g:\自动轧制计划打印\main_app.py
+          
+
+        
+            
+toolName: view_files
+            
+status: success
+          
+            
+filePath: g:\自动轧制计划打印\main_app.py
+          
+以下是您请求的所有方法的完整代码：
+
+## 1. `export_zhuanglu_shunxu()` - 导出装炉顺序.xls
+```python
+def export_zhuanglu_shunxu(self):
+    """导出装炉顺序 - 严格按照点点精灵脚本步骤执行"""
+    log_lines = ["开始导出装炉顺序..."]
+    
+    # 文件路径
+    zhuanglu_file = os.path.join(self.plan_dir, "装炉顺序.xls")
+    
+    # 从配置中读取窗口标题
+    window_title = self.coordinates.get("test_window", "BGCM1-宝钢股份多基地")
+    
+    # 从配置中读取坐标
+    zhuanglu_tab = self.coordinates.get("zhuanglu_tab", (261, 87))
+    zhuanglu_export = self.coordinates.get("zhuanglu_export_btn", (990, 831))
+    
+    # 步骤1: 激活目标窗口
+    log_lines.append(f"[1/9] 激活目标窗口: {window_title}...")
+    try:
+        if not self.activate_window(window_title):
+            log_lines.append("✗ 激活窗口失败")
+            return False, "\n".join(log_lines)
+        log_lines.append(f"✓ 已激活窗口: {window_title}")
+        time.sleep(0.5)  # 激活窗口后延迟
+    except Exception as e:
+        log_lines.append(f"✗ 激活窗口失败: {str(e)}")
+        return False, "\n".join(log_lines)
+    
+    # 步骤2: 鼠标点击 - 装炉顺作成管理画面
+    log_lines.append(f"[2/9] 鼠标点击: 装炉顺作成管理画面 @ {zhuanglu_tab}...")
+    pyautogui.moveTo(zhuanglu_tab[0], zhuanglu_tab[1])
+    pyautogui.click()
+    time.sleep(0.5)  # 点击后延迟
+    log_lines.append("点击完成")
+    
+    # 步骤3: 键盘按键 - F2
+    log_lines.append("[3/9] 键盘按键: F2...")
+    pyautogui.press('f2')
+    time.sleep(0.5)  # F2后延迟
+    log_lines.append("F2键已按下")
+
+    # 步骤4: 延迟 - 500ms
+    log_lines.append("[4/9] 延迟: 500ms...")
+    time.sleep(0.5)
+    log_lines.append("延迟完成")
+
+    # 步骤5: 鼠标点击 - 导出按钮
+    log_lines.append(f"[5/9] 鼠标点击: 导出按钮 @ {zhuanglu_export}...")
+    pyautogui.moveTo(zhuanglu_export[0], zhuanglu_export[1])
+    pyautogui.click()
+    time.sleep(1.0)  # 点击后延迟，等待保存对话框弹出
+    log_lines.append("导出按钮点击完成，等待保存对话框...")
+
+    # 步骤6: 键盘按键 - 输入"装炉顺序"
+    log_lines.append("[6/9] 键盘按键: 输入'装炉顺序'...")
+    # 等待对话框完全弹出并获取焦点
+    time.sleep(1.0)
+    # 使用剪贴板粘贴方式输入，更可靠
+    import pyperclip
+    pyperclip.copy("装炉顺序")
+    time.sleep(0.2)
+    pyautogui.hotkey('ctrl', 'v')
+    time.sleep(0.5)  # 输入后延迟
+    log_lines.append("文本已输入")
+
+    # 步骤7: 键盘按键 - Return
+    log_lines.append("[7/9] 键盘按键: Return...")
+    pyautogui.press('return')
+    time.sleep(0.3)  # 回车后延迟
+    log_lines.append("回车键已按下")
+
+    # 步骤8: 键盘按键 - Left
+    log_lines.append("[8/9] 键盘按键: Left...")
+    pyautogui.press('left')
+    time.sleep(0.2)  # 左方向键后延迟
+    log_lines.append("左方向键已按下")
+
+    # 步骤9: 键盘按键 - Return
+    log_lines.append("[9/9] 键盘按键: Return...")
+    pyautogui.press('return')
+    log_lines.append("回车键已按下")
+    
+    # 等待导出完成
+    log_lines.append("等待导出完成...")
+    time.sleep(3)
+    
+    # 关闭Excel窗口（可选，根据实际情况决定）
+    log_lines.append("尝试关闭Excel窗口...")
+    try:
+        # 按Alt+F4关闭当前窗口
+        pyautogui.hotkey('alt', 'f4')
+        time.sleep(1)
+        # 可能会弹出保存提示，按N（不保存）
+        pyautogui.press('n')
+        time.sleep(1)
+        log_lines.append("Excel窗口已关闭")
+    except Exception as e:
+        log_lines.append(f"关闭Excel窗口失败: {str(e)}")
+    
+    log_lines.append("装炉顺序导出操作完成")
+    return True, "\n".join(log_lines)
+```
+
+## 2. `export_zhizhi_plan_list(test_window)` - 导出总计划号列表
+```python
+def export_zhizhi_plan_list(self, test_window=None, test_mode=False):
+    """导出总计划号列表
+    
+    参数:
+        test_window: 测试窗口标题，如果为None则自动选择
+        test_mode: 是否为测试模式，测试模式下每一步都会暂停等待用户确认
+    """
+    try:
+        # 选择测试窗口
+        if test_window is None:
+            test_window = self.select_test_window()
+        if not test_window:
+            print("✗ 用户取消选择测试窗口")
+            return False
+        
+        print("\n=== 导出总计划号列表 ===")
+        if test_mode:
+            print("【测试模式】每一步都会暂停等待确认")
+        
+        # 从配置中读取坐标
+        zhizhi_tab = self.coordinates.get("zhizhi_tab", (92, 85))
+        plan_select = self.coordinates.get("plan_select", (860, 134))
+        zhizhi_export_btn = self.coordinates.get("zhizhi_export_btn", (77, 501))
+        
+        # 步骤1: 激活窗口
+        print("[1/10] 激活窗口...")
+        if not self.activate_window(test_window):
+            print("✗ 激活窗口失败")
+            return False
+        time.sleep(0.5)
+        if test_mode:
+            if not messagebox.askyesno("测试", "步骤1完成：窗口已激活\n是否继续？"):
+                return False
+        
+        # 步骤2: 点击轧制计划管理标签
+        print(f"[2/10] 点击轧制计划管理标签 {zhizhi_tab}...")
+        pyautogui.moveTo(zhizhi_tab[0], zhizhi_tab[1])
+        pyautogui.click()
+        time.sleep(0.5)
+        if test_mode:
+            if not messagebox.askyesno("测试", "步骤2完成：已点击轧制计划管理标签\n是否继续？"):
+                return False
+        
+        # 步骤3: 选择计划号
+        print(f"[3/10] 选择计划号 {plan_select}...")
+        pyautogui.moveTo(plan_select[0], plan_select[1])
+        pyautogui.click()
+        time.sleep(0.3)
+        if test_mode:
+            if not messagebox.askyesno("测试", "步骤3完成：已选择计划号\n是否继续？"):
+                return False
+        
+        # 步骤4: 按Home键选择所有计划号
+        print("[4/10] 按Home键选择所有计划号...")
+        pyautogui.press('home')
+        time.sleep(0.5)
+        print("  -> 按回车键确认选择...")
+        pyautogui.press('return')
+        time.sleep(0.5)
+        if test_mode:
+            if not messagebox.askyesno("测试", "步骤4完成：已按Home键和回车键\n是否继续？"):
+                return False
+        
+        # 步骤5: 按F2刷新计划主体信息列表
+        print("[5/10] 按F2刷新计划主体信息列表...")
+        pyautogui.press('f2')
+        time.sleep(0.5)
+        if test_mode:
+            if not messagebox.askyesno("测试", "步骤5完成：已按F2刷新\n是否继续？"):
+                return False
+        
+        # 步骤6: 点击导出计划主体信息按钮
+        print(f"[6/10] 点击导出计划主体信息 {zhizhi_export_btn}...")
+        pyautogui.moveTo(zhizhi_export_btn[0], zhizhi_export_btn[1])
+        pyautogui.click()
+        time.sleep(1.5)  # 增加等待时间，确保保存对话框弹出
+        if test_mode:
+            if not messagebox.askyesno("测试", "步骤6完成：已点击导出按钮，保存对话框应该已弹出\n是否继续？"):
+                return False
+        
+        # 步骤7: 输入文件名"总计划号列表"
+        print("[7/10] 输入文件名'总计划号列表'...")
+        # 等待对话框完全弹出并获取焦点
+        time.sleep(0.5)
+        # 使用剪贴板粘贴方式输入，更可靠（参考装炉顺序导出）
+        import pyperclip
+        pyperclip.copy("总计划号列表")
+        time.sleep(0.2)
+        pyautogui.hotkey('ctrl', 'v')
+        time.sleep(0.5)  # 输入后延迟
+        print("文件名已输入")
+        if test_mode:
+            if not messagebox.askyesno("测试", "步骤7完成：已输入文件名'总计划号列表'\n是否继续？"):
+                return False
+        
+        # 步骤8: 按回车确认
+        print("[8/10] 按回车确认...")
+        pyautogui.press('return')
+        time.sleep(0.3)
+        if test_mode:
+            if not messagebox.askyesno("测试", "步骤8完成：已按回车\n是否继续？"):
+                return False
+        
+        # 步骤9: 按左方向键（替换覆盖旧文件）
+        print("[9/10] 按左方向键选择覆盖...")
+        pyautogui.press('left')
+        time.sleep(0.2)
+        if test_mode:
+            if not messagebox.askyesno("测试", "步骤9完成：已按左方向键\n是否继续？"):
+                return False
+        
+        # 步骤10: 按回车确认保存
+        print("[10/10] 按回车确认保存...")
+        pyautogui.press('return')
+        time.sleep(2)  # 等待保存完成
+        if test_mode:
+            messagebox.showinfo("测试", "步骤10完成：已保存文件")
+        
+        print("✓ 总计划号列表导出成功")
+        return True
+    except Exception as e:
+        print(f"✗ 导出总计划号列表失败: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False
+```
+
+## 3. `read_zhizhi_plan_list_with_coords()` - 读取总计划号列表并计算坐标
+```python
+def read_zhizhi_plan_list_with_coords(self):
+    """读取总计划号列表文件，返回计划号到坐标的映射字典
+    
+    根据设置页面中的第一个计划号坐标和计划号间距，
+    计算每个计划号的实际屏幕坐标。
+    
+    返回: {计划号: (x, y)} 的字典
+    """
+    try:
+        import os
+        
+        # 总计划号列表文件路径
+        file_path = os.path.join(self.plan_dir, "总计划号列表.xls")
+        
+        if not os.path.exists(file_path):
+            print(f"总计划号列表文件不存在: {file_path}")
+            return None
+        
+        print(f"读取总计划号列表文件并计算坐标: {file_path}")
+        
+        # 使用副本读取策略
+        temp_file = None
+        try:
+            # 尝试直接读取
+            success, result = self.safe_read_excel(file_path, max_retries=3, retry_delay=0.5)
+            if not success:
+                print(f"直接读取失败: {result}，尝试使用副本...")
+                raise PermissionError(result)
+        except PermissionError:
+            print(f"原文件被占用，尝试使用副本读取...")
+            temp_file = file_path + ".tmp"
+            shutil.copy2(file_path, temp_file)
+            print(f"已创建临时副本: {temp_file}")
+            success, result = self.safe_read_excel(temp_file, max_retries=3, retry_delay=0.5)
+            if not success:
+                print(f"副本读取也失败: {result}")
+                return None
+        
+        workbook = result
+        sheet = workbook.sheet_by_index(0)
+        
+        # 查找"序号"列和"计划号"列
+        seq_col = -1  # 序号列
+        plan_col = -1  # 计划号列
+        
+        for col in range(sheet.ncols):
+            cell_value = sheet.cell_value(0, col)
+            if cell_value == "序号":
+                seq_col = col
+            elif cell_value == "计划号":
+                plan_col = col
+        
+        if plan_col == -1:
+            print("未找到'计划号'列，尝试使用第一列")
+            plan_col = 0
+        
+        print(f"找到列: 序号列={seq_col}, 计划号列={plan_col}")
+        
+        # 从配置中读取第一个计划号坐标、间距和偏移量
+        first_plan = self.coordinates.get("first_plan", (239, 208))
+        plan_spacing = self.coordinates.get("plan_spacing", 21)
+        # 第一个计划号的纵坐标偏移量（用于校准中点位置）
+        first_plan_offset = self.coordinates.get("first_plan_offset", 0)
+        
+        first_x = first_plan[0]
+        first_y = first_plan[1] + first_plan_offset  # 应用偏移量校准
+        
+        print(f"第一个计划号原始坐标: ({first_plan[0]}, {first_plan[1]})")
+        print(f"第一个计划号偏移量: {first_plan_offset}")
+        print(f"第一个计划号校准后坐标: ({first_x}, {first_y})")
+        print(f"计划号间距: {plan_spacing} 像素")
+        
+        # 读取计划号并计算坐标
+        plan_coord_map = {}
+        
+        for row in range(1, sheet.nrows):
+            # 读取序号（如果有序号列）
+            seq_value = None
+            if seq_col != -1:
+                seq_cell = sheet.cell_value(row, seq_col)
+                if seq_cell:
+                    if isinstance(seq_cell, float):
+                        seq_value = int(seq_cell)
+                    else:
+                        try:
+                            seq_value = int(str(seq_cell).strip())
+                        except:
+                            seq_value = row  # 如果转换失败，使用行号
+            else:
+                seq_value = row  # 如果没有序号列，使用行号作为序号
+            
+            # 读取计划号
+            cell_value = sheet.cell_value(row, plan_col)
+            if cell_value:
+                # 处理可能的浮点数格式
+                if isinstance(cell_value, float):
+                    if cell_value == int(cell_value):
+                        plan_no = str(int(cell_value)).strip()
+                    else:
+                        plan_no = str(cell_value).strip()
+                else:
+                    plan_no = str(cell_value).strip()
+                
+                if plan_no:
+                    # 计算坐标：序号从1开始，所以减1得到索引
+                    # 第一个计划号(序号=1)的索引是0，使用first_y
+                    # 第二个计划号(序号=2)的索引是1，使用first_y + plan_spacing
+                    index = seq_value - 1 if seq_value else row - 1
+                    coord_y = first_y + (index * plan_spacing)
+                    coord_x = first_x
+                    
+                    plan_coord_map[plan_no] = (coord_x, coord_y)
+                    print(f"  计划号 {plan_no}: 序号={seq_value}, 索引={index}, 坐标=({coord_x}, {coord_y})")
+        
+        print(f"\n从总计划号列表计算了 {len(plan_coord_map)} 个计划号的坐标")
+        
+        # 释放workbook资源
+        try:
+            workbook.release_resources()
+        except:
+            pass
+        
+        # 清理临时文件
+        if temp_file and os.path.exists(temp_file):
+            try:
+                os.remove(temp_file)
+                print(f"已删除临时副本")
+            except:
+                pass
+        
+        return plan_coord_map
+        
+    except Exception as e:
+        print(f"读取总计划号列表并计算坐标失败: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        # 确保释放资源
+        try:
+            if 'workbook' in locals():
+                workbook.release_resources()
+        except:
+            pass
+        # 清理临时文件
+        if temp_file and os.path.exists(temp_file):
+            try:
+                os.remove(temp_file)
+            except:
+                pass
+        return None
+```
+
+## 4. `export_single_plan_detail(plan_no, coord, plan_detail_export_btn, test_window)` - 导出单个计划号明细
+```python
+def export_single_plan_detail(self, plan_no, plan_coord, plan_detail_export_btn=None, test_window=None):
+    """导出单个计划号的明细
+    
+    按照图片中的步骤执行：
+    1. 鼠标点击计划号坐标
+    2. 延迟500ms
+    3. 鼠标点击导出计划明细按钮
+    4. 键盘输入计划号
+    5. 按回车确认
+    6. 按左方向键（替换覆盖）
+    7. 按回车确认
+    
+    参数:
+        plan_no: 计划号
+        plan_coord: 计划号的坐标 (x, y)
+        plan_detail_export_btn: 导出计划明细按钮坐标，如果为None则使用配置中的坐标
+        test_window: 测试窗口标题
+        
+    返回:
+        True - 导出成功
+        False - 导出失败
+    """
+    try:
+        print(f"\n=== 导出计划 {plan_no} 的明细 ===")
+        print(f"计划号坐标: {plan_coord}")
+        
+        # 选择测试窗口
+        if test_window is None:
+            test_window = self.select_test_window()
+        if not test_window:
+            print("✗ 用户取消选择测试窗口")
+            return False
+        
+        # 激活窗口
+        if not self.activate_window(test_window):
+            print("✗ 激活窗口失败")
+            return False
+        time.sleep(0.3)
+        
+        # 获取导出计划明细按钮坐标
+        if plan_detail_export_btn is None:
+            plan_detail_export_btn = self.coordinates.get("plan_detail_export", (79, 870))
+        
+        # 步骤1: 鼠标点击计划号坐标
+        print(f"[1/7] 点击计划号 {plan_no} 坐标 {plan_coord}...")
+        pyautogui.moveTo(plan_coord[0], plan_coord[1])
+        pyautogui.click()
+        time.sleep(0.5)  # 延迟500ms
+        
+        # 步骤2: 鼠标点击导出计划明细按钮
+        print(f"[2/7] 点击导出计划明细按钮 {plan_detail_export_btn}...")
+        pyautogui.moveTo(plan_detail_export_btn[0], plan_detail_export_btn[1])
+        pyautogui.click()
+        time.sleep(0.5)  # 等待保存对话框弹出
+        
+        # 步骤3: 键盘输入计划号（使用剪贴板粘贴）
+        print(f"[3/7] 输入计划号 '{plan_no}'...")
+        import pyperclip
+        pyperclip.copy(plan_no)
+        time.sleep(0.2)
+        pyautogui.hotkey('ctrl', 'v')
+        time.sleep(0.3)
+        
+        # 步骤4: 按回车确认
+        print("[4/7] 按回车确认...")
+        pyautogui.press('return')
+        time.sleep(0.3)
+        
+        # 步骤5: 按左方向键（替换覆盖旧文件）
+        print("[5/7] 按左方向键选择覆盖...")
+        pyautogui.press('left')
+        time.sleep(0.2)
+        
+        # 步骤6: 按回车确认保存
+        print("[6/7] 按回车确认保存...")
+        pyautogui.press('return')
+        time.sleep(2)  # 等待保存完成
+        
+        print(f"✓ 计划 {plan_no} 明细导出成功")
+        return True
+        
+    except Exception as e:
+        print(f"✗ 导出计划 {plan_no} 明细失败: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False
+```
+
+## 5. `refresh_plan_list(export_zhuanglu=False)` - 刷新计划号列表
+```python
+def refresh_plan_list(self, export_zhuanglu=False):
+    """刷新计划号列表，标注状态
+    
+    参数:
+        export_zhuanglu: 是否导出装炉顺序（默认False，刷新按钮不执行导出）
+    """
+    try:
+        import time
+        print(f"\n[{time.strftime('%H:%M:%S')}] 开始刷新...")
+        
+        # 重置进度条
+        self.reset_refresh_progress()
+        
+        # 注意：刷新按钮不再执行导出操作，只读取已有的装炉顺序文件
+        # 导出操作由自动导出按钮统一处理
+        if export_zhuanglu:
+            print("注意：刷新功能不再执行导出操作，请使用自动导出按钮")
+        
+        # 扫描计划打印目录中的文件
+        print("扫描计划打印目录中的装炉顺序.xls文件...")
+        self.update_refresh_progress(10)  # 10% - 开始扫描
+        
+        # 重新加载已处理计划号记录（支持手动清空后刷新）
+        self.processed_plans = self.load_processed_plans()
+        print(f"已重新加载已处理记录: {len(self.processed_plans)} 个")
+        
+        # 加载已打印记录
+        self.printed_plans = self.load_printed_plans()
+        print(f"已重新加载已打印记录: {len(self.printed_plans)} 个")
+        
+        # 扫描目录中的文件（包括backup目录，用于显示已打印状态）
+        existing_plans = self.scan_plan_files(include_backup=True)
+        print(f"扫描到 {len(existing_plans)} 个有效文件")
+        print(f"文件中的计划号: {list(existing_plans.keys())}")
+        self.update_refresh_progress(30)  # 30% - 文件扫描完成
+        
+        # 读取装炉顺序文件
+        装炉顺序文件 = os.path.join(self.plan_dir, "装炉顺序.xls")
+        print(f"正在读取装炉顺序文件: {装炉顺序文件}")
+        
+        if not os.path.exists(装炉顺序文件):
+            self.reset_refresh_progress()
+            # 检查目录下有什么文件
+            try:
+                files_in_dir = os.listdir(self.plan_dir)
+                xls_files = [f for f in files_in_dir if f.endswith('.xls') or f.endswith('.xlsx')]
+                files_info = f"\n\n目录 {self.plan_dir} 中的Excel文件:\n" + "\n".join(xls_files[:10]) if xls_files else f"\n\n目录 {self.plan_dir} 中没有Excel文件"
+            except Exception as e:
+                files_info = f"\n\n无法读取目录: {str(e)}"
+            
+            error_msg = f"文件不存在: {装炉顺序文件}\n\n请检查:\n1. 文件是否在该路径\n2. 文件名是否正确(应为: 装炉顺序.xls)\n3. 自动导出步骤1是否成功执行{files_info}"
+            print(error_msg)
+            messagebox.showerror("错误", error_msg)
+            return
+        
+        # 使用副本读取策略，避免文件被占用的问题
+        print("使用副本读取策略读取装炉顺序文件...")
+        try:
+            result = read_file_with_copy(
+                装炉顺序文件, 
+                self.read_excel_file,
+                max_retries=3, 
+                retry_delay=0.5
+            )
+        except Exception as e:
+            print(f"副本读取失败: {e}")
+            # 如果副本读取也失败，尝试等待解锁
+            if is_file_locked(装炉顺序文件):
+                print(f"文件被锁定，尝试等待解锁...")
+                if wait_for_file_unlock(装炉顺序文件, timeout=5, check_interval=0.3):
+                    result = self.read_excel_file(装炉顺序文件, max_retries=3, retry_delay=0.5)
+                else:
+                    self.reset_refresh_progress()
+                    error_msg = f"装炉顺序文件被占用\n路径: {装炉顺序文件}\n\n请手动关闭Excel后重试"
+                    print(error_msg)
+                    messagebox.showerror("错误", error_msg)
+                    return
+            else:
+                raise
+        if result is None:
+            self.reset_refresh_progress()
+            error_msg = f"无法读取装炉顺序.xls文件\n路径: {装炉顺序文件}\n\n可能原因:\n1. 文件被Excel占用\n2. 文件格式损坏\n3. 权限不足"
+            print(error_msg)
+            messagebox.showerror("错误", error_msg)
+            return
+        
+        headers, data_rows = result
+        print(f"成功读取装炉顺序文件，行数: {len(data_rows)}, 列数: {len(headers)}")
+        self.update_refresh_progress(50)  # 50% - 文件读取完成
+        
+        # 查找计划号列、钢卷号列和坯厚列
+        plan_col = -1
+        钢卷号列 = -1
+        坯厚列 = -1
+        for i, header in enumerate(headers):
+            if header == "计划号":
+                plan_col = i
+            elif header == "钢卷号":
+                钢卷号列 = i
+            elif header == "坯厚":
+                坯厚列 = i
+        
+        if plan_col == -1:
+            messagebox.showerror("错误", "未找到计划号列")
+            return
+        
+        # 统计每个计划号的钢卷号块数，并检查是否需要标注Δ（坯厚>230）
+        plan_block_count = {}  # plan_no -> count
+        plan_need_delta = {}  # plan_no -> 是否需要标注Δ
+        plan_delta_钢卷号 = {}  # plan_no -> 需要标注Δ的钢卷号列表
+        
+        for row_data in data_rows:
+            if plan_col < len(row_data):
+                cell_value = row_data[plan_col]
+                if cell_value:
+                    # 处理可能的浮点数格式（如 12345.0），与显示时保持一致
+                    if isinstance(cell_value, float):
+                        if cell_value == int(cell_value):
+                            plan_no_str = str(int(cell_value)).strip()
+                        else:
+                            plan_no_str = str(cell_value).strip()
+                    else:
+                        plan_no_str = str(cell_value).strip()
+                    
+                    # 检查是否有钢卷号（有钢卷号的行才算一块）
+                    has_block = False
+                    当前钢卷号 = None
+                    if 钢卷号列 != -1 and 钢卷号列 < len(row_data):
+                        钢卷号值 = row_data[钢卷号列]
+                        if 钢卷号值 and str(钢卷号值).strip():
+                            has_block = True
+                            当前钢卷号 = str(钢卷号值).strip()
+                    
+                    if has_block:
+                        if plan_no_str not in plan_block_count:
+                            plan_block_count[plan_no_str] = 0
+                        plan_block_count[plan_no_str] += 1
+                        
+                        # 检查坯厚是否>230
+                        if 坯厚列 != -1 and 坯厚列 < len(row_data):
+                            坯厚值 = row_data[坯厚列]
+                            try:
+                                if 坯厚值:
+                                    坯厚数值 = float(坯厚值)
+                                    if 坯厚数值 > 230:
+                                        # 标记该计划号需要标注Δ
+                                        if plan_no_str not in plan_need_delta:
+                                            plan_need_delta[plan_no_str] = True
+                                        # 记录需要标注Δ的钢卷号
+                                        if plan_no_str not in plan_delta_钢卷号:
+                                            plan_delta_钢卷号[plan_no_str] = []
+                                        if 当前钢卷号 and 当前钢卷号 not in plan_delta_钢卷号[plan_no_str]:
+                                            plan_delta_钢卷号[plan_no_str].append(当前钢卷号)
+                            except (ValueError, TypeError):
+                                pass  # 坯厚值无法转换为数字，忽略
+        
+        # 提取计划号并标注状态
+        seen = set()
+        无文件计数 = 0
+        已处理计数 = 0
+        正常计数 = 0
+        
+        # 清空列表
+        self.plan_listbox.delete(0, tk.END)
+        
+        for row_data in data_rows:
+            if plan_col >= len(row_data):
+                continue
+                
+            # 处理可能的浮点数格式（如 12345.0）
+            cell_value = row_data[plan_col]
+            if isinstance(cell_value, float):
+                # 如果是浮点数且是整数，转换为整数再转字符串
+                if cell_value == int(cell_value):
+                    plan_no = str(int(cell_value)).strip()
+                else:
+                    plan_no = str(cell_value).strip()
+            else:
+                plan_no = str(cell_value).strip()
+            
+            if plan_no and plan_no not in seen:
+                seen.add(plan_no)
+                
+                # 检查文件是否存在（使用计划号作为key）
+                file_exists = plan_no in existing_plans
+                # 检查是否已处理
+                is_processed = plan_no in self.processed_plans
+                # 检查是否已打印（从打印记录文件中读取）
+                is_printed = plan_no in self.printed_plans
+                
+                # 检查文件是否在backup目录中
+                is_in_backup = False
+                if file_exists:
+                    file_path = existing_plans[plan_no]
+                    backup_dir = os.path.join(self.plan_dir, "backup")
+                    is_in_backup = os.path.normpath(file_path).lower().startswith(
+                        os.path.normpath(backup_dir).lower())
+                
+                # 调试输出
+                if is_printed:
+                    print(f"[已打印] 计划号 '{plan_no}' 已在打印记录中")
+                elif not file_exists:
+                    if is_processed:
+                        print(f"[已处理-无文件] 计划号 '{plan_no}' 已处理但文件不存在")
+                    else:
+                        print(f"[无文件] 计划号 '{plan_no}' 不在目录中")
+                
+                # 统计（可以同时属于多个类别）
+                if is_processed:
+                    已处理计数 += 1
+                if is_printed:
+                    已处理计数 += 1  # 已打印的也算已处理
+                if not file_exists and not is_processed and not is_printed:
+                    无文件计数 += 1
+                if not is_processed and not is_printed and file_exists:
+                    正常计数 += 1
+                
+                # 获取块数
+                block_count = plan_block_count.get(plan_no, 0)
+                
+                # 检查是否需要标注Δ（坯厚>230）
+                need_delta = plan_need_delta.get(plan_no, False)
+                
+                # 构建显示文本（可以同时显示多个状态）
+                status_labels = []
+                if is_printed:
+                    status_labels.append("已打印")
+                elif is_processed:
+                    status_labels.append("已处理")
+                if not file_exists and not is_processed and not is_printed:
+                    status_labels.append("无文件")
+                
+                # 块数显示：数字左对齐，"块"字右对齐，总宽度4字符
+                # 例如：[15 块]、[8  块]、[123块]
+                block_str = f"{block_count:<3d}块"
+                
+                # 添加Δ标注（如果需要）
+                delta_str = "Δ" if need_delta else ""
+                
+                if status_labels:
+                    # 将多个状态标签用"]["连接，显示为 [已处理][已打印] 格式
+                    # 每个标签单独用[]包裹
+                    status_str = ''.join([f'[{label}]' for label in status_labels])
+                    display_text = f"{plan_no:8s}{delta_str} [{block_str}] {status_str}"
+                else:
+                    display_text = f"{plan_no:8s}{delta_str} [{block_str}]"
+                
+                # 添加到列表框
+                self.plan_listbox.insert(tk.END, display_text)
+                idx = self.plan_listbox.size() - 1  # 获取刚插入的索引
+                
+                # 设置颜色标注（优先级：已打印>已处理>无文件>正常）
+                if is_printed:
+                    self.plan_listbox.itemconfigure(idx, fg='blue')  # 已打印用蓝色
+                elif is_processed:
+                    self.plan_listbox.itemconfigure(idx, fg='green')  # 已处理用绿色
+                elif not file_exists:
+                    self.plan_listbox.itemconfigure(idx, fg='red')  # 无文件用红色
+        
+        # 保存需要标注Δ的钢卷号信息（用于打印时标注）
+        self.plan_delta_钢卷号 = plan_delta_钢卷号
+        
+        # 计算总块数
+        total_blocks = sum(plan_block_count.values())
+        
+        # 更新总块数显示
+        self.total_blocks_label.config(text=f"总块数: {total_blocks}")
+        
+        # 更新进度条到100%（保持绿色）
+        self.update_refresh_progress(100)
+        
+        print(f"列表刷新完成，共加载 {len(seen)} 个计划号")
+        print(f"  - 正常: {正常计数} 个")
+        print(f"  - 无文件: {无文件计数} 个")
+        print(f"  - 已处理: {已处理计数} 个")
+        print(f"  - 总块数: {total_blocks} 块")
+        print(f"[{time.strftime('%H:%M:%S')}] 刷新完成\n")
+        
+        # 进度条保持100%绿色，不自动重置
+        # 下次点击刷新按钮时会自动重置
+        
+    except Exception as e:
+        import traceback
+        error_msg = str(e)
+        print(f"刷新失败详细错误: {error_msg}")
+        print(f"错误类型: {type(e).__name__}")
+        traceback.print_exc()
+        # 重置进度条
+        self.reset_refresh_progress()
+        messagebox.showerror("错误", f"刷新失败: {error_msg}\n\n请检查装炉顺序.xls文件格式是否正确，或查看控制台输出获取详细信息。")
+```
+
+## 6. `mark_plan_as_exported(plan_no)` - 标记计划号已导出
+```python
+def mark_plan_as_exported(self, plan_no):
+    """标记计划号已导出（更新装炉顺序文件中的状态）
+    
+    参数:
+        plan_no: 计划号
+    """
+    try:
+        print(f"标记计划号 {plan_no} 为已导出...")
+        
+        # 这里可以实现更新Excel文件中的状态列
+        # 暂时先添加到已处理集合中
+        self.processed_plans.add(plan_no)
+        self.save_processed_plans()
+        
+        print(f"✓ 计划号 {plan_no} 已标记为已导出")
+        
+    except Exception as e:
+        print(f"✗ 标记计划号失败: {str(e)}")
+```

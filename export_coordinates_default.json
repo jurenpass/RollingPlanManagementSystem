@@ -1,0 +1,45 @@
+{
+  "zhuanglu_tab": [
+    284,
+    84
+  ],
+  "zhuanglu_export_btn": [
+    988,
+    819
+  ],
+  "zhizhi_tab": [
+    107,
+    85
+  ],
+  "plan_select": [
+    734,
+    135
+  ],
+  "zhizhi_export_btn": [
+    78,
+    740
+  ],
+  "first_plan": [
+    235,
+    207
+  ],
+  "plan_spacing": 21,
+  "first_plan_offset": 0,
+  "plan_detail_export": [
+    79,
+    859
+  ],
+  "test_window": "BGCMS1-宝钢股份多基地制造管理系统运行环境",
+  "export_speed": "中",
+  "custom_window_title": "",
+  "show_operation_warning": false,
+  "auto_process_after_export": true,
+  "auto_print_after_export": true,
+  "debug_mode": false,
+  "anti_logout_interval_value": 100,
+  "anti_logout_interval": 6000000,
+  "anti_logout_unit": "分钟",
+  "auto_exec_interval": 30,
+  "auto_exec_times": "18:40",
+  "auto_exec_mode": "time"
+}
