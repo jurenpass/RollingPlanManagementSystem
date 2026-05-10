@@ -9,15 +9,10 @@ current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 added_files = [
     ('settings.json', '.'),
     ('default_settings.json', '.'),
-    ('export_coordinates.json', '.'),
     ('export_coordinates_default.json', '.'),
-    ('furnace_order.db', '.'),
     ('annotation_conditions.json', '.'),
-    ('总计划号列表.xls', '计划号'),
-    ('装炉顺序.xls', '计划号'),
     ('settings_window.ui', '.'),
     ('settings_window_ui.py', '.'),
-    ('start.vbs', '.'),
     ('APS.txt', '.')
 ]
 

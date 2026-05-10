@@ -450,7 +450,7 @@ class MainWindow(QMainWindow):
                 # 从项目目录读取现有的APS.txt文件
                 # 使用正确的路径逻辑，确保打包后也能找到文件
                 if getattr(sys, 'frozen', False):
-                    project_aps_file = os.path.join(os.path.dirname(sys.executable), "APS.txt")
+                    project_aps_file = os.path.join(sys._MEIPASS, "APS.txt")
                 else:
                     project_aps_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "APS.txt")
 
@@ -1104,31 +1104,8 @@ class MainWindow(QMainWindow):
                             print("成功返回主程序画面")
                         except Exception as e:
                             print(f"返回主程序画面失败: {e}")
-                        
-                        # 定义30秒后进入装炉明细画面的函数
-                        def go_to_furnace_details():
-                            try:
-                                # 检查是否有装炉明细窗口
-                                has_furnace_details_window = False
-                                for widget in QApplication.topLevelWidgets():
-                                    if hasattr(widget, 'windowTitle') and '装炉明细' in widget.windowTitle():
-                                        has_furnace_details_window = True
-                                        widget.activateWindow()
-                                        widget.raise_()
-                                        widget.show()
-                                        print("30秒延时后进入装炉明细画面")
-                                        break
-                                
-                                if not has_furnace_details_window:
-                                    # 如果没有装炉明细窗口，打开新的
-                                    print("未找到装炉明细窗口，打开新的装炉明细画面")
-                                    self.open_furnace_details()
-                                    print("成功打开装炉明细窗口")
-                            except Exception as e:
-                                print(f"进入装炉明细画面失败: {e}")
-                        
-                        # 30秒后进入装炉明细画面
-                        QTimer.singleShot(30000, go_to_furnace_details)
+                        # 10秒后进入装炉明细画面（使用类方法）
+                        QTimer.singleShot(10000, self.go_to_furnace_details)
                     else:
                         # 使用自定义消息框显示错误消息 - 可手动关闭，自动3秒关闭
                         self.custom_messagebox("错误", event.message, msg_type='error', auto_close=3)
@@ -3306,7 +3283,7 @@ class MainWindow(QMainWindow):
                 # 如果不存在，尝试从项目目录加载
                 # 使用正确的路径逻辑，确保打包后也能找到文件
                 if getattr(sys, 'frozen', False):
-                    project_aps_file = os.path.join(os.path.dirname(sys.executable), "APS.txt")
+                    project_aps_file = os.path.join(sys._MEIPASS, "APS.txt")
                 else:
                     project_aps_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "APS.txt")
                 if os.path.exists(project_aps_file):
@@ -3338,7 +3315,7 @@ class MainWindow(QMainWindow):
                 # 如果不存在，尝试从项目目录加载
                 # 使用正确的路径逻辑，确保打包后也能找到文件
                 if getattr(sys, 'frozen', False):
-                    project_aps_file = os.path.join(os.path.dirname(sys.executable), "APS.txt")
+                    project_aps_file = os.path.join(sys._MEIPASS, "APS.txt")
                 else:
                     project_aps_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "APS.txt")
                 if os.path.exists(project_aps_file):
@@ -4477,9 +4454,58 @@ class MainWindow(QMainWindow):
         }
     
     def open_furnace_details(self):
-        """打开装炉明细窗口"""
-        self.furnace_details_window = FurnaceDetailsWindow(self)
-        self.furnace_details_window.show()
+        """打开装炉明细窗口 - 确保始终只有一个窗口打开"""
+        from PyQt5.QtWidgets import QApplication
+        
+        # 检查是否已有装炉明细窗口
+        existing_windows = []
+        for widget in QApplication.topLevelWidgets():
+            if hasattr(widget, 'windowTitle') and '装炉明细' in widget.windowTitle():
+                existing_windows.append(widget)
+        
+        if existing_windows:
+            # 如果已有装炉明细窗口，激活它而不是打开新窗口
+            for window in existing_windows:
+                window.activateWindow()
+                window.raise_()
+                window.show()
+            print("已激活现有的装炉明细窗口")
+        else:
+            # 如果没有装炉明细窗口，创建新窗口
+            self.furnace_details_window = FurnaceDetailsWindow(self)
+            self.furnace_details_window.show()
+            print("创建新的装炉明细窗口")
+
+    def go_to_furnace_details(self):
+        """进入装炉明细画面 - 被定时器调用"""
+        try:
+            from PyQt5.QtWidgets import QApplication
+
+            has_furnace_details_window = False
+            for widget in QApplication.topLevelWidgets():
+                if hasattr(widget, 'windowTitle') and '装炉明细' in widget.windowTitle():
+                    has_furnace_details_window = True
+                    # 激活装炉明细窗口
+                    widget.activateWindow()
+                    widget.raise_()
+                    widget.show()
+                    # 刷新装炉明细数据
+                    if hasattr(widget, 'refresh_data'):
+                        print("刷新装炉明细窗口数据")
+                        widget.refresh_data()
+                        # 刷新后恢复上次选中的钢卷号位置
+                        if hasattr(widget, 'restore_selected_coil'):
+                            widget.restore_selected_coil()
+                    print("已进入装炉明细画面")
+                    break
+
+            if not has_furnace_details_window:
+                # 如果没有装炉明细窗口，打开新的装炉明细窗口
+                print("未找到装炉明细窗口，打开新的装炉明细画面")
+                self.open_furnace_details()
+                print("成功打开装炉明细窗口")
+        except Exception as e:
+            print(f"进入装炉明细画面失败: {e}")
 
 
     
@@ -5449,87 +5475,95 @@ class MainWindow(QMainWindow):
             
             # 处理导出计划号明细事件
             if event.type() == QEvent.User and hasattr(event, 'valid_no_file_plans'):
-                try:
-                    print("\n=== 导出无文件计划号明细 ===")
-                    
-                    valid_no_file_plans = event.valid_no_file_plans
-                    plan_detail_export_btn = event.plan_detail_export_btn
-                    test_window = event.test_window
-                    delay_time = event.delay_time
-                    coord_map = getattr(event, 'coord_map', {})
-                    
-                    exported_plans = []
-                    failed_plans = []
-                    
-                    for i, plan_no in enumerate(valid_no_file_plans):
-                        print(f"[{i+1}/{len(valid_no_file_plans)}] 导出计划: {plan_no}")
-                        try:
-                            # 从坐标映射中获取计划号的实际坐标
-                            plan_coord = coord_map.get(str(plan_no), (100, 100))
-                            print(f"  计划号坐标: {plan_coord}")
-                            success = self.export_single_plan_detail(plan_no, plan_coord, plan_detail_export_btn=plan_detail_export_btn, test_window=test_window, add_debug_log=print)
-                            if success:
-                                exported_plans.append(plan_no)
-                                print(f"  [√] 导出成功")
-                            else:
-                                failed_plans.append(plan_no)
-                                print(f"  [×] 导出失败")
-                        except Exception as e:
-                            failed_plans.append(plan_no)
-                            print(f"  [×] 导出失败: {str(e)}")
+                # 将导出操作放到后台线程中执行，避免阻塞主线程
+                import threading
+                
+                def export_plans_worker():
+                    try:
+                        print("\n=== 导出无文件计划号明细 ===")
                         
-                        # 添加延迟
-                        if i < len(valid_no_file_plans) - 1:
-                            import time
-                            time.sleep(delay_time)
-                    
-                    print(f"\n计划号明细导出完成: {len(exported_plans)} 个成功, {len(failed_plans)} 个失败")
-                    
-                    # 刷新界面（在主线程中执行）
-                    from PyQt5.QtCore import QEvent, QCoreApplication
-                    
-                    class RefreshEvent(QEvent):
-                        def __init__(self, exported_plans, coord_map):
-                            super().__init__(QEvent.User)
-                            self.exported_plans = exported_plans
-                            self.coord_map = coord_map
-                            self.refresh_type = 'plan_list'
-                    
-                    # 发送刷新事件到主线程
-                    event = RefreshEvent(exported_plans, coord_map)
-                    QCoreApplication.postEvent(self, event)
-                    
-                    print("\n=== 自动导出全部完成 ===")
-                    
-                    # 导出完成
-                    from PyQt5.QtCore import QEvent, QCoreApplication
-                    
-                    class FinishedEvent(QEvent):
-                        def __init__(self, success, message, exported_plans, failed_plans, coord_map):
-                            super().__init__(QEvent.User)
-                            self.success = success
-                            self.message = message
-                            self.exported_plans = exported_plans
-                            self.failed_plans = failed_plans
-                            self.coord_map = coord_map
-                    
-                    # 发送事件到主线程
-                    event = FinishedEvent(True, f"自动导出全部完成\n\n成功导出 {len(exported_plans)} 个计划号\n失败 {len(failed_plans)} 个计划号", exported_plans, failed_plans, coord_map)
-                    QCoreApplication.postEvent(self, event)
-                except Exception as e:
-                    print(f"导出计划号明细失败: {e}")
-                    # 导出失败
-                    from PyQt5.QtCore import QEvent, QCoreApplication
-                    
-                    class FinishedEvent(QEvent):
-                        def __init__(self, success, message):
-                            super().__init__(QEvent.User)
-                            self.success = success
-                            self.message = message
-                    
-                    # 发送事件到主线程
-                    event = FinishedEvent(False, f"自动导出失败: {str(e)}")
-                    QCoreApplication.postEvent(self, event)
+                        valid_no_file_plans = event.valid_no_file_plans
+                        plan_detail_export_btn = event.plan_detail_export_btn
+                        test_window = event.test_window
+                        delay_time = event.delay_time
+                        coord_map = getattr(event, 'coord_map', {})
+                        
+                        exported_plans = []
+                        failed_plans = []
+                        
+                        for i, plan_no in enumerate(valid_no_file_plans):
+                            print(f"[{i+1}/{len(valid_no_file_plans)}] 导出计划: {plan_no}")
+                            try:
+                                # 从坐标映射中获取计划号的实际坐标
+                                plan_coord = coord_map.get(str(plan_no), (100, 100))
+                                print(f"  计划号坐标: {plan_coord}")
+                                success = self.export_single_plan_detail(plan_no, plan_coord, plan_detail_export_btn=plan_detail_export_btn, test_window=test_window, add_debug_log=print)
+                                if success:
+                                    exported_plans.append(plan_no)
+                                    print(f"  [√] 导出成功")
+                                else:
+                                    failed_plans.append(plan_no)
+                                    print(f"  [×] 导出失败")
+                            except Exception as e:
+                                failed_plans.append(plan_no)
+                                print(f"  [×] 导出失败: {str(e)}")
+                            
+                            # 添加延迟
+                            if i < len(valid_no_file_plans) - 1:
+                                import time
+                                time.sleep(delay_time)
+                        
+                        print(f"\n计划号明细导出完成: {len(exported_plans)} 个成功, {len(failed_plans)} 个失败")
+                        
+                        # 刷新界面（在主线程中执行）
+                        from PyQt5.QtCore import QEvent, QCoreApplication
+                        
+                        class RefreshEvent(QEvent):
+                            def __init__(self, exported_plans, coord_map):
+                                super().__init__(QEvent.User)
+                                self.exported_plans = exported_plans
+                                self.coord_map = coord_map
+                                self.refresh_type = 'plan_list'
+                        
+                        # 发送刷新事件到主线程
+                        refresh_event = RefreshEvent(exported_plans, coord_map)
+                        QCoreApplication.postEvent(self, refresh_event)
+                        
+                        print("\n=== 自动导出全部完成 ===")
+                        
+                        # 导出完成
+                        class FinishedEvent(QEvent):
+                            def __init__(self, success, message, exported_plans, failed_plans, coord_map):
+                                super().__init__(QEvent.User)
+                                self.success = success
+                                self.message = message
+                                self.exported_plans = exported_plans
+                                self.failed_plans = failed_plans
+                                self.coord_map = coord_map
+                        
+                        # 发送事件到主线程
+                        finished_event = FinishedEvent(True, f"自动导出全部完成\n\n成功导出 {len(exported_plans)} 个计划号\n失败 {len(failed_plans)} 个计划号", exported_plans, failed_plans, coord_map)
+                        QCoreApplication.postEvent(self, finished_event)
+                    except Exception as e:
+                        print(f"导出计划号明细失败: {e}")
+                        # 导出失败
+                        from PyQt5.QtCore import QEvent, QCoreApplication
+                        
+                        class FinishedEvent(QEvent):
+                            def __init__(self, success, message):
+                                super().__init__(QEvent.User)
+                                self.success = success
+                                self.message = message
+                        
+                        # 发送事件到主线程
+                        finished_event = FinishedEvent(False, f"自动导出失败: {str(e)}")
+                        QCoreApplication.postEvent(self, finished_event)
+                
+                # 启动后台线程执行导出
+                export_thread = threading.Thread(target=export_plans_worker)
+                export_thread.daemon = True
+                export_thread.start()
+                
                 return True
             
             # 处理刷新事件
@@ -5606,45 +5640,29 @@ class MainWindow(QMainWindow):
                                 print("成功返回主程序画面")
                             except Exception as e:
                                 print(f"返回主程序画面失败: {e}")
+
+                            # 无论是否有导出计划号，都在10秒后进入装炉明细画面
+                            # 使用QTimer确保在主线程中执行
+                            from PyQt5.QtWidgets import QApplication
+                            from PyQt5.QtCore import QTimer
+
+                            # 10秒后进入装炉明细画面（使用类方法）
+                            QTimer.singleShot(10000, self.go_to_furnace_details)
                         else:
                             # 确保应用程序是活动的
                             from PyQt5.QtWidgets import QApplication
                             from PyQt5.QtCore import QTimer
-                            
+
                             QApplication.setActiveWindow(self)
                             # 确保本程序窗口是活动的
                             self.activateWindow()
                             self.raise_()
                             self.show()
-                            
+
                             # 使用自定义消息框显示提示信息 - 可手动关闭，自动3秒关闭
                             self.custom_messagebox("提示", event.message, msg_type='info', auto_close=3)
-                            
-                            # 定义进入装炉明细画面的函数
-                            def go_to_furnace_details():
-                                try:
-                                    # 30秒后进入装炉明细画面
-                                    has_furnace_details_window = False
-                                    for widget in QApplication.topLevelWidgets():
-                                        if hasattr(widget, 'windowTitle') and '装炉明细' in widget.windowTitle():
-                                            has_furnace_details_window = True
-                                            # 激活装炉明细窗口
-                                            widget.activateWindow()
-                                            widget.raise_()
-                                            widget.show()
-                                            print("30秒延时后进入装炉明细画面")
-                                            break
-                                    
-                                    if not has_furnace_details_window:
-                                        # 如果没有装炉明细窗口，打开新的装炉明细窗口
-                                        print("未找到装炉明细窗口，打开新的装炉明细画面")
-                                        self.open_furnace_details()
-                                        print("成功打开装炉明细窗口")
-                                except Exception as e:
-                                    print(f"进入装炉明细画面失败: {e}")
-                            
-                            # 设置30秒后进入装炉明细画面
-                            QTimer.singleShot(30000, go_to_furnace_details)
+                            # 10秒后进入装炉明细画面（使用类方法）
+                            QTimer.singleShot(10000, self.go_to_furnace_details)
                     else:
                         # 使用自定义消息框显示错误信息 - 可手动关闭，自动3秒关闭
                         self.custom_messagebox("错误", event.message, msg_type='error', auto_close=3)
@@ -5906,37 +5924,6 @@ class MainWindow(QMainWindow):
                 # 重置运行标志
                 self.is_auto_export_running = False
                 print("自动导出运行标志已重置为False")
-                
-                # 自动执行模式下，打开装炉明细画面
-                if not from_main_window:
-                    # 自动执行完打开装炉明细画面，恢复之前的滚动状态及光标条位置
-                    print("30秒后打开装炉明细窗口...")
-                    # 直接在单独的线程中打开装炉明细窗口，避免事件循环冲突
-                    import threading
-                    def open_furnace_details():
-                        # 延迟30秒执行
-                        import time
-                        time.sleep(30)
-                        # 先检查是否已有装炉明细窗口
-                        from PyQt5.QtWidgets import QApplication
-                        has_furnace_details_window = False
-                        for widget in QApplication.topLevelWidgets():
-                            if hasattr(widget, 'windowTitle') and '装炉明细' in widget.windowTitle():
-                                has_furnace_details_window = True
-                                # 激活已有的装炉明细窗口
-                                widget.activateWindow()
-                                widget.raise_()
-                                widget.show()
-                                print("30秒延时后进入已有的装炉明细画面")
-                                break
-                        
-                        if not has_furnace_details_window:
-                            # 如果没有装炉明细窗口，打开新的
-                            print("未找到装炉明细窗口，打开新的装炉明细画面")
-                            self.furnace_details()
-                            print("成功打开装炉明细窗口")
-                    # 启动新线程
-                    threading.Thread(target=open_furnace_details, daemon=True).start()
         
         # 启动后台线程执行导出操作
         import threading
@@ -6488,6 +6475,10 @@ class MainWindow(QMainWindow):
             # 检查pyautogui是否可用
             try:
                 import pyautogui
+                # 禁用 pyautogui 的自动暂停机制，避免操作卡住
+                pyautogui.PAUSE = 0
+                # 禁用 failsafe，避免误触导致程序停止
+                pyautogui.FAILSAFE = False
                 PYAUTOGUI_AVAILABLE = True
             except ImportError as e:
                 PYAUTOGUI_AVAILABLE = False
@@ -7174,18 +7165,21 @@ class FurnaceDetailsWindow(QMainWindow):
         self.parent = parent
         self.setWindowTitle("装炉明细")
         self.showMaximized()
-        
+
         # 设置窗口背景色
         self.setStyleSheet("background-color: #f0f0f0;")
-        
+
         # 创建中心部件
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-        
+
         # 主布局
         main_layout = QVBoxLayout(central_widget)
         main_layout.setContentsMargins(15, 15, 15, 15)
         main_layout.setSpacing(10)
+
+        # 记录最后选中的钢卷号，用于恢复定位
+        self.last_selected_coil_no = None
         
         # 列名
         columns = [
@@ -7569,6 +7563,17 @@ class FurnaceDetailsWindow(QMainWindow):
 
         # 加载数据
         self.load_furnace_data()
+
+        # 创建刷新数据的方法，供外部调用
+        def refresh_data():
+            """刷新装炉明细数据"""
+            print("刷新装炉明细数据...")
+            self.load_furnace_data()
+            # 刷新数据后，恢复上次选中的钢卷号位置
+            self.restore_selected_coil()
+            # 保存当前数据，确保打印时能正确识别新增的钢卷号
+            self.save_current_table_data()
+        self.refresh_data = refresh_data
 
     def show_context_menu(self, event):
         """显示右键菜单"""
@@ -9274,6 +9279,8 @@ class FurnaceDetailsWindow(QMainWindow):
                 self.scroll_timer.stop()
             # 保存状态
             self.save_current_table_data()
+            # 保存最后选中的钢卷号
+            self.save_last_selected_coil()
             # 保存标注条件
             import json
             import os
@@ -10856,6 +10863,8 @@ class FurnaceDetailsWindow(QMainWindow):
                 if hasattr(workbook, 'release_resources'):
                     workbook.release_resources()
                 
+                # 打印成功后，保存当前数据，确保下次打印能正确识别新增的钢卷号
+                self.save_current_table_data()
                 return True
                 
             except ImportError:
