@@ -3793,13 +3793,15 @@ class MainWindow(QMainWindow):
             import time
             settings = self.get_settings()
             exec_mode = settings.get("execMode", "interval")
+            label_text = ""
             if exec_mode == "interval":
                 interval_minutes = settings.get("intervalMinutes", 30)
                 # 计算下一次执行的具体时间
                 next_exec_time = time.time() + (interval_minutes * 60)
                 next_time_str = time.strftime("%H:%M:%S", time.localtime(next_exec_time))
-                self.next_execution_label.setText(f"下一次执行: {next_time_str}")
-                print(f"设置标签为: 下一次执行: {next_time_str}")
+                label_text = f"下一次执行: {next_time_str}"
+                self.next_execution_label.setText(label_text)
+                print(f"设置标签为: {label_text}")
                 # 强制更新UI
                 self.next_execution_label.repaint()
                 self.next_execution_label.update()
@@ -3808,21 +3810,35 @@ class MainWindow(QMainWindow):
             else:
                 if self.next_execution_time:
                     next_time_str = time.strftime("%H:%M:%S", time.localtime(self.next_execution_time))
-                    self.next_execution_label.setText(f"下一次执行: {next_time_str}")
-                    print(f"设置标签为: 下一次执行: {next_time_str}")
+                    label_text = f"下一次执行: {next_time_str}"
+                    self.next_execution_label.setText(label_text)
+                    print(f"设置标签为: {label_text}")
                     # 强制更新UI
                     self.next_execution_label.repaint()
                     self.next_execution_label.update()
                     self.repaint()
                     self.update()
                 else:
-                    self.next_execution_label.setText("下一次执行: 无")
-                    print("设置标签为: 下一次执行: 无")
+                    label_text = "下一次执行: 无"
+                    self.next_execution_label.setText(label_text)
+                    print(f"设置标签为: {label_text}")
                     # 强制更新UI
                     self.next_execution_label.repaint()
                     self.next_execution_label.update()
                     self.repaint()
                     self.update()
+            
+            # 同时更新装炉明细窗口的下一次执行时间
+            if hasattr(self, 'furnace_details_window') and self.furnace_details_window:
+                try:
+                    if hasattr(self.furnace_details_window, 'next_execution_label'):
+                        self.furnace_details_window.next_execution_label.setText(label_text)
+                        self.furnace_details_window.next_execution_label.repaint()
+                        self.furnace_details_window.next_execution_label.update()
+                        print(f"已更新装炉明细窗口的下一次执行时间为: {label_text}")
+                except Exception as e:
+                    print(f"更新装炉明细窗口的下一次执行时间失败: {str(e)}")
+            
             print("自动执行服务已启动")
         except Exception as e:
             print(f"启动自动执行服务失败: {str(e)}")
@@ -4172,6 +4188,15 @@ class MainWindow(QMainWindow):
                 self.stop_auto_execution()
                 # 清空下一次执行时间显示
                 self.next_execution_label.setText("下一次执行: 无")
+            
+            # 更新主窗口的自动执行复选框状态（确保状态一致）
+            if hasattr(self, 'auto_exec_checkbox'):
+                self.auto_exec_checkbox.setChecked(enabled)
+            
+            # 同步装炉明细窗口的自动执行复选框状态
+            if hasattr(self, 'furnace_details_window') and self.furnace_details_window:
+                if hasattr(self.furnace_details_window, 'auto_exec_checkbox'):
+                    self.furnace_details_window.auto_exec_checkbox.setChecked(enabled)
         except Exception as e:
             print(f"处理自动执行复选框状态变化失败: {str(e)}")
     
@@ -4191,6 +4216,15 @@ class MainWindow(QMainWindow):
             config_file = os.path.join(self.plan_dir, 'settings.json')
             with open(config_file, 'w', encoding='utf-8') as f:
                 json.dump(settings, f, ensure_ascii=False, indent=2)
+            
+            # 更新主窗口的自动打印复选框状态（确保状态一致）
+            if hasattr(self, 'auto_print_checkbox'):
+                self.auto_print_checkbox.setChecked(enabled)
+            
+            # 同步装炉明细窗口的自动打印复选框状态
+            if hasattr(self, 'furnace_details_window') and self.furnace_details_window:
+                if hasattr(self.furnace_details_window, 'auto_print_checkbox'):
+                    self.furnace_details_window.auto_print_checkbox.setChecked(enabled)
         except Exception as e:
             print(f"处理自动打印复选框状态变化失败: {str(e)}")
     
@@ -4469,6 +4503,8 @@ class MainWindow(QMainWindow):
                 window.activateWindow()
                 window.raise_()
                 window.show()
+                # 更新self.furnace_details_window引用
+                self.furnace_details_window = window
             print("已激活现有的装炉明细窗口")
         else:
             # 如果没有装炉明细窗口，创建新窗口
@@ -4489,6 +4525,8 @@ class MainWindow(QMainWindow):
                     widget.activateWindow()
                     widget.raise_()
                     widget.show()
+                    # 更新self.furnace_details_window引用
+                    self.furnace_details_window = widget
                     # 刷新装炉明细数据
                     if hasattr(widget, 'refresh_data'):
                         print("刷新装炉明细窗口数据")
@@ -7444,6 +7482,18 @@ class FurnaceDetailsWindow(QMainWindow):
         right_layout.setSpacing(15)  # 增加间距
         bottom_layout.addLayout(right_layout)
         
+        # 自动打印复选框
+        self.auto_print_checkbox = QCheckBox("自动打印")
+        self.auto_print_checkbox.setFont(QFont("宋体", 14))
+        self.auto_print_checkbox.setStyleSheet("background-color: #f0f0f0;")
+        right_layout.addWidget(self.auto_print_checkbox)
+        
+        # 自动执行复选框
+        self.auto_exec_checkbox = QCheckBox("自动执行")
+        self.auto_exec_checkbox.setFont(QFont("宋体", 14))
+        self.auto_exec_checkbox.setStyleSheet("background-color: #f0f0f0;")
+        right_layout.addWidget(self.auto_exec_checkbox)
+        
         # 下一次执行时间显示
         self.next_execution_label = QLabel("下一次执行: 无")
         self.next_execution_label.setFont(QFont("宋体", 12))
@@ -7454,6 +7504,18 @@ class FurnaceDetailsWindow(QMainWindow):
         if self.parent:
             next_exec_text = self.parent.next_execution_label.text()
             self.next_execution_label.setText(next_exec_text)
+            # 同步主窗口的自动打印和自动执行复选框状态
+            if hasattr(self.parent, 'auto_print_checkbox'):
+                self.auto_print_checkbox.setChecked(self.parent.auto_print_checkbox.isChecked())
+            if hasattr(self.parent, 'auto_exec_checkbox'):
+                self.auto_exec_checkbox.setChecked(self.parent.auto_exec_checkbox.isChecked())
+        
+        # 连接自动执行复选框信号到主窗口处理函数
+        if self.parent and hasattr(self.parent, 'on_auto_exec_changed'):
+            self.auto_exec_checkbox.stateChanged.connect(self.parent.on_auto_exec_changed)
+        # 连接自动打印复选框信号到主窗口处理函数
+        if self.parent and hasattr(self.parent, 'on_auto_print_changed'):
+            self.auto_print_checkbox.stateChanged.connect(self.parent.on_auto_print_changed)
         
         # 自动滚动状态
         self.scroll_status_label = QLabel("")

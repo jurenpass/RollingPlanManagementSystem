@@ -13,7 +13,8 @@ added_files = [
     ('annotation_conditions.json', '.'),
     ('settings_window.ui', '.'),
     ('settings_window_ui.py', '.'),
-    ('APS.txt', '.')
+    ('APS.txt', '.'),
+    ('furnace_order.db', '.')
 ]
 
 # 收集 pywin32 的二进制文件
