@@ -1,0 +1,708 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1800</width>
+    <height>900</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>粗轧主画面 - RM Main Screen</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_0">
+    <item>
+     <widget class="QFrame" name="topStatusBar">
+      <property name="styleSheet">
+       <string notr="true">background-color: #c8c8c8;</string>
+      </property>
+      <layout class="QHBoxLayout" name="topLayout_0">
+       <item>
+        <widget class="QGroupBox" name="plantStatusGroup">
+         <property name="title">
+          <string>Plant Status RM</string>
+         </property>
+         <layout class="QGridLayout" name="plantStatusLayout_0">
+          <item row="0" column="0">
+           <widget class="QLabel" name="plantStatusLabel">
+            <property name="text">
+             <string>Plant Status RM</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QFrame" name="plantStatusLight">
+            <property name="fixedSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: #00ff00; border: 1px solid #008000;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="diagnosticLabel">
+            <property name="text">
+             <string>Diagnostic RM</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QFrame" name="diagnosticLight">
+            <property name="fixedSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: #00ff00; border: 1px solid #008000;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="csmdsmLabel">
+            <property name="text">
+             <string>CSM/DSM RM</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QFrame" name="csmdsmLight">
+            <property name="fixedSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: #00ff00; border: 1px solid #008000;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="topSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="setpointsGroup">
+         <property name="title">
+          <string>Setpoints RM</string>
+         </property>
+         <layout class="QGridLayout" name="setpointsLayout_0">
+          <item row="0" column="0">
+           <widget class="QLabel" name="setpointsLabel">
+            <property name="text">
+             <string>Setpoints RM</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QFrame" name="setpointsLight">
+            <property name="fixedSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: #00ff00; border: 1px solid #008000;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="diagnosticL2Label">
+            <property name="text">
+             <string>Diagnostic Level2</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QFrame" name="diagnosticL2Light">
+            <property name="fixedSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: #00ff00; border: 1px solid #008000;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="idStatusBar">
+      <property name="styleSheet">
+       <string notr="true">background-color: #e0e0e0;</string>
+      </property>
+      <layout class="QHBoxLayout" name="idStatusLayout_0">
+       <item>
+        <widget class="QFrame" name="id5200Frame">
+         <property name="fixedWidth">
+          <number>80</number>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #00d4ff; border: 2px solid #0080ff;</string>
+         </property>
+         <layout class="QVBoxLayout" name="id5200Layout_0">
+          <item>
+           <widget class="QLabel" name="idLabel1">
+            <property name="text">
+             <string>ID</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="idValue1">
+            <property name="text">
+             <string>5200</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="font">
+             <font>
+              <bold>true</bold>
+             </font>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="idModeFrame">
+         <property name="fixedWidth">
+          <number>80</number>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #00d4ff; border: 2px solid #0080ff;</string>
+         </property>
+         <layout class="QVBoxLayout" name="idModeLayout_0">
+          <item>
+           <widget class="QLabel" name="idModeLabel">
+            <property name="text">
+             <string>ID-Mode</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="idModeValue">
+            <property name="text">
+             <string>5200</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="font">
+             <font>
+              <bold>true</bold>
+             </font>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="millPacingGroup">
+         <property name="title">
+          <string>Mill Pacing</string>
+         </property>
+         <layout class="QHBoxLayout" name="millPacingLayout_0">
+          <item>
+           <widget class="QLabel" name="wbLabel">
+            <property name="text">
+             <string>WB</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: #008000;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="eLabel">
+            <property name="text">
+             <string>E</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: #008000;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="tLabel">
+            <property name="text">
+             <string>T</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: #008000;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="cLabel">
+            <property name="text">
+             <string>C</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: #008000;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="aLabel">
+            <property name="text">
+             <string>A</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: #008000;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="rcLabel">
+            <property name="text">
+             <string>RC</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: #800080;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="millLineFrame">
+      <property name="styleSheet">
+       <string notr="true">background-color: #c8c8c8;</string>
+      </property>
+      <layout class="QHBoxLayout" name="millLineLayout_0">
+       <item>
+        <widget class="QWidget" name="leftDevices">
+         <layout class="QVBoxLayout" name="leftDevicesLayout_0">
+          <item>
+           <widget class="QLabel" name="discAutoLabel">
+            <property name="text">
+             <string>Disc.Auto</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: #008000;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="longInherLabel">
+            <property name="text">
+             <string>Long Inher.</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: #008000;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="millLineSpacer1">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QWidget" name="standsArea">
+         <layout class="QHBoxLayout" name="standsLayout_0">
+          <item>
+           <widget class="QFrame" name="standRT1">
+            <property name="fixedSize">
+             <size>
+              <width>35</width>
+              <height>50</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: #40c040; border: 1px solid #008000;</string>
+            </property>
+            <layout class="QVBoxLayout" name="standRT1Layout_0">
+             <item>
+              <widget class="QLabel" name="rt1Label">
+               <property name="text">
+                <string>RT1</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="standRT2">
+            <property name="fixedSize">
+             <size>
+              <width>35</width>
+              <height>50</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: #40c040; border: 1px solid #008000;</string>
+            </property>
+            <layout class="QVBoxLayout" name="standRT2Layout_0">
+             <item>
+              <widget class="QLabel" name="rt2Label">
+               <property name="text">
+                <string>RT2</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="standRT3">
+            <property name="fixedSize">
+             <size>
+              <width>35</width>
+              <height>50</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: #40c040; border: 1px solid #008000;</string>
+            </property>
+            <layout class="QVBoxLayout" name="standRT3Layout_0">
+             <item>
+              <widget class="QLabel" name="rt3Label">
+               <property name="text">
+                <string>RT3</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="millLineSpacer2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QWidget" name="rightDevices">
+         <layout class="QVBoxLayout" name="rightDevicesLayout_0">
+          <item>
+           <widget class="QLabel" name="rmTransLabel">
+            <property name="text">
+             <string>RM Trans</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: #008000;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lineLabel">
+            <property name="text">
+             <string>Line</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: #0000ff;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="statusLine">
+      <property name="fixedHeight">
+       <number>8</number>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: #00c000;</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="bottomButtonsFrame">
+      <property name="styleSheet">
+       <string notr="true">background-color: #a8a8a8;</string>
+      </property>
+      <layout class="QHBoxLayout" name="bottomButtonsLayout_0">
+       <item>
+        <widget class="QPushButton" name="millModeButton">
+         <property name="text">
+          <string>Mill Mode</string>
+         </property>
+         <property name="fixedSize">
+          <size>
+           <width>100</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #4CAF50; color: white; border: 1px solid #2E7D32;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="standModeButton">
+         <property name="text">
+          <string>Stand Mode</string>
+         </property>
+         <property name="fixedSize">
+          <size>
+           <width>100</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #c0c0c0; border: 1px solid #808080;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="sizingPressButton">
+         <property name="text">
+          <string>Sizing Press Mode</string>
+         </property>
+         <property name="fixedSize">
+          <size>
+           <width>120</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #c0c0c0; border: 1px solid #808080;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="simulationButton">
+         <property name="text">
+          <string>Simulation</string>
+         </property>
+         <property name="fixedSize">
+          <size>
+           <width>100</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #c0c0c0; border: 1px solid #808080;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="rollDataButton">
+         <property name="text">
+          <string>Roll Data</string>
+         </property>
+         <property name="fixedSize">
+          <size>
+           <width>100</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #c0c0c0; border: 1px solid #808080;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="joggingButton">
+         <property name="text">
+          <string>Jogging Selection</string>
+         </property>
+         <property name="fixedSize">
+          <size>
+           <width>120</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #c0c0c0; border: 1px solid #808080;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="setCounterButton">
+         <property name="text">
+          <string>Set Run Counter</string>
+         </property>
+         <property name="fixedSize">
+          <size>
+           <width>120</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #c0c0c0; border: 1px solid #808080;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="releaseButton">
+         <property name="text">
+          <string>Release Drives</string>
+         </property>
+         <property name="fixedSize">
+          <size>
+           <width>120</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #c0c0c0; border: 1px solid #808080;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="changeSkiButton">
+         <property name="text">
+          <string>Change Ski</string>
+         </property>
+         <property name="fixedSize">
+          <size>
+           <width>100</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #c0c0c0; border: 1px solid #808080;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="coolingButton">
+         <property name="text">
+          <string>Cooling</string>
+         </property>
+         <property name="fixedSize">
+          <size>
+           <width>100</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #c0c0c0; border: 1px solid #808080;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="confirmButton">
+         <property name="text">
+          <string>Confirm</string>
+         </property>
+         <property name="fixedSize">
+          <size>
+           <width>100</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #c0c0c0; border: 1px solid #808080;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="faultButton">
+         <property name="text">
+          <string>Fault acknowledge</string>
+         </property>
+         <property name="fixedSize">
+          <size>
+           <width>120</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #c0c0c0; border: 1px solid #808080;</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1800</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar">
+  </widget>
+ </widget>
+ <resources>
+ </resources>
+ <connections>
+ </connections>
+</ui>
