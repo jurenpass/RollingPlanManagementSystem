@@ -1,0 +1,1830 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1600</width>
+    <height>900</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>粗轧主画面</string>
+  </property>
+  <property name="windowState">
+   <enum>Qt::WindowMaximized</enum>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="mainLayout">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <widget class="QFrame" name="topFrame">
+      <property name="styleSheet">
+       <string notr="true">background-color: #c0c0c0;</string>
+      </property>
+      <layout class="QHBoxLayout" name="topFrameLayout">
+       <property name="spacing">
+        <number>5</number>
+       </property>
+       <property name="leftMargin">
+        <number>5</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>5</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <widget class="QWidget" name="leftStatusWidget">
+         <layout class="QVBoxLayout" name="leftStatusLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="plantStatusRow">
+            <layout class="QHBoxLayout" name="plantStatusRowLayout">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="plantStatusLabel">
+               <property name="text">
+                <string>Plant Status RM</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="plantStatusLight">
+               <property name="fixedSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #808080; border: 1px solid #606060;</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="diagnosticRow">
+            <layout class="QHBoxLayout" name="diagnosticRowLayout">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="diagnosticLabel">
+               <property name="text">
+                <string>Diagnostic RM</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="diagnosticLight">
+               <property name="fixedSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #808080; border: 1px solid #606060;</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="csmdsmRow">
+            <layout class="QHBoxLayout" name="csmdsmRowLayout">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="csmdsmLabel">
+               <property name="text">
+                <string>CSM/DSM RM</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="csmdsmLight">
+               <property name="fixedSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #808080; border: 1px solid #606060;</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="topSpacer1">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QWidget" name="rightStatusWidget">
+         <layout class="QVBoxLayout" name="rightStatusLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="setpointsRow">
+            <layout class="QHBoxLayout" name="setpointsRowLayout">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="setpointsLabel">
+               <property name="text">
+                <string>Setpoints RM</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="setpointsLight">
+               <property name="fixedSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #808080; border: 1px solid #606060;</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="diagnosticL2Row">
+            <layout class="QHBoxLayout" name="diagnosticL2RowLayout">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="diagnosticL2Label">
+               <property name="text">
+                <string>Diagnostic Level2</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="diagnosticL2Light">
+               <property name="fixedSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #808080; border: 1px solid #606060;</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="idFrame">
+      <property name="styleSheet">
+       <string notr="true">background-color: #d0d0d0;</string>
+      </property>
+      <layout class="QHBoxLayout" name="idFrameLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>10</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <widget class="QFrame" name="id5200Frame">
+         <property name="fixedSize">
+          <size>
+           <width>70</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #00b0ff; border: 2px solid #0080c0;</string>
+         </property>
+         <layout class="QVBoxLayout" name="id5200Layout">
+          <property name="spacing">
+           <number>1</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="idLabel">
+            <property name="text">
+             <string>ID</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="idValue">
+            <property name="text">
+             <string>5200</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="font">
+             <font>
+              <bold>true</bold>
+             </font>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="cModeLabel">
+         <property name="text">
+          <string>C-Mode</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #008000;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="longInherLabel">
+         <property name="text">
+          <string>Long Inher.</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #008000;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="millPacingWidget">
+         <layout class="QVBoxLayout" name="millPacingLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="millPacingTitle">
+            <property name="text">
+             <string>Mill Pacing</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="millPacingLabels">
+            <layout class="QHBoxLayout" name="millPacingLabelsLayout">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="wbLabel">
+               <property name="text">
+                <string>WB</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: #008000;</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="eLabel">
+               <property name="text">
+                <string>E</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: #008000;</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="tLabel">
+               <property name="text">
+                <string>T</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: #008000;</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="cLabel">
+               <property name="text">
+                <string>C</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: #008000;</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="aLabel">
+               <property name="text">
+                <string>A</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: #008000;</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="rcLabel">
+               <property name="text">
+                <string>RC</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: #800080;</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="idSpacer1">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="plantStatusCenterLabel">
+         <property name="text">
+          <string>Plant Status RM</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="idSpacer2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="setpointsCenterLabel">
+         <property name="text">
+          <string>Setpoints RM</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="idSpacer3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="cobbleLabel">
+         <property name="text">
+          <string>Cobble P.Back</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="rmTransLabel">
+         <property name="text">
+          <string>RM Trans</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #008000;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lineLabel">
+         <property name="text">
+          <string>Line</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #0000ff;</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="millLineFrame">
+      <property name="styleSheet">
+       <string notr="true">background-color: #b8b8b8;</string>
+      </property>
+      <layout class="QHBoxLayout" name="millLineFrameLayout">
+       <property name="spacing">
+        <number>5</number>
+       </property>
+       <property name="leftMargin">
+        <number>5</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>5</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <widget class="QWidget" name="leftMillDevices">
+         <layout class="QVBoxLayout" name="leftMillDevicesLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="discAutoLabel">
+            <property name="text">
+             <string>Disc.Auto</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: #008000;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="fuDischargeLabel">
+            <property name="text">
+             <string>FU Discharge</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="noSlabLabel">
+            <property name="text">
+             <string>No Slab Apr.</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="millLineCenter">
+         <layout class="QVBoxLayout" name="millLineCenterLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="topLabelsRow">
+            <layout class="QHBoxLayout" name="topLabelsRowLayout">
+             <property name="spacing">
+              <number>10</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="nStop1Label">
+               <property name="text">
+                <string>N-STOP</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="stopGoLabel">
+               <property name="text">
+                <string>Stop &amp; Go Fast</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="nStop2Label">
+               <property name="text">
+                <string>N-STOP</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="dTranLabel">
+               <property name="text">
+                <string>D-TRAN</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="crpForLabel">
+               <property name="text">
+                <string>CRP-FOR</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="xTranLabel">
+               <property name="text">
+                <string>X-TRAN</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="standsRow">
+            <layout class="QHBoxLayout" name="standsRowLayout">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QFrame" name="standRT1">
+               <property name="fixedSize">
+                <size>
+                 <width>30</width>
+                 <height>45</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #30b030; border: 1px solid #008000;</string>
+               </property>
+               <layout class="QVBoxLayout" name="standRT1Layout">
+                <property name="leftMargin">
+                 <number>1</number>
+                </property>
+                <property name="topMargin">
+                 <number>1</number>
+                </property>
+                <property name="rightMargin">
+                 <number>1</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>1</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="rt1Label">
+                  <property name="text">
+                   <string>RT1</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: white;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="standRT2">
+               <property name="fixedSize">
+                <size>
+                 <width>30</width>
+                 <height>45</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #30b030; border: 1px solid #008000;</string>
+               </property>
+               <layout class="QVBoxLayout" name="standRT2Layout">
+                <property name="leftMargin">
+                 <number>1</number>
+                </property>
+                <property name="topMargin">
+                 <number>1</number>
+                </property>
+                <property name="rightMargin">
+                 <number>1</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>1</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="rt2Label">
+                  <property name="text">
+                   <string>RT2</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: white;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="standRT3">
+               <property name="fixedSize">
+                <size>
+                 <width>30</width>
+                 <height>45</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #30b030; border: 1px solid #008000;</string>
+               </property>
+               <layout class="QVBoxLayout" name="standRT3Layout">
+                <property name="leftMargin">
+                 <number>1</number>
+                </property>
+                <property name="topMargin">
+                 <number>1</number>
+                </property>
+                <property name="rightMargin">
+                 <number>1</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>1</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="rt3Label">
+                  <property name="text">
+                   <string>RT3</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: white;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="standRT4">
+               <property name="fixedSize">
+                <size>
+                 <width>30</width>
+                 <height>45</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #30b030; border: 1px solid #008000;</string>
+               </property>
+               <layout class="QVBoxLayout" name="standRT4Layout">
+                <property name="leftMargin">
+                 <number>1</number>
+                </property>
+                <property name="topMargin">
+                 <number>1</number>
+                </property>
+                <property name="rightMargin">
+                 <number>1</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>1</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="rt4Label">
+                  <property name="text">
+                   <string>RT4</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: white;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="standRT5">
+               <property name="fixedSize">
+                <size>
+                 <width>30</width>
+                 <height>45</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #30b030; border: 1px solid #008000;</string>
+               </property>
+               <layout class="QVBoxLayout" name="standRT5Layout">
+                <property name="leftMargin">
+                 <number>1</number>
+                </property>
+                <property name="topMargin">
+                 <number>1</number>
+                </property>
+                <property name="rightMargin">
+                 <number>1</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>1</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="rt5Label">
+                  <property name="text">
+                   <string>RT5</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: white;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="standRT6">
+               <property name="fixedSize">
+                <size>
+                 <width>30</width>
+                 <height>45</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #30b030; border: 1px solid #008000;</string>
+               </property>
+               <layout class="QVBoxLayout" name="standRT6Layout">
+                <property name="leftMargin">
+                 <number>1</number>
+                </property>
+                <property name="topMargin">
+                 <number>1</number>
+                </property>
+                <property name="rightMargin">
+                 <number>1</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>1</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="rt6Label">
+                  <property name="text">
+                   <string>RT6</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: white;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="standRT7">
+               <property name="fixedSize">
+                <size>
+                 <width>30</width>
+                 <height>45</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #30b030; border: 1px solid #008000;</string>
+               </property>
+               <layout class="QVBoxLayout" name="standRT7Layout">
+                <property name="leftMargin">
+                 <number>1</number>
+                </property>
+                <property name="topMargin">
+                 <number>1</number>
+                </property>
+                <property name="rightMargin">
+                 <number>1</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>1</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="rt7Label">
+                  <property name="text">
+                   <string>RT7</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: white;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="standRT8">
+               <property name="fixedSize">
+                <size>
+                 <width>30</width>
+                 <height>45</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: #30b030; border: 1px solid #008000;</string>
+               </property>
+               <layout class="QVBoxLayout" name="standRT8Layout">
+                <property name="leftMargin">
+                 <number>1</number>
+                </property>
+                <property name="topMargin">
+                 <number>1</number>
+                </property>
+                <property name="rightMargin">
+                 <number>1</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>1</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="rt8Label">
+                  <property name="text">
+                   <string>RT8</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: white;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="rightMillDevices">
+         <layout class="QVBoxLayout" name="rightMillDevicesLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="fumeExhaustLabel">
+            <property name="text">
+             <string>Fume Exhaust</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="mp60AutoLabel">
+            <property name="text">
+             <string>MP60-Auto</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="spLabelsWidget">
+            <layout class="QHBoxLayout" name="spLabelsWidgetLayout">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="sp1Label">
+               <property name="text">
+                <string>SP</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="sp2Label">
+               <property name="text">
+                <string>SP 2</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="noSlabLeftLabel">
+            <property name="text">
+             <string>No.of Slab left RM</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="dataFrame">
+      <property name="styleSheet">
+       <string notr="true">background-color: #c8c8c8;</string>
+      </property>
+      <layout class="QHBoxLayout" name="dataFrameLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <property name="leftMargin">
+        <number>5</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>5</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <widget class="QWidget" name="leftDataWidget">
+         <layout class="QVBoxLayout" name="leftDataWidgetLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="entryWidget">
+            <layout class="QVBoxLayout" name="entryWidgetLayout">
+             <property name="spacing">
+              <number>2</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="entryTitle">
+               <property name="text">
+                <string>Entry</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="entryValue1Frame">
+               <property name="styleSheet">
+                <string notr="true">background-color: #0080ff;</string>
+               </property>
+               <layout class="QHBoxLayout" name="entryValue1FrameLayout">
+                <item>
+                 <widget class="QLabel" name="entryValue1">
+                  <property name="text">
+                   <string>1110 °C</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: white;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="entryValue2Frame">
+               <property name="styleSheet">
+                <string notr="true">background-color: #0080ff;</string>
+               </property>
+               <layout class="QHBoxLayout" name="entryValue2FrameLayout">
+                <item>
+                 <widget class="QLabel" name="entryValue2">
+                  <property name="text">
+                   <string>600 °C</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: white;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="centerDataWidget">
+         <layout class="QVBoxLayout" name="centerDataWidgetLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="sgWidget">
+            <layout class="QVBoxLayout" name="sgWidgetLayout">
+             <property name="spacing">
+              <number>2</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="sgTitle">
+               <property name="text">
+                <string>SG</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="sgValueFrame">
+               <property name="styleSheet">
+                <string notr="true">background-color: #0080ff;</string>
+               </property>
+               <layout class="QHBoxLayout" name="sgValueFrameLayout">
+                <item>
+                 <widget class="QLabel" name="sgValue">
+                  <property name="text">
+                   <string>2250 mm</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: white;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="rightDataWidget">
+         <layout class="QVBoxLayout" name="rightDataWidgetLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="r1Widget">
+            <layout class="QVBoxLayout" name="r1WidgetLayout">
+             <property name="spacing">
+              <number>2</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="r1Title">
+               <property name="text">
+                <string>R1</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="r1ValueFrame">
+               <property name="styleSheet">
+                <string notr="true">background-color: #0080ff;</string>
+               </property>
+               <layout class="QHBoxLayout" name="r1ValueFrameLayout">
+                <item>
+                 <widget class="QLabel" name="r1Value">
+                  <property name="text">
+                   <string>203.48 mm</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: white;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="dataSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QWidget" name="farRightDataWidget">
+         <layout class="QVBoxLayout" name="farRightDataWidgetLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="r2FanWidget">
+            <layout class="QVBoxLayout" name="r2FanWidgetLayout">
+             <property name="spacing">
+              <number>2</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="r2FanTitle">
+               <property name="text">
+                <string>R2 Fan</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="r2FanValueFrame">
+               <property name="styleSheet">
+                <string notr="true">background-color: #0080ff;</string>
+               </property>
+               <layout class="QHBoxLayout" name="r2FanValueFrameLayout">
+                <item>
+                 <widget class="QLabel" name="r2FanValue">
+                  <property name="text">
+                   <string>5.8 m/s</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: white;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="middleTableFrame">
+      <property name="styleSheet">
+       <string notr="true">background-color: #c0c0c0;</string>
+      </property>
+      <layout class="QHBoxLayout" name="middleTableFrameLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <property name="leftMargin">
+        <number>5</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>5</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <widget class="QTableWidget" name="leftMiddleTable">
+         <property name="rowCount">
+          <number>3</number>
+         </property>
+         <property name="columnCount">
+          <number>4</number>
+         </property>
+         <column>
+          <property name="text">
+           <string/>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string/>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string/>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string/>
+          </property>
+         </column>
+         <row>
+          <property name="text">
+           <string>SP</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>R1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>R2</string>
+          </property>
+         </row>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="rightMiddleTable">
+         <property name="rowCount">
+          <number>2</number>
+         </property>
+         <property name="columnCount">
+          <number>4</number>
+         </property>
+         <column>
+          <property name="text">
+           <string/>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string/>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string/>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string/>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="bottomTableFrame">
+      <property name="styleSheet">
+       <string notr="true">background-color: #b8b8b8;</string>
+      </property>
+      <layout class="QHBoxLayout" name="bottomTableFrameLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <property name="leftMargin">
+        <number>5</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>5</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <widget class="QTableWidget" name="leftBottomTable">
+         <property name="rowCount">
+          <number>6</number>
+         </property>
+         <property name="columnCount">
+          <number>5</number>
+         </property>
+         <column>
+          <property name="text">
+           <string>E2[mm]</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>R2[mm]</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>V [m/s]</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Desc</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Sk[%]</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="rightBottomTable">
+         <property name="rowCount">
+          <number>6</number>
+         </property>
+         <property name="columnCount">
+          <number>5</number>
+         </property>
+         <column>
+          <property name="text">
+           <string>E2[mm]</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>R2[mm]</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>V [m/s]</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Desc</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Sk[%]</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="buttonsFrame">
+      <property name="styleSheet">
+       <string notr="true">background-color: #a8a8a8;</string>
+      </property>
+      <layout class="QHBoxLayout" name="buttonsFrameLayout">
+       <property name="spacing">
+        <number>5</number>
+       </property>
+       <property name="leftMargin">
+        <number>5</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>5</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <widget class="QPushButton" name="millModeButton">
+         <property name="text">
+          <string>Mill Mode</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #4CAF50;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="standModeButton">
+         <property name="text">
+          <string>Stand Mode</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="sizingPressButton">
+         <property name="text">
+          <string>Sizing Press Mode</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="simulationButton">
+         <property name="text">
+          <string>Simulation</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="rollDataButton">
+         <property name="text">
+          <string>Roll Data</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="joggingButton">
+         <property name="text">
+          <string>Jogging Selection</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="setCounterButton">
+         <property name="text">
+          <string>Set Run Counter</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="releaseButton">
+         <property name="text">
+          <string>Release Drives</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="changeSkiButton">
+         <property name="text">
+          <string>Change Ski</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="coolingButton">
+         <property name="text">
+          <string>Cooling</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="confirmButton">
+         <property name="text">
+          <string>Confirm</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="faultButton">
+         <property name="text">
+          <string>Fault acknowledge</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1600</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QTableWidget, QTableWidgetItem, 
     QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QScrollArea, 
     QHeaderView, QMessageBox, QLineEdit, QCheckBox, QComboBox, QDialog,
-    QAbstractItemView
+    QAbstractItemView, QGroupBox, QFrame, QGridLayout
 )
 from PyQt5.QtCore import Qt, QTimer, QSize, QEvent, pyqtSignal
 from PyQt5.QtGui import QFont, QColor, QBrush
@@ -21,6 +21,853 @@ try:
     PYAUTOGUI_AVAILABLE = True
 except ImportError:
     PYAUTOGUI_AVAILABLE = False
+
+
+class RMMainWindow(QMainWindow):
+    """粗轧主画面窗口 - 复刻西门子WinCC粗轧主画面"""
+    
+    def __init__(self, parent=None):
+        super().__init__()
+        self.parent = parent
+        self.setWindowTitle("粗轧主画面")
+        self.resize(1900, 1000)
+        
+        # 设置窗口背景色为WinCC风格的灰色
+        self.setStyleSheet("background-color: #c8c8c8;")
+        
+        try:
+            # 创建中心部件
+            central_widget = QWidget()
+            self.setCentralWidget(central_widget)
+            
+            # 主布局
+            main_layout = QVBoxLayout(central_widget)
+            main_layout.setContentsMargins(5, 5, 5, 5)
+            main_layout.setSpacing(5)
+            
+            # 1. 顶部状态栏
+            self.create_top_status_bar(main_layout)
+            
+            # 2. ID和状态显示区
+            self.create_id_status_area(main_layout)
+            
+            # 3. 轧制线视图
+            self.create_mill_line_view(main_layout)
+            
+            # 4. 状态指示线
+            self.create_status_indicator_line(main_layout)
+            
+            # 5. 底部状态区域
+            self.create_bottom_status_area(main_layout)
+            
+            # 6. 参数显示区域
+            self.create_params_area(main_layout)
+            
+            # 7. 数据表格区域
+            self.create_data_tables(main_layout)
+            
+            # 8. 底部操作按钮
+            self.create_bottom_buttons(main_layout)
+            
+            print("粗轧主画面窗口创建成功")
+        except Exception as e:
+            print(f"创建粗轧主画面窗口时出错: {e}")
+            import traceback
+            traceback.print_exc()
+            QMessageBox.critical(self, "错误", f"创建窗口失败: {str(e)}")
+    
+    def create_top_status_bar(self, parent_layout):
+        """创建顶部状态栏区域"""
+        top_bar = QWidget()
+        top_bar.setStyleSheet("background-color: #e0e0e0;")
+        top_layout = QHBoxLayout(top_bar)
+        top_layout.setContentsMargins(5, 5, 5, 5)
+        top_layout.setSpacing(10)
+        
+        # 左侧状态组
+        left_group = QGroupBox("Plant Status RM")
+        left_group.setFont(QFont("Arial", 10, QFont.Bold))
+        left_group.setStyleSheet("QGroupBox { border: 1px solid #808080; }")
+        left_layout = QGridLayout(left_group)
+        left_layout.setContentsMargins(5, 5, 5, 5)
+        left_layout.setSpacing(5)
+        
+        status_items = [
+            ("Plant Status RM", "Green"),
+            ("Diagnostic RM", "Green"),
+            ("CSM/DSM RM", "Green")
+        ]
+        
+        for i, (label, status) in enumerate(status_items):
+            lbl = QLabel(label)
+            lbl.setFont(QFont("Arial", 9))
+            left_layout.addWidget(lbl, i, 0)
+            
+            status_box = QFrame()
+            status_box.setFixedSize(20, 20)
+            if status == "Green":
+                status_box.setStyleSheet("background-color: #00ff00; border: 1px solid #008000;")
+            else:
+                status_box.setStyleSheet("background-color: #ff0000; border: 1px solid #800000;")
+            left_layout.addWidget(status_box, i, 1)
+            
+            arrow_btn = QPushButton("↓")
+            arrow_btn.setFixedSize(20, 20)
+            arrow_btn.setStyleSheet("background-color: #d0d0d0;")
+            left_layout.addWidget(arrow_btn, i, 2)
+        
+        top_layout.addWidget(left_group)
+        
+        # 中间空白区域
+        top_layout.addStretch(1)
+        
+        # 右侧状态组
+        right_group = QGroupBox("Setpoints RM")
+        right_group.setFont(QFont("Arial", 10, QFont.Bold))
+        right_group.setStyleSheet("QGroupBox { border: 1px solid #808080; }")
+        right_layout = QGridLayout(right_group)
+        right_layout.setContentsMargins(5, 5, 5, 5)
+        right_layout.setSpacing(5)
+        
+        status_items2 = [
+            ("Setpoints RM", "Green"),
+            ("Diagnostic Level2", "Green")
+        ]
+        
+        for i, (label, status) in enumerate(status_items2):
+            lbl = QLabel(label)
+            lbl.setFont(QFont("Arial", 9))
+            right_layout.addWidget(lbl, i, 0)
+            
+            status_box = QFrame()
+            status_box.setFixedSize(20, 20)
+            if status == "Green":
+                status_box.setStyleSheet("background-color: #00ff00; border: 1px solid #008000;")
+            else:
+                status_box.setStyleSheet("background-color: #ff0000; border: 1px solid #800000;")
+            right_layout.addWidget(status_box, i, 1)
+            
+            arrow_btn = QPushButton("↓")
+            arrow_btn.setFixedSize(20, 20)
+            arrow_btn.setStyleSheet("background-color: #d0d0d0;")
+            right_layout.addWidget(arrow_btn, i, 2)
+        
+        top_layout.addWidget(right_group)
+        
+        parent_layout.addWidget(top_bar)
+    
+    def create_id_status_area(self, parent_layout):
+        """创建ID和状态显示区"""
+        id_area = QWidget()
+        id_layout = QHBoxLayout(id_area)
+        id_layout.setContentsMargins(5, 5, 5, 5)
+        id_layout.setSpacing(5)
+        
+        # ID 5200
+        id_box1 = self.create_id_box("ID", "5200", "#00d4ff")
+        id_layout.addWidget(id_box1)
+        
+        # ID-Mode
+        id_box2 = self.create_id_box("ID", "5200", "#00d4ff")
+        id_layout.addWidget(id_box2)
+        
+        # C-Mode
+        id_box3 = self.create_id_box("C-Mode", "", "#00d4ff")
+        id_layout.addWidget(id_box3)
+        
+        # Mill Pacing
+        pace_group = QGroupBox("Mill Pacing")
+        pace_group.setFont(QFont("Arial", 9, QFont.Bold))
+        pace_group.setStyleSheet("QGroupBox { border: 1px solid #808080; background-color: #f0f0f0; }")
+        pace_layout = QHBoxLayout(pace_group)
+        pace_layout.setContentsMargins(5, 5, 5, 5)
+        
+        status_labels = ["WB", "E", "T", "C", "A", "RC"]
+        for label in status_labels:
+            lbl = QLabel(label)
+            lbl.setFont(QFont("Arial", 8, QFont.Bold))
+            if label in ["WB", "E", "T", "C", "A"]:
+                lbl.setStyleSheet("color: #008000;")
+            else:
+                lbl.setStyleSheet("color: #800080;")
+            pace_layout.addWidget(lbl)
+        
+        id_layout.addWidget(pace_group)
+        
+        id_layout.addStretch(1)
+        
+        # ID 5203
+        id_box4 = self.create_id_box("ID", "5203", "#00d4ff")
+        id_layout.addWidget(id_box4)
+        
+        # 状态标签
+        status_labels2 = ["P", "S", "C", "T", "C", "A", "RC", "E2"]
+        for label in status_labels2:
+            lbl = QLabel(label)
+            lbl.setFont(QFont("Arial", 8, QFont.Bold))
+            if label in ["P", "S", "C", "T"]:
+                lbl.setStyleSheet("color: #008000;")
+            elif label == "A":
+                lbl.setStyleSheet("color: #0000ff;")
+            elif label == "RC":
+                lbl.setStyleSheet("color: #800080;")
+            else:
+                lbl.setStyleSheet("color: #ff8000;")
+            id_layout.addWidget(lbl)
+        
+        id_layout.addStretch(1)
+        
+        # ID R2
+        id_box5 = self.create_id_box("ID", "R2", "#00d4ff")
+        id_layout.addWidget(id_box5)
+        
+        # 更多状态标签
+        status_labels3 = ["E", "H", "AA", "WB", "S", "T", "C", "A", "BB", "RC"]
+        for label in status_labels3:
+            lbl = QLabel(label)
+            lbl.setFont(QFont("Arial", 8, QFont.Bold))
+            if label in ["E", "S", "T", "C", "A"]:
+                lbl.setStyleSheet("color: #008000;")
+            elif label in ["H", "AA", "WB"]:
+                lbl.setStyleSheet("color: #0000ff;")
+            elif label == "BB":
+                lbl.setStyleSheet("color: #ff0000;")
+            else:
+                lbl.setStyleSheet("color: #800080;")
+            id_layout.addWidget(lbl)
+        
+        id_layout.addStretch(1)
+        
+        # 时间显示
+        time_box = self.create_status_box("0:50", "s", "#ffff00", "#808000")
+        id_layout.addWidget(time_box)
+        
+        id_layout.addStretch(1)
+        
+        # ID Cobble P.Back
+        id_box6 = self.create_id_box("ID", "Cobble P.Back", "#00d4ff")
+        id_layout.addWidget(id_box6)
+        
+        parent_layout.addWidget(id_area)
+    
+    def create_mill_line_view(self, parent_layout):
+        """创建轧制线视图"""
+        mill_area = QWidget()
+        mill_layout = QHBoxLayout(mill_area)
+        mill_layout.setContentsMargins(5, 5, 5, 5)
+        mill_layout.setSpacing(2)
+        
+        # 左侧设备
+        left_devices = QVBoxLayout()
+        
+        # Disc.Auto
+        disc_auto = QLabel("Disc.Auto")
+        disc_auto.setFont(QFont("Arial", 8, QFont.Bold))
+        disc_auto.setStyleSheet("color: #008000;")
+        left_devices.addWidget(disc_auto)
+        
+        # 箭头指示
+        arrow_frame = QFrame()
+        arrow_frame.setFixedSize(40, 60)
+        arrow_layout = QVBoxLayout(arrow_frame)
+        for _ in range(3):
+            arrow = QLabel("↑")
+            arrow.setFont(QFont("Arial", 8))
+            arrow.setStyleSheet("color: #008000;")
+            arrow_layout.addWidget(arrow)
+        left_devices.addWidget(arrow_frame)
+        
+        mill_layout.addLayout(left_devices)
+        mill_layout.addStretch(1)
+        
+        # 机架区域
+        stands = ["RT1", "RT2", "RT3", "RT4", "RT5", "RT6", "RT7", "RT8", "RT9", "RT10", "RT11", "RT12", "RT13", "RT14", "RT15", "RT16", "RT17"]
+        
+        for i, stand in enumerate(stands):
+            stand_widget = QWidget()
+            stand_layout = QVBoxLayout(stand_widget)
+            stand_layout.setContentsMargins(2, 2, 2, 2)
+            
+            # 机架标签
+            stand_label = QLabel(stand)
+            stand_label.setFont(QFont("Arial", 7, QFont.Bold))
+            stand_label.setAlignment(Qt.AlignCenter)
+            stand_layout.addWidget(stand_label)
+            
+            # 机架图形
+            stand_frame = QFrame()
+            stand_frame.setFixedSize(30, 20)
+            
+            # 特殊机架样式
+            if stand in ["RT10", "RT11"]:
+                stand_frame.setStyleSheet("background-color: #00ff00; border: 1px solid #008000;")
+            elif stand in ["RT6", "RT12"]:
+                stand_frame.setStyleSheet("background-color: #00ff00; border: 1px solid #008000;")
+            else:
+                stand_frame.setStyleSheet("background-color: #40c040; border: 1px solid #008000;")
+            
+            stand_layout.addWidget(stand_frame)
+            
+            mill_layout.addWidget(stand_widget)
+        
+        mill_layout.addStretch(1)
+        
+        # 右侧设备
+        right_devices = QVBoxLayout()
+        
+        # RM Trans
+        rm_trans = QLabel("RM Trans")
+        rm_trans.setFont(QFont("Arial", 8, QFont.Bold))
+        rm_trans.setStyleSheet("color: #008000;")
+        right_devices.addWidget(rm_trans)
+        
+        # Line
+        line_label = QLabel("Line")
+        line_label.setFont(QFont("Arial", 8, QFont.Bold))
+        line_label.setStyleSheet("color: #0000ff;")
+        right_devices.addWidget(line_label)
+        
+        mill_layout.addLayout(right_devices)
+        
+        parent_layout.addWidget(mill_area)
+    
+    def create_status_indicator_line(self, parent_layout):
+        """创建状态指示线"""
+        status_line = QFrame()
+        status_line.setFixedHeight(8)
+        status_line.setStyleSheet("background-color: #00c000;")
+        parent_layout.addWidget(status_line)
+    
+    def create_bottom_status_area(self, parent_layout):
+        """创建底部状态区域"""
+        bottom_status = QWidget()
+        bottom_layout = QHBoxLayout(bottom_status)
+        bottom_layout.setSpacing(10)
+        
+        # 左侧状态
+        left_status_group = QGroupBox()
+        left_status_group.setStyleSheet("QGroupBox { border: none; }")
+        left_status_layout = QVBoxLayout(left_status_group)
+        
+        # No Slab Appr.
+        no_slab_label = QLabel("No Slab Appr.")
+        no_slab_label.setFont(QFont("Arial", 8, QFont.Bold))
+        no_slab_label.setStyleSheet("color: #ff0000;")
+        left_status_layout.addWidget(no_slab_label)
+        
+        # DESC / N-STOP
+        status_row1 = QHBoxLayout()
+        
+        desc_btn = QPushButton("DESC")
+        desc_btn.setFont(QFont("Arial", 8, QFont.Bold))
+        desc_btn.setFixedSize(50, 20)
+        desc_btn.setStyleSheet("background-color: #008000; color: white;")
+        status_row1.addWidget(desc_btn)
+        
+        nstop_btn = QPushButton("N-STOP")
+        nstop_btn.setFont(QFont("Arial", 8, QFont.Bold))
+        nstop_btn.setFixedSize(60, 20)
+        nstop_btn.setStyleSheet("background-color: #ff0000; color: white;")
+        status_row1.addWidget(nstop_btn)
+        
+        left_status_layout.addLayout(status_row1)
+        
+        bottom_layout.addWidget(left_status_group)
+        
+        bottom_layout.addStretch(1)
+        
+        # 中间状态按钮
+        mid_status_group = QGroupBox()
+        mid_status_group.setStyleSheet("QGroupBox { border: none; }")
+        mid_status_layout = QVBoxLayout(mid_status_group)
+        
+        status_row2 = QHBoxLayout()
+        
+        on_btn = QPushButton("ON")
+        on_btn.setFont(QFont("Arial", 8, QFont.Bold))
+        on_btn.setFixedSize(40, 20)
+        on_btn.setStyleSheet("background-color: #00ff00;")
+        status_row2.addWidget(on_btn)
+        
+        nstop_btn2 = QPushButton("N-STOP")
+        nstop_btn2.setFont(QFont("Arial", 8, QFont.Bold))
+        nstop_btn2.setFixedSize(60, 20)
+        nstop_btn2.setStyleSheet("background-color: #ff0000; color: white;")
+        status_row2.addWidget(nstop_btn2)
+        
+        dtran_btn = QPushButton("D-TRAN")
+        dtran_btn.setFont(QFont("Arial", 8, QFont.Bold))
+        dtran_btn.setFixedSize(60, 20)
+        dtran_btn.setStyleSheet("background-color: #008000; color: white;")
+        status_row2.addWidget(dtran_btn)
+        
+        status_row3 = QHBoxLayout()
+        
+        ready_btn = QPushButton("Ready")
+        ready_btn.setFont(QFont("Arial", 8, QFont.Bold))
+        ready_btn.setFixedSize(50, 20)
+        ready_btn.setStyleSheet("background-color: #00ff00;")
+        status_row3.addWidget(ready_btn)
+        
+        neg30_label = QLabel("-30")
+        neg30_label.setFont(QFont("Arial", 8))
+        neg30_label.setStyleSheet("color: #0000ff;")
+        status_row3.addWidget(neg30_label)
+        
+        mid_status_layout.addLayout(status_row2)
+        mid_status_layout.addLayout(status_row3)
+        
+        bottom_layout.addWidget(mid_status_group)
+        
+        bottom_layout.addStretch(1)
+        
+        # 右侧状态
+        right_status_group = QGroupBox()
+        right_status_group.setStyleSheet("QGroupBox { border: none; }")
+        right_status_layout = QVBoxLayout(right_status_group)
+        
+        status_row4 = QHBoxLayout()
+        
+        on_for_btn = QPushButton("ON-FOR")
+        on_for_btn.setFont(QFont("Arial", 8, QFont.Bold))
+        on_for_btn.setFixedSize(60, 20)
+        on_for_btn.setStyleSheet("background-color: #00ff00;")
+        status_row4.addWidget(on_for_btn)
+        
+        crp_for_btn = QPushButton("CRP-FOR")
+        crp_for_btn.setFont(QFont("Arial", 8, QFont.Bold))
+        crp_for_btn.setFixedSize(70, 20)
+        crp_for_btn.setStyleSheet("background-color: #008000; color: white;")
+        status_row4.addWidget(crp_for_btn)
+        
+        status_row5 = QHBoxLayout()
+        
+        num9_label = QLabel("9")
+        num9_label.setFont(QFont("Arial", 10, QFont.Bold))
+        num9_label.setStyleSheet("color: #ff8000;")
+        status_row5.addWidget(num9_label)
+        
+        right_status_layout.addLayout(status_row4)
+        right_status_layout.addLayout(status_row5)
+        
+        bottom_layout.addWidget(right_status_group)
+        
+        bottom_layout.addStretch(1)
+        
+        # SP/LP/HP状态
+        sp_group = QGroupBox()
+        sp_group.setStyleSheet("QGroupBox { border: none; }")
+        sp_layout = QVBoxLayout(sp_group)
+        
+        sp_row1 = QHBoxLayout()
+        
+        sp_label = QLabel("SP")
+        sp_label.setFont(QFont("Arial", 8, QFont.Bold))
+        sp_label.setStyleSheet("color: #0000ff;")
+        sp_row1.addWidget(sp_label)
+        
+        num2_label = QLabel("2")
+        num2_label.setFont(QFont("Arial", 10, QFont.Bold))
+        num2_label.setStyleSheet("color: #0000ff;")
+        sp_row1.addWidget(num2_label)
+        
+        sp_layout.addLayout(sp_row1)
+        
+        sp_row2 = QHBoxLayout()
+        
+        lp_label = QLabel("LP")
+        lp_label.setFont(QFont("Arial", 8, QFont.Bold))
+        lp_label.setStyleSheet("color: #0000ff;")
+        sp_row2.addWidget(lp_label)
+        
+        num3_label = QLabel("3")
+        num3_label.setFont(QFont("Arial", 10, QFont.Bold))
+        num3_label.setStyleSheet("color: #0000ff;")
+        sp_row2.addWidget(num3_label)
+        
+        sp_layout.addLayout(sp_row2)
+        
+        sp_row3 = QHBoxLayout()
+        
+        hp_label = QLabel("HP")
+        hp_label.setFont(QFont("Arial", 8, QFont.Bold))
+        hp_label.setStyleSheet("color: #0000ff;")
+        sp_row3.addWidget(hp_label)
+        
+        num8_label = QLabel("8")
+        num8_label.setFont(QFont("Arial", 10, QFont.Bold))
+        num8_label.setStyleSheet("color: #0000ff;")
+        sp_row3.addWidget(num8_label)
+        
+        sp_layout.addLayout(sp_row3)
+        
+        bottom_layout.addWidget(sp_group)
+        
+        bottom_layout.addStretch(1)
+        
+        # MP/T状态
+        mp_group = QGroupBox()
+        mp_group.setStyleSheet("QGroupBox { border: none; }")
+        mp_layout = QVBoxLayout(mp_group)
+        
+        mp_row1 = QHBoxLayout()
+        
+        mp_label = QLabel("MP 3")
+        mp_label.setFont(QFont("Arial", 8, QFont.Bold))
+        mp_label.setStyleSheet("color: #008000;")
+        mp_row1.addWidget(mp_label)
+        
+        mpsb_label = QLabel("MPSB Ackn")
+        mpsb_label.setFont(QFont("Arial", 8, QFont.Bold))
+        mpsb_label.setStyleSheet("color: #ffff00;")
+        mp_row1.addWidget(mpsb_label)
+        
+        mp_layout.addLayout(mp_row1)
+        
+        xtran_btn = QPushButton("X-TRAN")
+        xtran_btn.setFont(QFont("Arial", 8, QFont.Bold))
+        xtran_btn.setFixedSize(60, 20)
+        xtran_btn.setStyleSheet("background-color: #008000; color: white;")
+        mp_layout.addWidget(xtran_btn)
+        
+        bottom_layout.addWidget(mp_group)
+        
+        bottom_layout.addStretch(1)
+        
+        # 剩余板坯数
+        slab_left_group = QGroupBox()
+        slab_left_group.setStyleSheet("QGroupBox { border: none; }")
+        slab_left_layout = QVBoxLayout(slab_left_group)
+        
+        slab_left_label = QLabel("Nr.of Slab left RM")
+        slab_left_label.setFont(QFont("Arial", 8, QFont.Bold))
+        slab_left_label.setStyleSheet("color: #000000;")
+        slab_left_layout.addWidget(slab_left_label)
+        
+        bottom_layout.addWidget(slab_left_group)
+        
+        parent_layout.addWidget(bottom_status)
+    
+    def create_params_area(self, parent_layout):
+        """创建参数显示区域"""
+        params_area = QWidget()
+        params_area.setStyleSheet("background-color: #d8d8d8;")
+        params_layout = QHBoxLayout(params_area)
+        params_layout.setContentsMargins(5, 5, 5, 5)
+        params_layout.setSpacing(5)
+        
+        # 左侧参数
+        left_params = QGroupBox()
+        left_params.setStyleSheet("QGroupBox { border: 1px solid #808080; }")
+        left_params_layout = QGridLayout(left_params)
+        left_params_layout.setContentsMargins(5, 5, 5, 5)
+        left_params_layout.setSpacing(3)
+        
+        param_labels = ["Entry", "", "", "1.00 m/s", "1.00 m/s", "SP", "", "SG Ref[mm]", "SG Ref[mm]", "SG", "", "", "R1", "", "", "", "Swivel", "", "SG", "", "", "HGC DS", "HGC OS", "E2", "", "", "R2", "", "", "", "Swivel", "", "", "SG", "", "", "Exit", "", "3.00 m/s", "0.00 m/s", "T", "B", "T-B", "B", ""]
+        param_values = ["1110 °C", "600 °C", "", "", "", "1361 mm", "1361 mm", "2260.0", "2260.0", "2250 mm", "2250 mm", "2260.0", "2260.0", "203.48 mm", "203.48 mm", "1.43 m/s", "0.01 MN", "7.3", "-0.51 mm", "-0.51 mm", "2157 mm", "2171 mm", "600 °C", "31.03 mm", "31.10 mm", "1030 mm", "1030 mm", "1.00 m/s", "1.00 m/s", "-0.05 MN", "155.2 mm", "155.26 mm", "1.00 m/s", "1.00 m/s", "0.20 MN", "+0.45 mm", "+0.45 mm", "Ski", "7 %", "2157 mm", "2171 mm", "25.12 mm", "25.12 mm", "1110 W mm", "600 °C", "", "", "5.1", "-3.1", "8", "-3", "8 °C"]
+        
+        row, col = 0, 0
+        for i, (label, value) in enumerate(zip(param_labels, param_values)):
+            if label:
+                lbl = QLabel(label)
+                lbl.setFont(QFont("Arial", 7))
+                lbl.setStyleSheet("color: #000000;")
+                left_params_layout.addWidget(lbl, row, col)
+            
+            if value:
+                val = QLabel(value)
+                val.setFont(QFont("Arial", 7, QFont.Bold))
+                if "°C" in value or "mm" in value or "m/s" in value or "MN" in value or "%" in value:
+                    val.setStyleSheet("color: #0000ff;")
+                else:
+                    val.setStyleSheet("color: #008000;")
+                left_params_layout.addWidget(val, row, col + 1)
+            
+            col += 2
+            if col >= 8:
+                col = 0
+                row += 1
+        
+        params_layout.addWidget(left_params)
+        
+        # 右侧参数
+        right_params = QGroupBox()
+        right_params.setStyleSheet("QGroupBox { border: 1px solid #808080; }")
+        right_params_layout = QGridLayout(right_params)
+        right_params_layout.setContentsMargins(5, 5, 5, 5)
+        right_params_layout.setSpacing(3)
+        
+        # R2 Fan按钮
+        r2_fan_btn = QPushButton("R2 Fan")
+        r2_fan_btn.setFont(QFont("Arial", 8, QFont.Bold))
+        r2_fan_btn.setFixedSize(80, 20)
+        r2_fan_btn.setStyleSheet("background-color: #008000; color: white;")
+        right_params_layout.addWidget(r2_fan_btn, 0, 0, 1, 2)
+        
+        # Next Slab / Actual Slab / Slab exit
+        next_slab_label = QLabel("Next Slab")
+        next_slab_label.setFont(QFont("Arial", 7, QFont.Bold))
+        right_params_layout.addWidget(next_slab_label, 1, 0)
+        
+        actual_slab_label = QLabel("Actual Slab")
+        actual_slab_label.setFont(QFont("Arial", 7, QFont.Bold))
+        right_params_layout.addWidget(actual_slab_label, 1, 1)
+        
+        slab_exit_label = QLabel("Slab exit")
+        slab_exit_label.setFont(QFont("Arial", 7, QFont.Bold))
+        right_params_layout.addWidget(slab_exit_label, 1, 2)
+        
+        # SP Slab ID
+        sp_slab_id = QLabel("SP")
+        sp_slab_id.setFont(QFont("Arial", 7))
+        right_params_layout.addWidget(sp_slab_id, 2, 0)
+        
+        sp_slab_box = QFrame()
+        sp_slab_box.setFixedHeight(16)
+        sp_slab_box.setStyleSheet("background-color: #000080;")
+        right_params_layout.addWidget(sp_slab_box, 2, 1, 1, 2)
+        
+        # R1 Slab ID
+        r1_slab_id = QLabel("R1")
+        r1_slab_id.setFont(QFont("Arial", 7))
+        right_params_layout.addWidget(r1_slab_id, 3, 0)
+        
+        r1_slab_box = QFrame()
+        r1_slab_box.setFixedHeight(16)
+        r1_slab_box.setStyleSheet("background-color: #000080;")
+        right_params_layout.addWidget(r1_slab_box, 3, 1, 1, 2)
+        
+        # R2 Slab ID
+        r2_slab_id = QLabel("R2")
+        r2_slab_id.setFont(QFont("Arial", 7))
+        right_params_layout.addWidget(r2_slab_id, 4, 0)
+        
+        r2_slab_box = QFrame()
+        r2_slab_box.setFixedHeight(16)
+        r2_slab_box.setStyleSheet("background-color: #000080;")
+        right_params_layout.addWidget(r2_slab_box, 4, 1, 1, 2)
+        
+        # WCL显示
+        wcl_label1 = QLabel("WCL 90 %")
+        wcl_label1.setFont(QFont("Arial", 7, QFont.Bold))
+        wcl_label1.setStyleSheet("color: #008000;")
+        right_params_layout.addWidget(wcl_label1, 3, 3)
+        
+        wcl_label2 = QLabel("WCL 90 %")
+        wcl_label2.setFont(QFont("Arial", 7, QFont.Bold))
+        wcl_label2.setStyleSheet("color: #008000;")
+        right_params_layout.addWidget(wcl_label2, 4, 3)
+        
+        # R2 Max speed / SP Level
+        r2_max_speed_label = QLabel("R2 Max speed")
+        r2_max_speed_label.setFont(QFont("Arial", 7))
+        right_params_layout.addWidget(r2_max_speed_label, 5, 0)
+        
+        r2_max_speed_val = QLabel("5.8 m/s")
+        r2_max_speed_val.setFont(QFont("Arial", 7, QFont.Bold))
+        r2_max_speed_val.setStyleSheet("color: #00d4ff;")
+        right_params_layout.addWidget(r2_max_speed_val, 5, 1)
+        
+        sp_level_label = QLabel("SP Level")
+        sp_level_label.setFont(QFont("Arial", 7))
+        right_params_layout.addWidget(sp_level_label, 5, 2)
+        
+        sp_level_val = QLabel("35.6 %")
+        sp_level_val.setFont(QFont("Arial", 7, QFont.Bold))
+        sp_level_val.setStyleSheet("color: #00d4ff;")
+        right_params_layout.addWidget(sp_level_val, 5, 3)
+        
+        # RT STOP按钮
+        rt_stop_btn = QPushButton("RT STOP")
+        rt_stop_btn.setFont(QFont("Arial", 7, QFont.Bold))
+        rt_stop_btn.setFixedSize(60, 18)
+        rt_stop_btn.setStyleSheet("background-color: #800000; color: white;")
+        right_params_layout.addWidget(rt_stop_btn, 6, 3)
+        
+        # 速度显示
+        speed_label = QLabel("V 90 m/s")
+        speed_label.setFont(QFont("Arial", 7, QFont.Bold))
+        speed_label.setStyleSheet("color: #008000;")
+        right_params_layout.addWidget(speed_label, 6, 1)
+        
+        wcl_label3 = QLabel("WCL 90 %")
+        wcl_label3.setFont(QFont("Arial", 7, QFont.Bold))
+        wcl_label3.setStyleSheet("color: #008000;")
+        right_params_layout.addWidget(wcl_label3, 6, 2)
+        
+        # R1 SPD UP / EXIT SPD UP按钮
+        r1_spd_btn = QPushButton("R1 SPD UP")
+        r1_spd_btn.setFont(QFont("Arial", 7, QFont.Bold))
+        r1_spd_btn.setFixedSize(70, 18)
+        r1_spd_btn.setStyleSheet("background-color: #008000; color: white;")
+        right_params_layout.addWidget(r1_spd_btn, 7, 2)
+        
+        exit_spd_btn = QPushButton("EXIT SPD UP")
+        exit_spd_btn.setFont(QFont("Arial", 7, QFont.Bold))
+        exit_spd_btn.setFixedSize(70, 18)
+        exit_spd_btn.setStyleSheet("background-color: #008000; color: white;")
+        right_params_layout.addWidget(exit_spd_btn, 7, 3)
+        
+        params_layout.addWidget(right_params)
+        
+        parent_layout.addWidget(params_area)
+    
+    def create_data_tables(self, parent_layout):
+        """创建数据表格区域"""
+        table_area = QWidget()
+        table_area.setStyleSheet("background-color: #e8e8e8;")
+        table_layout = QHBoxLayout(table_area)
+        table_layout.setContentsMargins(5, 5, 5, 5)
+        table_layout.setSpacing(10)
+        
+        # 左侧表格
+        left_table = QGroupBox()
+        left_table.setStyleSheet("QGroupBox { border: 1px solid #808080; }")
+        left_table_layout = QVBoxLayout(left_table)
+        
+        # 表格标题行
+        header_row = QWidget()
+        header_layout = QHBoxLayout(header_row)
+        
+        headers = ["E2[mm]", "R2[mm]", "V [m/s]", "Desc", "Ski[%]", "Ski[m]"]
+        for header in headers:
+            lbl = QLabel(header)
+            lbl.setFont(QFont("Arial", 7, QFont.Bold))
+            lbl.setStyleSheet("color: #000000;")
+            lbl.setFixedWidth(60)
+            header_layout.addWidget(lbl)
+        
+        left_table_layout.addWidget(header_row)
+        
+        # 表格数据
+        for i in range(5):
+            data_row = QWidget()
+            data_layout = QHBoxLayout(data_row)
+            
+            values = ["1650", "1650", "3.5", str(i + 1), "1", "1"]
+            for j, value in enumerate(values):
+                val = QLabel(value)
+                val.setFont(QFont("Arial", 7, QFont.Bold))
+                if j < 3:
+                    val.setStyleSheet("color: #000080;")
+                else:
+                    val.setStyleSheet("color: #008000;")
+                val.setFixedWidth(60)
+                val.setAlignment(Qt.AlignCenter)
+                data_layout.addWidget(val)
+            
+            left_table_layout.addWidget(data_row)
+        
+        table_layout.addWidget(left_table)
+        
+        # 右侧表格
+        right_table = QGroupBox()
+        right_table.setStyleSheet("QGroupBox { border: 1px solid #808080; }")
+        right_table_layout = QVBoxLayout(right_table)
+        
+        # 表格标题行
+        right_header_row = QWidget()
+        right_header_layout = QHBoxLayout(right_header_row)
+        
+        right_headers = ["E2[mm]", "R2[mm]", "V [m/s]", "Desc", "Ski[%]", "Ski[m]"]
+        for header in right_headers:
+            lbl = QLabel(header)
+            lbl.setFont(QFont("Arial", 7, QFont.Bold))
+            lbl.setStyleSheet("color: #000000;")
+            lbl.setFixedWidth(60)
+            right_header_layout.addWidget(lbl)
+        
+        right_table_layout.addWidget(right_header_row)
+        
+        # 表格数据
+        for i in range(5):
+            data_row = QWidget()
+            data_layout = QHBoxLayout(data_row)
+            
+            values = ["1650", "1650", "1650", str(i + 1), "1", "1"]
+            for j, value in enumerate(values):
+                val = QLabel(value)
+                val.setFont(QFont("Arial", 7, QFont.Bold))
+                if j < 3:
+                    val.setStyleSheet("color: #008080;")
+                else:
+                    val.setStyleSheet("color: #008000;")
+                val.setFixedWidth(60)
+                val.setAlignment(Qt.AlignCenter)
+                data_layout.addWidget(val)
+            
+            right_table_layout.addWidget(data_row)
+        
+        table_layout.addWidget(right_table)
+        
+        table_layout.addStretch(1)
+        
+        parent_layout.addWidget(table_area)
+    
+    def create_bottom_buttons(self, parent_layout):
+        """创建底部操作按钮区域"""
+        bottom_bar = QWidget()
+        bottom_bar.setStyleSheet("background-color: #a8a8a8;")
+        bottom_layout = QHBoxLayout(bottom_bar)
+        bottom_layout.setContentsMargins(5, 5, 5, 5)
+        bottom_layout.setSpacing(5)
+        
+        button_names = [
+            "Mill Mode", "Stand Mode", "Sizing Press Mode", "Simulation",
+            "Roll Data", "Jogging Selection", "Set Run Counter",
+            "Release Drives", "Change Ski", "Cooling", "Confirm", "Fault acknowledge"
+        ]
+        
+        for name in button_names:
+            btn = QPushButton(name)
+            btn.setFont(QFont("Arial", 9))
+            btn.setFixedSize(120, 40)
+            btn.setStyleSheet("background-color: #c0c0c0; border: 1px solid #808080;")
+            bottom_layout.addWidget(btn)
+        
+        bottom_layout.addStretch(1)
+        
+        parent_layout.addWidget(bottom_bar)
+    
+    def create_id_box(self, label, value, color):
+        """创建ID显示框"""
+        box = QGroupBox()
+        box.setStyleSheet(f"QGroupBox {{ border: 2px solid {color}; background-color: #f0f0f0; }}")
+        layout = QVBoxLayout(box)
+        
+        lbl = QLabel(label)
+        lbl.setFont(QFont("Arial", 8))
+        lbl.setStyleSheet("color: #000000;")
+        layout.addWidget(lbl)
+        
+        if value:
+            val = QLabel(value)
+            val.setFont(QFont("Arial", 10, QFont.Bold))
+            val.setStyleSheet(f"color: {color};")
+            layout.addWidget(val)
+        
+        return box
+    
+    def create_status_box(self, value, unit, bg_color, text_color):
+        """创建状态显示框"""
+        box = QFrame()
+        box.setStyleSheet(f"background-color: {bg_color}; border: 2px solid {text_color};")
+        layout = QVBoxLayout(box)
+        
+        val = QLabel(value)
+        val.setFont(QFont("Arial", 12, QFont.Bold))
+        val.setStyleSheet(f"color: {text_color};")
+        val.setAlignment(Qt.AlignCenter)
+        layout.addWidget(val)
+        
+        unit_lbl = QLabel(unit)
+        unit_lbl.setFont(QFont("Arial", 8))
+        unit_lbl.setStyleSheet(f"color: {text_color};")
+        unit_lbl.setAlignment(Qt.AlignCenter)
+        layout.addWidget(unit_lbl)
+        
+        return box
+
 
 class MainWindow(QMainWindow):
     """主窗口"""
@@ -182,6 +1029,9 @@ class MainWindow(QMainWindow):
         self.table_widget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.table_widget.customContextMenuRequested.connect(self.show_context_menu)
         
+        # 连接双击事件
+        self.table_widget.doubleClicked.connect(self.on_plan_double_clicked)
+        
         # 设置表格样式,添加边框和选中行背景色
         table_style = """
             QTableWidget {
@@ -341,7 +1191,12 @@ class MainWindow(QMainWindow):
         self.process_plans_btn.setStyleSheet(button_style)
         left_btn_layout.addWidget(self.process_plans_btn)
         
-
+        self.rm_main_btn = QPushButton("粗轧主画面")
+        self.rm_main_btn.setFont(QFont("宋体", 20))
+        self.rm_main_btn.setFixedSize(140, 40)
+        self.rm_main_btn.setStyleSheet(button_style)
+        left_btn_layout.addWidget(self.rm_main_btn)
+        
         
         btn_layout.addLayout(left_btn_layout)
         
@@ -570,6 +1425,18 @@ class MainWindow(QMainWindow):
                 )
             ''')
             
+            # 创建装炉明细打印记录表（存储已打印的钢卷号）
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS furnace_printed_coils (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    plan_number TEXT,
+                    coil_number TEXT,
+                    sequence INTEGER,
+                    printed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (plan_number) REFERENCES plans(plan_number)
+                )
+            ''')
+            
             # 创建计划顺序表
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS plan_order (
@@ -725,7 +1592,8 @@ class MainWindow(QMainWindow):
             # D开头的计划号，检查钢卷号
             all_coil_nos = self.get_all_coil_nos_from_plan_file(file_path)
             if not all_coil_nos:
-                return False  # 没有钢卷号
+                # 如果无法获取钢卷号列表，默认认为需要处理（可能是文件格式特殊）
+                return True
             
             if plan_no not in self.processed_plans:
                 return True
@@ -756,7 +1624,8 @@ class MainWindow(QMainWindow):
             # D开头的计划号，检查钢卷号
             all_coil_nos = self.get_all_coil_nos_from_plan_file(file_path)
             if not all_coil_nos:
-                return False  # 没有钢卷号
+                # 如果无法获取钢卷号列表，默认认为需要打印（可能是文件格式特殊）
+                return True
             
             if plan_no not in self.printed_plans:
                 return True
@@ -787,8 +1656,6 @@ class MainWindow(QMainWindow):
             
             # D开头的计划号，记录所有钢卷号
             all_coil_nos = self.get_all_coil_nos_from_plan_file(file_path)
-            if not all_coil_nos:
-                return
             
             if plan_no not in self.processed_plans:
                 self.processed_plans[plan_no] = set()
@@ -796,7 +1663,10 @@ class MainWindow(QMainWindow):
             for coil_no in all_coil_nos:
                 self.processed_plans[plan_no].add(coil_no)
             
-            print(f"标记 {plan_no} 的 {len(all_coil_nos)} 个钢卷号为已处理（D开头计划）")
+            if all_coil_nos:
+                print(f"标记 {plan_no} 的 {len(all_coil_nos)} 个钢卷号为已处理（D开头计划）")
+            else:
+                print(f"标记 {plan_no} 为已处理（D开头计划，无钢卷号）")
         except Exception as e:
             print(f"标记已处理钢卷号失败: {e}")
     
@@ -814,8 +1684,6 @@ class MainWindow(QMainWindow):
             
             # D开头的计划号，记录所有钢卷号
             all_coil_nos = self.get_all_coil_nos_from_plan_file(file_path)
-            if not all_coil_nos:
-                return
             
             if plan_no not in self.printed_plans:
                 self.printed_plans[plan_no] = set()
@@ -823,7 +1691,10 @@ class MainWindow(QMainWindow):
             for coil_no in all_coil_nos:
                 self.printed_plans[plan_no].add(coil_no)
             
-            print(f"标记 {plan_no} 的 {len(all_coil_nos)} 个钢卷号为已打印（D开头计划）")
+            if all_coil_nos:
+                print(f"标记 {plan_no} 的 {len(all_coil_nos)} 个钢卷号为已打印（D开头计划）")
+            else:
+                print(f"标记 {plan_no} 为已打印（D开头计划，无钢卷号）")
         except Exception as e:
             print(f"标记已打印钢卷号失败: {e}")
     
@@ -1199,13 +2070,179 @@ class MainWindow(QMainWindow):
     def refresh_plan_list(self, export_zhuanglu=False):
         """刷新计划号列表"""
         try:
-            # 扫描并重命名计划号文件
+            print("\n=== 开始刷新计划号列表 ===")
+            
+            # 1. 强制刷新装炉顺序数据缓存
+            self.clear_zhuanglu_cache()
+            
+            # 2. 扫描并重命名计划号文件
             self.scan_and_rename_plan_files()
             
-            # 从数据库读取数据并更新表格
+            # 3. 从数据库读取数据并更新表格
             self.refresh_plan_list_from_file()
+            
+            print("=== 计划号列表刷新完成 ===\n")
         except Exception as e:
             print(f"刷新计划号列表失败: {str(e)}")
+            import traceback
+            traceback.print_exc()
+    
+    def clear_zhuanglu_cache(self):
+        """清除装炉顺序相关的缓存数据"""
+        print("清除装炉顺序缓存...")
+        
+        # 清除装炉顺序映射
+        if hasattr(self, '装炉顺序映射'):
+            self.装炉顺序映射 = {}
+        
+        # 清除轧宽余量映射
+        if hasattr(self, '轧宽余量映射'):
+            self.轧宽余量映射 = {}
+        
+        # 清除文件系统缓存（Windows）
+        try:
+            import ctypes
+            ctypes.windll.kernel32.FlushFileBuffers(-1)
+            print("文件系统缓存已刷新")
+        except:
+            pass
+        
+        # 清除 xlrd 的内部缓存
+        if 'xlrd' in sys.modules:
+            xlrd_module = sys.modules['xlrd']
+            if hasattr(xlrd_module, '_open_workbooks'):
+                xlrd_module._open_workbooks.clear()
+                print("xlrd 内部缓存已清除")
+        
+        print("装炉顺序缓存清除完成")
+    
+    def ensure_zhuanglu_shunxu_file(self, force_reload=False):
+        """确保装炉顺序文件能被准确获取
+        Args:
+            force_reload: 是否强制重新加载（跳过缓存）
+        Returns:
+            tuple: (success, message)
+        """
+        print("\n=== 确保装炉顺序文件 ===")
+        
+        plan_dir = os.path.join(self.plan_dir, "计划号")
+        zhuanglu_file = os.path.join(plan_dir, "装炉顺序.xls")
+        
+        # 1. 检查文件是否存在
+        if not os.path.exists(zhuanglu_file):
+            msg = f"装炉顺序文件不存在: {zhuanglu_file}"
+            print(f"[×] {msg}")
+            return False, msg
+        
+        # 2. 如果强制重新加载，清除缓存并关闭Excel进程
+        if force_reload:
+            self.clear_zhuanglu_cache()
+            self.kill_all_excel_processes()
+        
+        # 3. 验证文件是最新的（检查文件修改时间）
+        file_mtime = os.path.getmtime(zhuanglu_file)
+        import time
+        current_time = time.time()
+        file_age_seconds = current_time - file_mtime
+        file_age_minutes = file_age_seconds / 60
+        print(f"文件修改时间: {time.ctime(file_mtime)}")
+        print(f"文件年龄: {file_age_minutes:.1f} 分钟")
+        
+        # 4. 尝试读取文件验证其有效性（带重试机制）
+        success, result = self.safe_read_excel_with_retry(zhuanglu_file)
+        if not success:
+            msg = f"无法读取装炉顺序文件: {result}"
+            print(f"[×] {msg}")
+            return False, msg
+        
+        workbook = result
+        sheet = workbook.sheet_by_index(0)
+        
+        # 5. 验证文件内容
+        if sheet.nrows < 2:
+            msg = "装炉顺序文件只有表头或为空"
+            print(f"[×] {msg}")
+            return False, msg
+        
+        headers = [str(sheet.cell_value(0, col)).strip() for col in range(sheet.ncols)]
+        required_cols = ["钢卷号", "装炉顺序号", "计划号"]
+        missing_cols = [col for col in required_cols if col not in headers]
+        
+        if missing_cols:
+            msg = f"装炉顺序文件缺少必要列: {', '.join(missing_cols)}"
+            print(f"[×] {msg}")
+            return False, msg
+        
+        # 6. 释放资源
+        if hasattr(workbook, 'release_resources'):
+            workbook.release_resources()
+        
+        msg = f"装炉顺序文件验证通过，共 {sheet.nrows - 1} 条数据"
+        print(f"[√] {msg}")
+        return True, msg
+    
+    def safe_read_excel_with_retry(self, file_path, max_retries=5, retry_delay=2.0):
+        """带重试机制的安全读取Excel文件，处理导出后可能无法读取的问题"""
+        import xlrd
+        import time
+        import os
+        
+        for attempt in range(max_retries):
+            try:
+                # 先检查文件是否可以访问
+                if not os.path.exists(file_path):
+                    return False, f"文件不存在: {file_path}"
+                
+                # 检查文件是否被占用（尝试以写入模式打开）
+                try:
+                    with open(file_path, 'rb') as f:
+                        pass  # 文件可以访问
+                except PermissionError:
+                    print(f"文件被占用，尝试关闭Excel进程...")
+                    self.kill_all_excel_processes()
+                    time.sleep(1)
+                    continue
+                
+                # 尝试读取文件
+                workbook = xlrd.open_workbook(file_path)
+                print(f"读取文件成功（尝试 {attempt + 1}/{max_retries}）")
+                return True, workbook
+                
+            except Exception as e:
+                print(f"读取文件失败（尝试 {attempt + 1}/{max_retries}）: {str(e)}")
+                if attempt < max_retries - 1:
+                    # 关闭Excel进程并重试
+                    self.kill_all_excel_processes()
+                    print(f"等待 {retry_delay} 秒后重试...")
+                    time.sleep(retry_delay)
+                else:
+                    return False, str(e)
+    
+    def kill_all_excel_processes(self):
+        """强制关闭所有Excel进程，解决文件被占用的问题"""
+        try:
+            import subprocess
+            import time
+            
+            # 第一次尝试正常关闭
+            subprocess.run(
+                ['taskkill', '/im', 'EXCEL.EXE'],
+                capture_output=True,
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+            time.sleep(1)
+            
+            # 第二次尝试强制关闭
+            subprocess.run(
+                ['taskkill', '/f', '/im', 'EXCEL.EXE'],
+                capture_output=True,
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+            time.sleep(2)
+            
+            print("Excel进程已强制关闭")
+        except Exception as e:
+            print(f"关闭Excel进程失败: {e}")
     
     def scan_and_rename_plan_files(self):
         """扫描并重命名计划号文件"""
@@ -1270,6 +2307,15 @@ class MainWindow(QMainWindow):
         try:
             from PyQt5.QtWidgets import QMessageBox, QApplication
             from PyQt5.QtCore import Qt
+            
+            # 如果不是强制处理，重新加载状态确保数据最新
+            # 强制处理时保持当前状态不变（可能已经被调用方修改）
+            if not force_process:
+                print("process_plans: 重新加载状态...")
+                self.load_processed_plans()
+                self.load_printed_plans()
+                print("process_plans: 状态重新加载完成")
+            
             # 检查是否选择了计划号
             selected_items = self.table_widget.selectionModel().selectedRows()
             if not selected_items:
@@ -1315,6 +2361,7 @@ class MainWindow(QMainWindow):
             
             # 获取选中的计划号
             selected_plans = [self.plan_data[index.row()]['plan_no'] for index in selected_items]
+            print(f"process_plans: 选中的计划号: {selected_plans}")
             
             # 检查选中的计划号中是否有已处理的（根据计划号类型判断）
             already_processed = []
@@ -1419,9 +2466,11 @@ class MainWindow(QMainWindow):
             
             # 保存已处理计划状态
             if processed_count > 0:
+                print(f"process_plans: 保存已处理计划状态，共处理 {processed_count} 个计划")
                 self.save_processed_plans()
                 # 刷新列表显示
                 self.refresh_data()
+                print(f"process_plans: 状态保存和刷新完成")
             
             # 检查是否需要自动打印（仅在自动导出流程中）
             if auto_print and success_files:
@@ -1534,19 +2583,28 @@ class MainWindow(QMainWindow):
         # 显示窗口
         result_window.exec_()
     
-    def print_furnace_details(self):
-        """打印装炉明细 - 像主程序画面中的格式打印"""
+    def print_furnace_details(self, is_incremental=False, table_widget=None):
+        """打印装炉明细 - 像主程序画面中的格式打印
+        
+        Args:
+            is_incremental: 是否增量打印（只打印新增的钢卷号数据）
+            table_widget: 可选参数，指定要打印的表格控件，默认为主窗口的表格
+        """
         try:
             import os
             import time
             import xlwt
+            import json
+            
+            # 使用传入的表格或默认使用主窗口的表格
+            target_table = table_widget if table_widget else self.table_widget
             
             # 获取所有数据
             rows = []
-            for row_idx in range(self.table_widget.rowCount()):
+            for row_idx in range(target_table.rowCount()):
                 row_data = []
-                for col_idx in range(self.table_widget.columnCount()):
-                    item = self.table_widget.item(row_idx, col_idx)
+                for col_idx in range(target_table.columnCount()):
+                    item = target_table.item(row_idx, col_idx)
                     if item:
                         row_data.append(item.text())
                     else:
@@ -1558,6 +2616,272 @@ class MainWindow(QMainWindow):
                 QMessageBox.information(self, "提示", "没有数据可打印")
                 return
             
+            # 初始化增量打印标志
+            真正增量打印 = False
+            
+            # 如果是增量打印，找出新增的钢卷号
+            if is_incremental:
+                # 从数据库读取已打印的钢卷号
+                import sqlite3
+                conn = sqlite3.connect(self.db_path)
+                cursor = conn.cursor()
+                
+                # 获取当前计划号
+                plan_number = ""
+                if rows:
+                    plan_number = rows[0][1] if len(rows[0]) > 1 else ""  # 计划号在第1列
+                
+                # 调试信息
+                print(f"调试信息: is_incremental = {is_incremental}")
+                print(f"调试信息: plan_number = '{plan_number}'")
+                
+                # 查询已打印的钢卷号
+                cursor.execute('''
+                    SELECT coil_number, sequence FROM furnace_printed_coils 
+                    WHERE plan_number = ?
+                ''', (plan_number,))
+                previous_data = cursor.fetchall()
+                
+                # 调试信息
+                print(f"调试信息: previous_data = {previous_data}")
+                
+                # 关闭连接
+                conn.close()
+                
+                # 获取已打印钢卷号列表
+                previous_coils = set(row[0] for row in previous_data)
+                
+                # 调试信息
+                print(f"调试信息: previous_coils = {previous_coils}")
+                
+                # 如果没有已打印数据，视为首次打印
+                if not previous_data:
+                    print(f"调试信息: 没有已打印数据，设置 is_incremental = False")
+                    is_incremental = False
+                
+                # 获取当前所有钢卷号（过滤掉特殊行如换辊行、自定义信息行）
+                current_coils_ordered = []  # 按顺序保存钢卷号和对应行索引
+                for row_idx, row_data in enumerate(rows):
+                    # 检查是否是特殊行（通过序号列判断）
+                    first_col_text = row_data[0] if row_data else ""
+                    # 如果序号列包含"换辊"或"△"等特殊标记，则跳过
+                    if "换辊" in first_col_text or "△" in first_col_text:
+                        continue
+                    coil_number = row_data[1] if len(row_data) > 1 else ""  # 钢卷号在第1列
+                    if coil_number and coil_number.strip():
+                        current_coils_ordered.append({
+                            'coil_number': coil_number.strip(),
+                            'row_data': row_data,
+                            'row_idx': row_idx
+                        })
+                
+                # 找出新增的钢卷号（不在上次打印数据中的）
+                new_coils = []
+                for item in current_coils_ordered:
+                    if item['coil_number'] not in previous_coils:
+                        new_coils.append(item)
+                
+                if not new_coils:
+                    # 调试信息
+                    print(f"调试信息: previous_coils = {previous_coils}")
+                    print(f"调试信息: current_coils_ordered = {[item['coil_number'] for item in current_coils_ordered]}")
+                    print(f"调试信息: new_coils = {[item['coil_number'] for item in new_coils]}")
+                    from PyQt5.QtWidgets import QMessageBox
+                    QMessageBox.information(self, "提示", "没有新增的钢卷号，无需打印")
+                    return
+                
+                print(f"增量打印：上次打印 {len(previous_coils)} 个钢卷号，当前 {len(current_coils_ordered)} 个，新增 {len(new_coils)} 个")
+                
+                # 检查新增钢卷号是否在表格最前面（前面没有已打印钢卷号）
+                # 找出所有新增钢卷号中最小的 row_idx
+                min_new_row_idx = min(item['row_idx'] for item in new_coils)
+                
+                # 找出所有已打印钢卷号中最大的 row_idx
+                max_printed_row_idx = -1
+                for i, item in enumerate(current_coils_ordered):
+                    if item['coil_number'] in previous_coils:
+                        max_printed_row_idx = i
+                
+                # 检查当前表格中是否还有已打印的钢卷号
+                has_printed_coil = False
+                for item in current_coils_ordered:
+                    if item['coil_number'] in previous_coils:
+                        has_printed_coil = True
+                        break
+                
+                # 根据用户选择决定是否增量打印
+                真正增量打印 = is_incremental
+                if is_incremental:
+                    if not has_printed_coil:
+                        print(f"首次打印或无已打印记录，打印全部数据")
+                        真正增量打印 = False
+                    else:
+                        print(f"执行增量打印（只打印新增钢卷号）")
+                else:
+                    print(f"执行全部打印（用户选择了全部打印）")
+                
+                # 确定新增钢卷号的位置（尾部增加还是中间插入）
+                # 找出最后一个已打印钢卷号的位置
+                last_printed_idx = -1
+                for i, item in enumerate(current_coils_ordered):
+                    if item['coil_number'] in previous_coils:
+                        last_printed_idx = i
+                
+                # 分类新增钢卷号
+                tail_new_coils = []  # 尾部新增
+                insert_new_coils = []  # 中间插入新增
+                
+                for item in new_coils:
+                    if item['row_idx'] > last_printed_idx:
+                        # 在最后一个已打印钢卷号之后，为尾部新增
+                        tail_new_coils.append(item)
+                    else:
+                        # 在中间插入
+                        insert_new_coils.append(item)
+                
+                # 计算新增钢卷号的新序号
+                # 获取原数据最后一块的序号（数据库返回的是元组 (coil_number, sequence)）
+                last_seq_num = 1
+                for item in previous_data:
+                    seq_str = str(item[1])  # sequence 在索引1位置
+                    # 提取纯数字序号（可能带后缀）
+                    import re
+                    match = re.match(r'^(\d+)', seq_str)
+                    if match:
+                        seq_num = int(match.group(1))
+                        if seq_num > last_seq_num:
+                            last_seq_num = seq_num
+                
+                # 计算新增序号
+                new_seq_info = []  # 保存新序号信息
+                
+                # 将所有新增钢卷号按位置排序
+                all_new_coils_sorted = sorted(new_coils, key=lambda x: x['row_idx'])
+                
+                # 找出第一个已打印钢卷号的序号（作为中间插入的基准）
+                first_printed_seq = "1"
+                for item in current_coils_ordered:
+                    if item['coil_number'] in previous_coils:
+                        # 从数据库中获取该钢卷号的序号
+                        for prev_item in previous_data:
+                            if prev_item[0] == item['coil_number']:
+                                first_printed_seq = str(prev_item[1])
+                                break
+                        break
+                
+                # 分别统计中间插入和尾部新增的数量
+                insert_count = 0
+                tail_count = 0
+                
+                # 逐个处理每个新增钢卷号，按位置排序
+                for item in all_new_coils_sorted:
+                    # 判断是中间插入还是尾部新增
+                    if item['row_idx'] > last_printed_idx:
+                        # 尾部新增
+                        tail_count += 1
+                        new_seq = last_seq_num + tail_count
+                    else:
+                        # 中间插入
+                        insert_count += 1
+                        # 使用 "第一个已打印序号-1>" 格式
+                        import re
+                        match = re.match(r'^(\d+)', first_printed_seq)
+                        if match:
+                            base_seq = match.group(1)
+                            new_seq = f"{base_seq}-{insert_count}>"
+                        else:
+                            new_seq = f"?-{insert_count}>"
+                    
+                    # 添加到 new_seq_info
+                    new_seq_info.append({
+                        'coil_number': item['coil_number'],
+                        'row_data': item['row_data'],
+                        'new_sequence': new_seq
+                    })
+                
+                print(f"尾部新增: {len(tail_new_coils)} 个")
+                print(f"中间插入新增: {len(insert_new_coils)} 个")
+                for info in new_seq_info:
+                    print(f"  {info['coil_number']} -> 序号: {info['new_sequence']}")
+                
+                # 只有真正执行增量打印时才执行以下逻辑
+                if 真正增量打印:
+                    # 更新rows为只包含新增数据
+                    rows = [info['row_data'] for info in new_seq_info]
+                    
+                    # 将新增钢卷号保存到数据库
+                    conn = sqlite3.connect(self.db_path)
+                    cursor = conn.cursor()
+                    
+                    for info in new_seq_info:
+                        # 提取新序号的数字部分
+                        seq_str = info['new_sequence']
+                        import re
+                        match = re.match(r'^(\d+)', seq_str)
+                        seq_num = int(match.group(1)) if match else seq_num + 1
+                        
+                        cursor.execute('''
+                            INSERT INTO furnace_printed_coils (plan_number, coil_number, sequence)
+                            VALUES (?, ?, ?)
+                        ''', (plan_number, info['coil_number'], seq_num))
+                    
+                    conn.commit()
+                    conn.close()
+                    
+                    print(f"已将 {len(new_seq_info)} 个新增钢卷号保存到数据库")
+                    
+                    # 提示信息
+                    提示行 = [f"装炉明细打印-新增({len(new_seq_info)}块)"]
+            else:
+                # 首次打印或全部打印
+                # 获取当前计划号
+                plan_number = ""
+                if rows:
+                    plan_number = rows[0][1] if len(rows[0]) > 1 else ""  # 计划号在第1列
+                
+                # 连接数据库
+                import sqlite3
+                conn = sqlite3.connect(self.db_path)
+                cursor = conn.cursor()
+                
+                # 如果是全部打印，先删除该计划号的所有打印记录
+                if not is_incremental:
+                    cursor.execute('DELETE FROM furnace_printed_coils WHERE plan_number = ?', (plan_number,))
+                
+                # 收集当前所有钢卷号并保存到数据库
+                seq_num = 1
+                count = 0
+                for row_idx, row_data in enumerate(rows):
+                    first_col_text = row_data[0] if row_data else ""
+                    if "换辊" in first_col_text or "△" in first_col_text:
+                        continue
+                    coil_number = row_data[1] if len(row_data) > 1 else ""
+                    if coil_number and coil_number.strip():
+                        # 插入数据库
+                        cursor.execute('''
+                            INSERT INTO furnace_printed_coils (plan_number, coil_number, sequence)
+                            VALUES (?, ?, ?)
+                        ''', (plan_number, coil_number.strip(), seq_num))
+                        seq_num += 1
+                        count += 1
+                
+                # 提交事务
+                conn.commit()
+                conn.close()
+                
+                print(f"已保存打印数据到数据库: {count} 个钢卷号")
+                
+                # 过滤掉特殊行
+                filtered_rows = []
+                for row_data in rows:
+                    first_col_text = row_data[0] if row_data else ""
+                    if "换辊" in first_col_text or "△" in first_col_text:
+                        continue
+                    filtered_rows.append(row_data)
+                rows = filtered_rows
+                
+                提示行 = ["装炉明细打印"]
+            
             # 创建临时 Excel 文件（存储在计划号文件夹中）
             plan_dir = os.path.join(self.plan_dir, "计划号")
             temp_file_name = f"temp_装炉明细打印_{int(time.time())}.xls"
@@ -1567,10 +2891,29 @@ class MainWindow(QMainWindow):
             workbook = xlwt.Workbook(encoding='utf-8')
             sheet = workbook.add_sheet('装炉明细')
             
+            # 设置页边距为0（上下左右都为0，使用inches为单位）
+            sheet.left_margin = 0.0
+            sheet.right_margin = 0.0
+            sheet.top_margin = 0.0
+            sheet.bottom_margin = 0.0
+            
+            # 设置页眉页脚为空（无页眉页脚）
+            sheet.header_str = b''
+            sheet.footer_str = b''
+            
             # 设置列名
             提示行 = ["装炉明细打印"]
             headers = ["序号", "计划号", "钢卷号", "牌号（钢级）", "坯宽", "减宽", "调宽", "轧宽", "公差带",
                 "粗轧报信", "除鳞", "坯厚", "坯长", "轧厚", "中厚", "RT2", "强度"]
+            
+            # 获取各列的索引（使用列名）
+            粗轧报信列索引 = headers.index("粗轧报信")
+            钢卷号列索引 = headers.index("钢卷号")
+            牌号列索引 = headers.index("牌号（钢级）")
+            坯宽列索引 = headers.index("坯宽")
+            坯长列索引 = headers.index("坯长")
+            轧厚列索引 = headers.index("轧厚")
+            强度列索引 = headers.index("强度")
             
             # 定义样式
             # 大标题样式
@@ -1615,11 +2958,11 @@ class MainWindow(QMainWindow):
             borders_header.bottom = xlwt.Borders.THIN
             style_header_border.borders = borders_header
             
-            # 字段列名样式（强度字段，8pt 字号）
+            # 字段列名样式（强度字段，12pt 字号）
             style_header_strength = xlwt.XFStyle()
             font_header_strength = xlwt.Font()
             font_header_strength.name = '仿宋'
-            font_header_strength.height = 160  # 8pt
+            font_header_strength.height = 240  # 12pt
             font_header_strength.bold = True
             style_header_strength.font = font_header_strength
             style_header_strength.alignment = alignment_header_border
@@ -1650,7 +2993,7 @@ class MainWindow(QMainWindow):
             borders_data.top = xlwt.Borders.THIN
             borders_data.bottom = xlwt.Borders.THIN
             
-            # 钢卷号列样式（16pt）- 左对齐
+            # 钢卷号列样式（16pt）- 居中对齐
             style_data_coil = xlwt.XFStyle()
             font_data_coil = xlwt.Font()
             font_data_coil.name = '仿宋'
@@ -1658,12 +3001,85 @@ class MainWindow(QMainWindow):
             font_data_coil.bold = True
             style_data_coil.font = font_data_coil
             alignment_data_coil = xlwt.Alignment()
-            alignment_data_coil.horz = xlwt.Alignment.HORZ_LEFT
+            alignment_data_coil.horz = xlwt.Alignment.HORZ_CENTER
             alignment_data_coil.vert = xlwt.Alignment.VERT_CENTER
             style_data_coil.alignment = alignment_data_coil
             style_data_coil.borders = borders_data
             
-            # 14pt 样式 - 左对齐（用于牌号）
+            # 钢卷号列样式（16pt）- 居中对齐 - 带删除线（用于不在装炉顺序中的钢卷号）
+            style_data_coil_strikethrough = xlwt.XFStyle()
+            font_data_coil_strikethrough = xlwt.Font()
+            font_data_coil_strikethrough.name = '仿宋'
+            font_data_coil_strikethrough.height = 320  # 16pt
+            font_data_coil_strikethrough.bold = True
+            font_data_coil_strikethrough.struck_out = True  # 删除线
+            style_data_coil_strikethrough.font = font_data_coil_strikethrough
+            style_data_coil_strikethrough.alignment = alignment_data_coil
+            style_data_coil_strikethrough.borders = borders_data
+            
+            # 计划号列样式（13pt）- 居中对齐
+            style_data_plan = xlwt.XFStyle()
+            font_data_plan = xlwt.Font()
+            font_data_plan.name = '仿宋'
+            font_data_plan.height = 260  # 13pt
+            font_data_plan.bold = True
+            style_data_plan.font = font_data_plan
+            alignment_data_plan = xlwt.Alignment()
+            alignment_data_plan.horz = xlwt.Alignment.HORZ_CENTER
+            alignment_data_plan.vert = xlwt.Alignment.VERT_CENTER
+            style_data_plan.alignment = alignment_data_plan
+            style_data_plan.borders = borders_data
+            
+            # 轧厚列样式（13pt）- 居中对齐，左右虚线
+            style_data_roll_thickness = xlwt.XFStyle()
+            font_data_roll_thickness = xlwt.Font()
+            font_data_roll_thickness.name = '仿宋'
+            font_data_roll_thickness.height = 260  # 13pt
+            font_data_roll_thickness.bold = True
+            style_data_roll_thickness.font = font_data_roll_thickness
+            alignment_data_roll_thickness = xlwt.Alignment()
+            alignment_data_roll_thickness.horz = xlwt.Alignment.HORZ_CENTER
+            alignment_data_roll_thickness.vert = xlwt.Alignment.VERT_CENTER
+            style_data_roll_thickness.alignment = alignment_data_roll_thickness
+            borders_roll_thickness = xlwt.Borders()
+            borders_roll_thickness.left = xlwt.Borders.MEDIUM_DASHED
+            borders_roll_thickness.right = xlwt.Borders.MEDIUM_DASHED
+            borders_roll_thickness.top = xlwt.Borders.THIN
+            borders_roll_thickness.bottom = xlwt.Borders.THIN
+            style_data_roll_thickness.borders = borders_roll_thickness
+            
+            # 坯长列样式（12pt）- 居中对齐，左右虚线
+            style_data_billet_length = xlwt.XFStyle()
+            font_data_billet_length = xlwt.Font()
+            font_data_billet_length.name = '仿宋'
+            font_data_billet_length.height = 240  # 12pt
+            font_data_billet_length.bold = True
+            style_data_billet_length.font = font_data_billet_length
+            alignment_data_billet_length = xlwt.Alignment()
+            alignment_data_billet_length.horz = xlwt.Alignment.HORZ_CENTER
+            alignment_data_billet_length.vert = xlwt.Alignment.VERT_CENTER
+            style_data_billet_length.alignment = alignment_data_billet_length
+            borders_billet_length = xlwt.Borders()
+            borders_billet_length.left = xlwt.Borders.MEDIUM_DASHED
+            borders_billet_length.right = xlwt.Borders.MEDIUM_DASHED
+            borders_billet_length.top = xlwt.Borders.THIN
+            borders_billet_length.bottom = xlwt.Borders.THIN
+            style_data_billet_length.borders = borders_billet_length
+            
+            # 14pt 样式 - 居中对齐（用于其他列）
+            style_data_14pt_center = xlwt.XFStyle()
+            font_data_14pt_center = xlwt.Font()
+            font_data_14pt_center.name = '仿宋'
+            font_data_14pt_center.height = 280  # 14pt
+            font_data_14pt_center.bold = True
+            style_data_14pt_center.font = font_data_14pt_center
+            alignment_data_14pt_center = xlwt.Alignment()
+            alignment_data_14pt_center.horz = xlwt.Alignment.HORZ_CENTER
+            alignment_data_14pt_center.vert = xlwt.Alignment.VERT_CENTER
+            style_data_14pt_center.alignment = alignment_data_14pt_center
+            style_data_14pt_center.borders = borders_data
+            
+            # 14pt 样式 - 居中对齐（用于牌号）
             style_data_14pt = xlwt.XFStyle()
             font_data_14pt = xlwt.Font()
             font_data_14pt.name = '仿宋'
@@ -1671,7 +3087,7 @@ class MainWindow(QMainWindow):
             font_data_14pt.bold = True
             style_data_14pt.font = font_data_14pt
             alignment_data_14pt = xlwt.Alignment()
-            alignment_data_14pt.horz = xlwt.Alignment.HORZ_LEFT
+            alignment_data_14pt.horz = xlwt.Alignment.HORZ_CENTER
             alignment_data_14pt.vert = xlwt.Alignment.VERT_CENTER
             style_data_14pt.alignment = alignment_data_14pt
             style_data_14pt.borders = borders_data
@@ -1690,49 +3106,117 @@ class MainWindow(QMainWindow):
             style_data_12pt.alignment = alignment_data_12pt
             style_data_12pt.borders = borders_data
             
-            # 12pt 样式（强度列）- 右边框为实线
+            # 14pt 样式（坯宽列）- 左边框为长虚线
+            style_data_billet_width = xlwt.XFStyle()
+            font_data_billet_width = xlwt.Font()
+            font_data_billet_width.name = '仿宋'
+            font_data_billet_width.height = 280  # 14pt
+            font_data_billet_width.bold = True
+            style_data_billet_width.font = font_data_billet_width
+            style_data_billet_width.alignment = alignment_data_14pt_center
+            borders_data_billet_width = xlwt.Borders()
+            borders_data_billet_width.left = xlwt.Borders.MEDIUM_DASHED
+            borders_data_billet_width.right = xlwt.Borders.THIN
+            borders_data_billet_width.top = xlwt.Borders.THIN
+            borders_data_billet_width.bottom = xlwt.Borders.THIN
+            style_data_billet_width.borders = borders_data_billet_width
+            
+            # 14pt 样式（坯宽到强度之间的列）- 左右边框为长虚线
+            style_data_dashed = xlwt.XFStyle()
+            font_data_dashed = xlwt.Font()
+            font_data_dashed.name = '仿宋'
+            font_data_dashed.height = 280  # 14pt
+            font_data_dashed.bold = True
+            style_data_dashed.font = font_data_dashed
+            style_data_dashed.alignment = alignment_data_14pt_center
+            borders_data_dashed = xlwt.Borders()
+            borders_data_dashed.left = xlwt.Borders.MEDIUM_DASHED
+            borders_data_dashed.right = xlwt.Borders.MEDIUM_DASHED
+            borders_data_dashed.top = xlwt.Borders.THIN
+            borders_data_dashed.bottom = xlwt.Borders.THIN
+            style_data_dashed.borders = borders_data_dashed
+            
+            # 14pt 样式（强度列）- 左边框为长虚线，右边框为实线
             style_data_12pt_strength = xlwt.XFStyle()
             font_data_12pt_strength = xlwt.Font()
             font_data_12pt_strength.name = '仿宋'
-            font_data_12pt_strength.height = 240  # 12pt
+            font_data_12pt_strength.height = 280  # 14pt
             font_data_12pt_strength.bold = True
             style_data_12pt_strength.font = font_data_12pt_strength
-            style_data_12pt_strength.alignment = alignment_data_12pt
+            style_data_12pt_strength.alignment = alignment_data_14pt_center
             borders_data_strength = xlwt.Borders()
-            borders_data_strength.left = xlwt.Borders.NO_LINE
+            borders_data_strength.left = xlwt.Borders.MEDIUM_DASHED
             borders_data_strength.right = xlwt.Borders.THIN
             borders_data_strength.top = xlwt.Borders.THIN
             borders_data_strength.bottom = xlwt.Borders.THIN
             style_data_12pt_strength.borders = borders_data_strength
             
-            # 设置列宽
+            # 14pt 自动换行样式（用于粗轧报信）- 完全复刻主程序处理计划功能的样式
+            style_data_wrap_14pt = xlwt.XFStyle()
+            font_data_wrap_14pt = xlwt.Font()
+            font_data_wrap_14pt.name = '仿宋'
+            font_data_wrap_14pt.height = 280  # 14pt
+            font_data_wrap_14pt.bold = True
+            style_data_wrap_14pt.font = font_data_wrap_14pt
+            alignment_data_wrap_14pt = xlwt.Alignment()
+            alignment_data_wrap_14pt.horz = xlwt.Alignment.HORZ_LEFT
+            alignment_data_wrap_14pt.vert = xlwt.Alignment.VERT_CENTER
+            alignment_data_wrap_14pt.wrap = True
+            style_data_wrap_14pt.alignment = alignment_data_wrap_14pt
+            borders_data_wrap = xlwt.Borders()
+            borders_data_wrap.left = xlwt.Borders.NO_LINE
+            borders_data_wrap.right = xlwt.Borders.NO_LINE
+            borders_data_wrap.top = xlwt.Borders.THIN
+            borders_data_wrap.bottom = xlwt.Borders.THIN
+            style_data_wrap_14pt.borders = borders_data_wrap
+            
+            # 14pt 左对齐样式（用于粗轧报信，单行或无内容时不自动换行）
+            style_data_14pt_left_no_wrap = xlwt.XFStyle()
+            font_data_14pt_left = xlwt.Font()
+            font_data_14pt_left.name = '仿宋'
+            font_data_14pt_left.height = 280  # 14pt
+            font_data_14pt_left.bold = True
+            style_data_14pt_left_no_wrap.font = font_data_14pt_left
+            alignment_data_14pt_left = xlwt.Alignment()
+            alignment_data_14pt_left.horz = xlwt.Alignment.HORZ_LEFT
+            alignment_data_14pt_left.vert = xlwt.Alignment.VERT_CENTER
+            style_data_14pt_left_no_wrap.alignment = alignment_data_14pt_left
+            style_data_14pt_left_no_wrap.borders = borders_data
+            
+            # 设置列宽（固定值）
+            # xlwt列宽单位是1/256字符宽，但Excel显示的宽度 = (xlwt宽度/256) - 0.7109375
+            # 所以需要补偿：xlwt宽度 = (目标宽度 + 0.7109375) × 256
+            def xlwt_col_width(excel_width):
+                return int((excel_width + 0.7109375) * 256)
+            
             col_widths = [
-                int(5.5 * 256 * 1.2),       # 1. 序号
-                int(7.0 * 256 * 1.04),       # 2. 计划号
-                int(19 * 256 * 1.04),        # 3. 钢卷号
-                int(18 * 256 * 1.04),       # 4. 牌号（钢级）
-                int(7 * 256 * 1.04),         # 5. 坯宽
-                int(7 * 256 * 1.05),         # 6. 减宽（侧压量）
-                int(6 * 256 * 1.2),          # 7. 调宽
-                int(7 * 256 * 1.13),         # 8. 轧宽
-                int(9 * 256 * 1.03),         # 9. 公差带
-                int(33 * 256 * 1.04),        # 10. 粗轧报信
-                int(7 * 256 * 1.08),         # 11. 除鳞
-                int(7 * 256 * 1.04),         # 12. 坯厚
-                int(6.2 * 256 * 1.13),       # 13. 坯长
-                int(6 * 256 * 1.04),         # 14. 轧厚
-                int(5 * 256 * 1.04),         # 15. 中厚
-                int(6.57 * 256 * 1.04),      # 16. RT2
-                int(2 * 256 * 1.2)           # 17. 强度
+                xlwt_col_width(5.6),           # 1. 序号
+                xlwt_col_width(7.0),           # 2. 计划号
+                xlwt_col_width(16.0),          # 3. 钢卷号
+                xlwt_col_width(16.0),          # 4. 牌号（钢级）
+                xlwt_col_width(6.0),           # 5. 坯宽
+                xlwt_col_width(6.0),           # 6. 减宽
+                xlwt_col_width(6.0),           # 7. 调宽
+                xlwt_col_width(6.0),           # 8. 轧宽
+                xlwt_col_width(9.5),           # 9. 公差带
+                xlwt_col_width(30.0),          # 10. 粗轧报信
+                xlwt_col_width(6.0),           # 11. 除鳞
+                xlwt_col_width(6.0),           # 12. 坯厚
+                xlwt_col_width(6.5),           # 13. 坯长
+                xlwt_col_width(6.0),           # 14. 轧厚
+                xlwt_col_width(4.0),           # 15. 中厚
+                xlwt_col_width(6.0),           # 16. RT2
+                xlwt_col_width(4.5)            # 17. 强度
             ]
             
             for col_idx, width in enumerate(col_widths):
                 if col_idx < len(headers):
                     sheet.col(col_idx).width = width
-                    sheet.col(col_idx).width_mismatch = True
             
             # 写入提示行（第一行）并合并单元格
-            sheet.write_merge(0, 0, 0, len(headers) - 1, 提示行 [0], style_title)
+            # 如果是增量打印，使用提示行变量
+            提示内容 = 提示行[0] if '提示行' in dir() else "装炉明细打印"
+            sheet.write_merge(0, 0, 0, len(headers) - 1, 提示内容, style_title)
             sheet.row(0).height = 460  # 23pt
             sheet.row(0).height_mismatch = True
             
@@ -1756,32 +3240,246 @@ class MainWindow(QMainWindow):
             print(f"准备写入 {len(rows)} 行数据")
             for row_idx, row_data in enumerate(rows):
                 print(f"写入第 {row_idx + 1} 行: {row_data}")
+                
                 # 写入序号
-                sheet.write(row_idx + 3, 0, seq_num, style_data_seq)
+                if 真正增量打印 and 'new_seq_info' in dir() and row_idx < len(new_seq_info):
+                    写入序号 = new_seq_info[row_idx]['new_sequence']
+                else:
+                    写入序号 = seq_num
+                sheet.write(row_idx + 3, 0, 写入序号, style_data_seq)
                 
-                # 写入计划号
-                sheet.write(row_idx + 3, 1, row_data[0], style_data_12pt)
+                # 写入计划号（13pt，居中对齐）
+                sheet.write(row_idx + 3, 1, row_data[0], style_data_plan)
                 
-                # 写入其他字段
+                # 写入其他字段（使用列名索引）
                 for data_idx, value in enumerate(row_data[1:], 2):  # 从钢卷号开始，Excel列从2开始
-                    if data_idx == 2:  # 钢卷号列（16pt，左对齐）
+                    if data_idx == 钢卷号列索引:  # 钢卷号列（16pt，居中对齐）
                         sheet.write(row_idx + 3, data_idx, value, style_data_coil)
-                    elif data_idx == 3:  # 牌号列（14pt，左对齐）
+                    elif data_idx == 牌号列索引:  # 牌号列（14pt，居中对齐）
                         sheet.write(row_idx + 3, data_idx, value, style_data_14pt)
-                    elif data_idx == 9:  # 粗轧报信列（12pt，左对齐）
-                        sheet.write(row_idx + 3, data_idx, value, style_data_12pt_left)
-                    elif data_idx == 16:  # 强度列（12pt，右边框实线）
+                    elif data_idx == 坯宽列索引:  # 坯宽列（14pt，左边框虚线）
+                        sheet.write(row_idx + 3, data_idx, value, style_data_billet_width)
+                    elif data_idx == 粗轧报信列索引:  # 粗轧报信列（14pt，左对齐，始终启用自动换行）
+                        sheet.write(row_idx + 3, data_idx, value, style_data_wrap_14pt)
+                        # 立即计算并设置行高
+                        if value and len(str(value)) > 0:
+                            内容 = str(value)
+                            总宽度 = sum(0.6 if c.isascii() else 1 for c in 内容)
+                            每行宽度 = 13
+                            需要行数 = max(1, int((总宽度 + 每行宽度 - 1) // 每行宽度))
+                            最后一行宽度 = 总宽度 % 每行宽度
+                            if 最后一行宽度 == 0:
+                                最后一行宽度 = 每行宽度
+                            if 最后一行宽度 > 每行宽度 * 0.8:
+                                需要行数 = 需要行数 + 1
+                            if 需要行数 > 1:
+                                # 多行内容：设置计算的行高，不启用height_mismatch，让Excel自动调整
+                                计算行高 = 500 + (需要行数 - 1) * 360
+                                sheet.row(row_idx + 3).height = 计算行高
+                            else:
+                                # 单行内容：设置固定行高25pt，启用height_mismatch强制使用设置的行高
+                                sheet.row(row_idx + 3).height = 500
+                                sheet.row(row_idx + 3).height_mismatch = True
+                        else:
+                            # 无内容：设置固定行高25pt，启用height_mismatch强制使用设置的行高
+                            sheet.row(row_idx + 3).height = 500
+                            sheet.row(row_idx + 3).height_mismatch = True
+                    elif data_idx == 坯长列索引:  # 坯长列（12pt，居中对齐，左右虚线）
+                        sheet.write(row_idx + 3, data_idx, value, style_data_billet_length)
+                    elif data_idx == 轧厚列索引:  # 轧厚列（13pt，居中对齐，左右虚线）
+                        sheet.write(row_idx + 3, data_idx, value, style_data_roll_thickness)
+                    elif data_idx == 强度列索引:  # 强度列（14pt，左边框虚线，右边框实线）
                         sheet.write(row_idx + 3, data_idx, value, style_data_12pt_strength)
-                    else:  # 其他所有列（12pt，居中对齐）
-                        sheet.write(row_idx + 3, data_idx, value, style_data_12pt)
+                    elif 5 <= data_idx <= 8 or 10 <= data_idx <= 11 or 14 <= data_idx <= 15:  # 坯宽到强度之间的列（左右虚线）
+                        sheet.write(row_idx + 3, data_idx, value, style_data_dashed)
+                    else:  # 其他所有列（14pt，居中对齐）
+                        sheet.write(row_idx + 3, data_idx, value, style_data_14pt_center)
                 
                 seq_num += 1
             
             print(f"共写入 {seq_num - 1} 行数据")
             
-            # 保存文件
-            workbook.save(temp_file_path)
-            print(f"已生成打印文件：{temp_file_path}")
+            # 添加统计信息（计划号列表统计）
+            # 添加空行分隔
+            seq_num += 1
+            sheet.write(seq_num + 2, 0, "", style_data_14pt_center)  # 空行
+            
+            # 判断是否为增量打印
+            is_incremental_print = 真正增量打印 and 'new_seq_info' in dir()
+            
+            # 创建16号字体样式（带边框）
+            style_16pt_center = xlwt.XFStyle()
+            font_16pt = xlwt.Font()
+            font_16pt.name = '仿宋'
+            font_16pt.height = 320  # 16pt
+            font_16pt.bold = True
+            style_16pt_center.font = font_16pt
+            style_16pt_center.alignment = alignment_data_14pt_center
+            style_16pt_center.borders = borders_header
+            
+            style_16pt_bold = xlwt.XFStyle()
+            style_16pt_bold.font = font_16pt
+            style_16pt_bold.alignment = alignment_title
+            style_16pt_bold.borders = borders_header
+            
+            # 添加统计信息标题
+            seq_num += 1
+            if is_incremental_print:
+                sheet.write_merge(seq_num + 2, seq_num + 2, 0, len(headers) - 1, "新增计划号统计", style_16pt_bold)
+            else:
+                sheet.write_merge(seq_num + 2, seq_num + 2, 0, len(headers) - 1, "计划号列表统计", style_16pt_bold)
+            sheet.row(seq_num + 2).height = 520  # 26pt
+            sheet.row(seq_num + 2).height_mismatch = True
+            
+            # 添加表头
+            seq_num += 1
+            sheet.write_merge(seq_num + 2, seq_num + 2, 0, 1, "计划号", style_16pt_center)  # 第1-2列合并
+            sheet.write(seq_num + 2, 2, "块数", style_16pt_center)  # 第3列
+            sheet.write_merge(seq_num + 2, seq_num + 2, 3, 5, "起止钢卷号", style_16pt_center)  # 第4-6列合并
+            sheet.write_merge(seq_num + 2, seq_num + 2, 6, len(headers) - 1, "预警", style_16pt_center)  # 第7到最后列合并
+            sheet.row(seq_num + 2).height = 560  # 28pt
+            sheet.row(seq_num + 2).height_mismatch = True
+            
+            # 收集统计数据
+            stats_data = []
+            total_blocks = 0
+            
+            # 收集预警信息
+            plan_warnings_map = {}
+            for row_data in rows:
+                first_col_text = row_data[0] if row_data else ""
+                if "换辊" in first_col_text or "△" in first_col_text:
+                    continue
+                plan_no = row_data[1] if len(row_data) > 1 else ""
+                
+                if plan_no:
+                    if plan_no not in plan_warnings_map:
+                        plan_warnings_map[plan_no] = set()
+                    
+                    # 检查减宽超265：减宽列(索引5) > 265
+                    try:
+                        jiankuan = float(row_data[5]) if len(row_data) > 5 and row_data[5] else 0
+                        if jiankuan > 265:
+                            plan_warnings_map[plan_no].add("减宽超265")
+                    except:
+                        pass
+            
+            if is_incremental_print:
+                # 增量打印：只统计新增的钢卷号
+                new_plan_stats = {}
+                for info in new_seq_info:
+                    coil_no = info['coil_number']
+                    row_data = info['row_data']
+                    plan_no = row_data[1] if row_data and len(row_data) > 1 else ''
+                    
+                    if plan_no not in new_plan_stats:
+                        new_plan_stats[plan_no] = {
+                            'count': 0,
+                            'coils': []
+                        }
+                    new_plan_stats[plan_no]['count'] += 1
+                    new_plan_stats[plan_no]['coils'].append(coil_no)
+                
+                # 处理统计数据
+                for plan_no, stats in new_plan_stats.items():
+                    coils = sorted(stats['coils'])
+                    coil_range = f"{coils[0]}-{coils[-1]}" if coils else ""  # 去掉中括号
+                    block_count = stats['count']
+                    
+                    # 获取预警信息
+                    warnings = list(plan_warnings_map.get(plan_no, []))
+                    
+                    # 从 no_aps_plans 中检查无APS预警
+                    if hasattr(self, 'no_aps_plans') and plan_no in self.no_aps_plans:
+                        warnings.append("无APS")
+                    
+                    # 从 low_roll_width_plans 中检查轧宽<930预警
+                    if hasattr(self, 'low_roll_width_plans') and plan_no in self.low_roll_width_plans:
+                        warnings.append("轧宽<930")
+                    
+                    warning_str = ", ".join(warnings) if warnings else ""
+                    
+                    stats_data.append({
+                        'plan_no': plan_no,
+                        'block_count': block_count,
+                        'coil_range': coil_range,
+                        'warning': warning_str
+                    })
+                    total_blocks += block_count
+            else:
+                # 全部打印：统计所有计划号
+                for plan_info in self.plan_data:
+                    plan_no = plan_info.get('plan_no', '')
+                    block_count = plan_info.get('count', 0)
+                    min_coil = plan_info.get('min_coil', '')
+                    max_coil = plan_info.get('max_coil', '')
+                    coil_range = f"{min_coil}-{max_coil}" if min_coil and max_coil else ""  # 去掉中括号
+                    
+                    # 获取预警信息
+                    warnings = list(plan_warnings_map.get(plan_no, []))
+                    
+                    # 从 no_aps_plans 中检查无APS预警
+                    if hasattr(self, 'no_aps_plans') and plan_no in self.no_aps_plans:
+                        warnings.append("无APS")
+                    
+                    # 从 low_roll_width_plans 中检查轧宽<930预警
+                    if hasattr(self, 'low_roll_width_plans') and plan_no in self.low_roll_width_plans:
+                        warnings.append("轧宽<930")
+                    
+                    warning_str = ", ".join(warnings) if warnings else ""
+                    
+                    stats_data.append({
+                        'plan_no': plan_no,
+                        'block_count': block_count,
+                        'coil_range': coil_range,
+                        'warning': warning_str
+                    })
+                    total_blocks += block_count
+            
+            # 写入统计数据
+            for data in stats_data:
+                seq_num += 1
+                
+                # 第1-2列合并：计划号
+                sheet.write_merge(seq_num + 2, seq_num + 2, 0, 1, data['plan_no'], style_16pt_center)
+                # 第3列：块数
+                sheet.write(seq_num + 2, 2, str(data['block_count']), style_16pt_center)
+                # 第4-6列合并：起止钢卷号
+                sheet.write_merge(seq_num + 2, seq_num + 2, 3, 5, data['coil_range'], style_16pt_center)
+                # 第7到最后列合并：预警
+                sheet.write_merge(seq_num + 2, seq_num + 2, 6, len(headers) - 1, data['warning'], style_16pt_center)
+                
+                sheet.row(seq_num + 2).height = 500  # 25pt
+                sheet.row(seq_num + 2).height_mismatch = True
+            
+            # 添加合计行
+            seq_num += 1
+            sheet.write_merge(seq_num + 2, seq_num + 2, 0, 1, "合计", style_16pt_center)
+            sheet.write(seq_num + 2, 2, str(total_blocks), style_16pt_center)
+            sheet.write_merge(seq_num + 2, seq_num + 2, 3, len(headers) - 1, "", style_16pt_center)
+            sheet.row(seq_num + 2).height = 500  # 25pt
+            sheet.row(seq_num + 2).height_mismatch = True
+            
+            print(f"共写入 {seq_num} 行数据（含统计信息）")
+            
+            # 获取设置，决定是否保存打印文件
+            settings = self.get_settings()
+            save_print_file = settings.get("savePrintFile", True)
+            
+            # 保存文件（根据设置决定是否保存）
+            if save_print_file:
+                workbook.save(temp_file_path)
+                print(f"已生成打印文件：{temp_file_path}")
+            else:
+                # 不保存文件到磁盘，使用内存流暂存用于打印
+                import io
+                output = io.BytesIO()
+                workbook.save(output)
+                output.seek(0)
+                # 将内存流写入临时文件用于打印
+                with open(temp_file_path, 'wb') as f:
+                    f.write(output.getvalue())
+                print(f"临时生成打印文件（不保存）：{temp_file_path}")
             
             # 验证文件是否存在且有内容
             import os
@@ -1815,8 +3513,16 @@ class MainWindow(QMainWindow):
                 from PyQt5.QtWidgets import QMessageBox
                 QMessageBox.critical(self, "错误", f"文件未生成：\n{temp_file_path}")
             
-            # 不删除临时文件，让用户可以查看和管理
-            print(f"文件已保留：{temp_file_path}")
+            # 根据设置决定是否删除临时文件
+            if save_print_file:
+                print(f"文件已保留：{temp_file_path}")
+            else:
+                # 删除临时文件
+                try:
+                    os.remove(temp_file_path)
+                    print(f"临时文件已删除：{temp_file_path}")
+                except Exception as e:
+                    print(f"删除临时文件失败：{str(e)}")
             
         except Exception as e:
             from PyQt5.QtWidgets import QMessageBox
@@ -1833,6 +3539,7 @@ class MainWindow(QMainWindow):
         import os
         import xlwt
         from xlutils.copy import copy
+        import pandas as pd
         
         # 1. 使用xlrd读取原文件
         success, result = self.safe_read_excel(file_path, max_retries=3, retry_delay=0.5)
@@ -1840,6 +3547,15 @@ class MainWindow(QMainWindow):
             raise Exception(f"读取文件失败: {result}")
         workbook = result
         sheet = workbook.sheet_by_index(0)
+        
+        # 从文件路径中提取计划号
+        expected_plan_no = os.path.splitext(os.path.basename(file_path))[0]
+        
+        # 在处理数据前验证文件中的计划号是否与文件名一致
+        # 注意：这里不使用验证，因为重新导出时可能会出现文件内容与文件名不匹配的情况
+        # 这是正常的，重新导出本来就是用最新的数据覆盖旧文件
+        # if not self.validate_plan_file_in_sheet(sheet, expected_plan_no):
+        #     raise Exception(f"文件验证失败: {expected_plan_no}.xls 中的计划号与文件名不匹配")
         
         # 2. 加载装炉顺序数据,构建映射
         装炉顺序映射 = {}
@@ -2418,6 +4134,17 @@ class MainWindow(QMainWindow):
         borders_data_16pt_left.bottom = xlwt.Borders.THIN  # 下边框
         style_data_16pt_left.borders = borders_data_16pt_left
         
+        # 钢卷号左对齐样式（16pt - 用于钢卷号,带下边框和删除线 - 不在装炉顺序中的钢卷号）
+        style_data_16pt_left_strikethrough = xlwt.XFStyle()
+        font_data_16pt_left_strikethrough = xlwt.Font()
+        font_data_16pt_left_strikethrough.name = '仿宋'
+        font_data_16pt_left_strikethrough.height = 320  # 16pt
+        font_data_16pt_left_strikethrough.bold = True
+        font_data_16pt_left_strikethrough.struck_out = True  # 删除线
+        style_data_16pt_left_strikethrough.font = font_data_16pt_left_strikethrough
+        style_data_16pt_left_strikethrough.alignment = alignment_data_16pt_left
+        style_data_16pt_left_strikethrough.borders = borders_data_16pt_left
+        
         # 装炉顺列右侧实线边框样式（12pt）
         style_data_12pt_right_border = xlwt.XFStyle()
         font_data_12pt_right_border = xlwt.Font()
@@ -2514,6 +4241,7 @@ class MainWindow(QMainWindow):
         逆宽轧制板坯数 = 0
         低轧宽板坯数 = 0
         极低轧宽板坯数 = 0
+        调宽问题列表 = []
         
         # 收集所有行数据
         all_row_data = []
@@ -2536,6 +4264,20 @@ class MainWindow(QMainWindow):
                         row_data["装炉顺序号"] = 原装炉顺序号
                         # 存储装炉顺用于后续写入
                         row_data["装炉顺"] = 装炉顺序映射[钢卷号字符串]["装炉顺"]
+                        # 标记钢卷号在装炉顺序中
+                        row_data["在装炉顺序中"] = True
+                    else:
+                        # 标记钢卷号不在装炉顺序中，需要添加删除线
+                        row_data["在装炉顺序中"] = False
+            
+            # 如果"装炉顺序号"仍缺失，使用"顺序号"字段的值作为备选
+            if "装炉顺序号" not in row_data or row_data["装炉顺序号"] is None or pd.isna(row_data["装炉顺序号"]):
+                if "顺序号" in row_data and row_data["顺序号"] is not None and not pd.isna(row_data["顺序号"]):
+                    row_data["装炉顺序号"] = row_data["顺序号"]
+                    row_data["装炉顺"] = row_data["顺序号"]
+                else:
+                    row_data["装炉顺序号"] = ""
+                    row_data["装炉顺"] = ""
             
             # 填充"轧宽+（余量）"字段
             if "钢卷号" in row_data:
@@ -2544,6 +4286,13 @@ class MainWindow(QMainWindow):
                     钢卷号字符串 = str(钢卷号值)
                     if 钢卷号字符串 in 轧宽余量映射:
                         row_data["轧宽+（余量）"] = 轧宽余量映射[钢卷号字符串]
+            
+            # 如果"轧宽+（余量）"仍缺失，使用"轧宽"字段的值作为备选
+            if "轧宽+（余量）" not in row_data or row_data["轧宽+（余量）"] is None or pd.isna(row_data["轧宽+（余量）"]):
+                if "轧宽" in row_data and row_data["轧宽"] is not None and not pd.isna(row_data["轧宽"]):
+                    row_data["轧宽+（余量）"] = row_data["轧宽"]
+                else:
+                    row_data["轧宽+（余量）"] = ""
             
             # 钢种转换逻辑
             if "牌号（钢级）" in row_data and "炼钢钢种" in row_data and "热轧产品分类" in row_data:
@@ -3033,63 +4782,9 @@ class MainWindow(QMainWindow):
         
         # 设置字段列名行的行高（25pt = 500 twips）
         new_sheet.row(字段列名行号).height = 500
-        new_sheet.row(字段列名行号).height_mismatch = True
         
         # 写入数据行
         for row_idx, row_data in enumerate(all_row_data, 字段列名行号 + 1):
-            # 计算粗轧报信字段的内容高度（按照原程序的方法）
-            粗轧报信列索引 = -1
-            for col_idx, col_name in enumerate(target_columns):
-                映射后的列名 = 字段名映射.get(col_name, col_name)
-                if 映射后的列名 == "粗轧报信":
-                    粗轧报信列索引 = col_idx
-                    break
-            
-            # 根据内容长度计算行高（至少25pt = 500 twips）
-            if 粗轧报信列索引 >= 0:
-                粗轧报信值 = row_data.get("粗轧报信", "")
-                if 粗轧报信值:
-                    内容 = str(粗轧报信值)
-                    # 按实际显示规则计算行数：每行约13个字符（考虑中英文混合）
-                    # 英文和数字占宽度较少,中文占宽度较多
-                    def 计算显示宽度(文本):
-                        宽度 = 0
-                        for 字符 in 文本:
-                            if 字符.isascii():
-                                宽度 += 0.6  # 英文字符和数字占0.6个中文宽度
-                            else:
-                                宽度 += 1  # 中文字符占1个宽度
-                        return 宽度
-                    
-                    总宽度 = 计算显示宽度(内容)
-                    每行宽度 = 13  # 每行约13个中文宽度（根据实际Excel显示调整）
-                    # 计算需要的行数
-                    需要行数 = max(1, int((总宽度 + 每行宽度 - 1) // 每行宽度))
-                    # 增加安全系数：只有内容较长时才增加1行,短内容不增加
-                    # 判断标准：如果最后一行接近满行（超过80%宽度）,则增加1行
-                    最后一行宽度 = 总宽度 % 每行宽度
-                    if 最后一行宽度 == 0:
-                        最后一行宽度 = 每行宽度
-                    if 最后一行宽度 > 每行宽度 * 0.8:
-                        需要行数 = 需要行数 + 1
-                    # 行高计算：基础行高25pt(500 twips),多行时每行增加18pt(360 twips)
-                    # 1行=25pt, 2行=25+18=43pt, 3行=25+18+18=61pt, 以此类推
-                    基础行高 = 500  # 25pt
-                    每增加行高 = 360  # 18pt
-                    # 计算总行高（至少25pt）
-                    计算行高 = 基础行高 + (需要行数 - 1) * 每增加行高
-                    # 设置行高（根据内容动态调整,最低25pt）
-                    new_sheet.row(row_idx).height = 计算行高
-                    new_sheet.row(row_idx).height_mismatch = True
-                else:
-                    # 无内容时使用默认行高（25pt = 500 twips）
-                    new_sheet.row(row_idx).height = 500
-                    new_sheet.row(row_idx).height_mismatch = True
-            else:
-                # 其他行使用默认行高（25pt = 500 twips）
-                new_sheet.row(row_idx).height = 500
-                new_sheet.row(row_idx).height_mismatch = True
-            
             顺序号 = row_idx - 字段列名行号  # 从1开始的顺序号
             
             # 写入顺序号
@@ -3139,7 +4834,12 @@ class MainWindow(QMainWindow):
                     需标注 = row_data.get("需标注", False)
                     if 需标注:
                         value = str(value) + "Δ"
-                    new_sheet.write(row_idx, col_idx, value, style_data_16pt_left)
+                    # 检查钢卷号是否在装炉顺序中，如果不在则添加删除线
+                    在装炉顺序中 = row_data.get("在装炉顺序中", True)
+                    if 在装炉顺序中:
+                        new_sheet.write(row_idx, col_idx, value, style_data_16pt_left)
+                    else:
+                        new_sheet.write(row_idx, col_idx, value, style_data_16pt_left_strikethrough)
                 elif col_name == "牌号（钢级）":
                     # 无 APS 钢种时添加Δ标记
                     is_no_aps = row_data.get("是无 APS 钢种", False)
@@ -3228,6 +4928,32 @@ class MainWindow(QMainWindow):
                 else:
                     new_sheet.write(row_idx, col_idx, value, style_data)
         
+        # 在写入所有数据后，统一重新设置行高（确保行高不会被自动换行覆盖）
+        # 设置数据行的行高
+        for row_idx, row_data in enumerate(all_row_data, 字段列名行号 + 1):
+            粗轧报信值 = row_data.get("粗轧报信", "")
+            if 粗轧报信值 and len(str(粗轧报信值)) > 0:
+                # 计算多行内容的行高
+                内容 = str(粗轧报信值)
+                总宽度 = sum(0.6 if c.isascii() else 1 for c in 内容)
+                每行宽度 = 13
+                需要行数 = max(1, int((总宽度 + 每行宽度 - 1) // 每行宽度))
+                最后一行宽度 = 总宽度 % 每行宽度
+                if 最后一行宽度 == 0:
+                    最后一行宽度 = 每行宽度
+                if 最后一行宽度 > 每行宽度 * 0.8:
+                    需要行数 = 需要行数 + 1
+                if 需要行数 > 1:
+                    # 多行时使用计算的行高
+                    计算行高 = 500 + (需要行数 - 1) * 360
+                    new_sheet.row(row_idx).height = 计算行高
+                else:
+                    # 单行时强制设置为25pt（500 twips）
+                    new_sheet.row(row_idx).height = 500
+            else:
+                # 无内容时强制设置为25pt（500 twips）
+                new_sheet.row(row_idx).height = 500
+        
         # 10. 保存新文件
         new_file_path = file_path  # 覆盖原文件
         
@@ -3237,9 +4963,15 @@ class MainWindow(QMainWindow):
         except Exception as e:
             raise Exception(f"保存文件失败: {str(e)}")
         finally:
-            # 释放资源
+            # 释放所有资源
+            print(f"run_excel_macro_with_pandas: 释放资源...")
             if hasattr(workbook, 'release_resources'):
                 workbook.release_resources()
+                print(f"run_excel_macro_with_pandas: 原文件资源已释放")
+            # 强制垃圾回收
+            import gc
+            gc.collect()
+            print(f"run_excel_macro_with_pandas: 垃圾回收完成")
         
         return has_low_roll_width, 包含无APS
     
@@ -3267,6 +4999,143 @@ class MainWindow(QMainWindow):
                     time.sleep(retry_delay)
                 else:
                     return False, str(e)
+    
+    def validate_plan_file(self, file_path, expected_plan_no):
+        """验证导出的计划文件
+        只检查:
+        1. 文件是否存在
+        2. "计划号"列是否存在
+        3. 文件中"计划号"列的值是否与文件名一致
+        
+        不检查列数、行数等其他内容
+        
+        Args:
+            file_path: 文件路径
+            expected_plan_no: 期望的计划号（文件名）
+            
+        Returns:
+            bool: 验证是否通过
+        """
+        import os
+        
+        try:
+            # 1. 检查文件是否存在
+            if not os.path.exists(file_path):
+                print(f"[×] 文件不存在: {file_path}")
+                return False
+            
+            # 2. 尝试读取文件
+            success, workbook = self.safe_read_excel(file_path)
+            if not success:
+                print(f"[×] 文件无法读取: {workbook}")
+                return False
+            
+            sheet = workbook.sheet_by_index(0)
+            
+            # 3. 检查是否有表头行
+            if sheet.nrows < 1:
+                print(f"[×] 文件没有表头行")
+                return False
+            
+            # 4. 查找"计划号"列
+            header_row = 0
+            plan_no_col_index = None
+            headers = [str(sheet.cell_value(header_row, col)).strip() for col in range(sheet.ncols)]
+            
+            for col_idx, header in enumerate(headers):
+                if header == "计划号":
+                    plan_no_col_index = col_idx
+                    break
+            
+            if plan_no_col_index is None:
+                print(f"[×] 文件中找不到'计划号'列，表头: {headers}")
+                return False
+            
+            print(f"[√] 找到'计划号'列在第 {plan_no_col_index} 列")
+            
+            # 5. 检查是否有数据行
+            if sheet.nrows < 2:
+                print(f"[×] 文件只有表头，没有数据")
+                return False
+            
+            # 6. 检查第一行数据的计划号是否与文件名一致
+            # 只检查第一行数据
+            file_plan_no = str(sheet.cell_value(1, plan_no_col_index)).strip()
+            
+            if not file_plan_no:
+                print(f"[×] 第一行数据的计划号为空")
+                return False
+            
+            # 比较计划号（忽略大小写和空格）
+            if file_plan_no.strip().lower() == expected_plan_no.strip().lower():
+                print(f"[√] 计划号匹配: 文件={expected_plan_no}")
+                return True
+            else:
+                print(f"[×] 计划号不匹配: 文件名={expected_plan_no}, 文件内容={file_plan_no}")
+                return False
+                
+        except Exception as e:
+            print(f"[×] 验证文件时发生错误: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return False
+    
+    def validate_plan_file_in_sheet(self, sheet, expected_plan_no):
+        """验证sheet中的计划号是否与期望的计划号一致
+        这个方法用于在处理文件时直接验证已读取的sheet对象，避免重复读取文件
+        
+        Args:
+            sheet: xlrd sheet对象（已读取的工作表）
+            expected_plan_no: 期望的计划号（文件名）
+            
+        Returns:
+            bool: 验证是否通过
+        """
+        try:
+            # 1. 检查是否有表头行
+            if sheet.nrows < 1:
+                print(f"[×] 文件没有表头行")
+                return False
+            
+            # 2. 查找"计划号"列
+            header_row = 0
+            plan_no_col_index = None
+            headers = [str(sheet.cell_value(header_row, col)).strip() for col in range(sheet.ncols)]
+            
+            for col_idx, header in enumerate(headers):
+                if header == "计划号":
+                    plan_no_col_index = col_idx
+                    break
+            
+            if plan_no_col_index is None:
+                print(f"[×] 文件中找不到'计划号'列，表头: {headers}")
+                return False
+            
+            # 3. 检查是否有数据行
+            if sheet.nrows < 2:
+                print(f"[×] 文件只有表头，没有数据")
+                return False
+            
+            # 4. 检查第一行数据的计划号是否与文件名一致
+            file_plan_no = str(sheet.cell_value(1, plan_no_col_index)).strip()
+            
+            if not file_plan_no:
+                print(f"[×] 第一行数据的计划号为空")
+                return False
+            
+            # 比较计划号（忽略大小写和空格）
+            if file_plan_no.strip().lower() == expected_plan_no.strip().lower():
+                print(f"[√] 计划号验证通过: {expected_plan_no}")
+                return True
+            else:
+                print(f"[×] 计划号验证失败: 文件名={expected_plan_no}, 内容={file_plan_no}")
+                return False
+                
+        except Exception as e:
+            print(f"[×] 验证计划号时发生错误: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return False
     
     def load_remove_phosphorus_list(self):
         """加载除鳞钢种列表"""
@@ -4152,6 +6021,8 @@ class MainWindow(QMainWindow):
         self.furnace_details_btn.clicked.connect(self.open_furnace_details)
         # 连接处理计划按钮
         self.process_plans_btn.clicked.connect(self.process_plans)
+        # 连接粗轧主画面按钮
+        self.rm_main_btn.clicked.connect(self.open_rm_main_window)
 
         # 连接显示按钮
         self.show_selected_btn.clicked.connect(self.show_selected)
@@ -4227,6 +6098,206 @@ class MainWindow(QMainWindow):
                     self.furnace_details_window.auto_print_checkbox.setChecked(enabled)
         except Exception as e:
             print(f"处理自动打印复选框状态变化失败: {str(e)}")
+    
+    def on_plan_double_clicked(self, index):
+        """双击计划号行，显示该计划号的所有钢卷号列表"""
+        from PyQt5.QtWidgets import QDialog, QTableWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QDialogButtonBox, QWidget, QHeaderView
+        from PyQt5.QtGui import QFont
+        from PyQt5.QtCore import Qt
+        
+        if not index.isValid():
+            return
+        
+        row = index.row()
+        plan_item = self.table_widget.item(row, 0)
+        if not plan_item:
+            return
+        
+        plan_no = plan_item.text()
+        
+        # 从装炉顺序.xls中读取钢卷号
+        coil_nos = []
+        
+        # 构建装炉顺序文件路径（与ensure_zhuanglu_shunxu_file一致）
+        plan_dir = os.path.join(self.plan_dir, "计划号")
+        zhuanglu_file = os.path.join(plan_dir, "装炉顺序.xls")
+        
+        if not os.path.exists(zhuanglu_file):
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.information(self, "提示", f"装炉顺序.xls 文件不存在\n路径: {zhuanglu_file}")
+            return
+        
+        try:
+            import xlrd
+            workbook = xlrd.open_workbook(zhuanglu_file)
+            sheet = workbook.sheet_by_index(0)
+            
+            # 查找计划号列和钢卷号列
+            plan_col = -1
+            coil_col = -1
+            
+            for row_idx in range(min(15, sheet.nrows)):
+                for col_idx in range(sheet.ncols):
+                    cell_value = str(sheet.cell_value(row_idx, col_idx)).strip()
+                    if "计划号" in cell_value or "ORDER_NO" in cell_value.upper():
+                        plan_col = col_idx
+                    if "钢卷号" in cell_value or "卷号" in cell_value or "COIL_NO" in cell_value.upper():
+                        coil_col = col_idx
+                
+                if plan_col != -1 and coil_col != -1:
+                    break
+            
+            if plan_col == -1:
+                from PyQt5.QtWidgets import QMessageBox
+                QMessageBox.information(self, "提示", "未找到计划号列")
+                return
+            
+            if coil_col == -1:
+                from PyQt5.QtWidgets import QMessageBox
+                QMessageBox.information(self, "提示", "未找到钢卷号列")
+                return
+            
+            # 从第一行开始读取数据（跳过表头）
+            for row_idx in range(1, sheet.nrows):
+                current_plan = str(sheet.cell_value(row_idx, plan_col)).strip()
+                # 去除可能的空格和特殊字符
+                current_plan = ''.join(c for c in current_plan if c.isalnum())
+                plan_no_clean = ''.join(c for c in plan_no if c.isalnum())
+                
+                if current_plan == plan_no_clean:
+                    coil_no = str(sheet.cell_value(row_idx, coil_col)).strip()
+                    coil_no = ''.join(c for c in coil_no if c.isdigit())
+                    if coil_no:
+                        coil_nos.append(coil_no)
+            
+            coil_nos = sorted(set(coil_nos), key=lambda x: int(x) if x.isdigit() else 0)
+            
+        except Exception as e:
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.information(self, "提示", f"读取装炉顺序文件失败: {str(e)}")
+            return
+        
+        if not coil_nos:
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.information(self, "提示", f"计划号 {plan_no} 没有钢卷号数据")
+            return
+        
+        # 创建对话框
+        dialog = QDialog(self)
+        dialog.setWindowTitle(f"计划号 {plan_no} 的钢卷号列表")
+        # 窗口宽度跟主程序窗口一样
+        dialog.resize(self.width(), 600)
+        
+        # 按前7位分组，每列显示相同前7位的钢卷号
+        # 第8位数字决定行号（0→第1行，1→第2行，...，9→第10行）
+        groups = {}
+        for coil_no in coil_nos:
+            if len(coil_no) >= 7:
+                prefix = coil_no[:7]  # 前7位
+                if prefix not in groups:
+                    groups[prefix] = {}
+                if len(coil_no) >= 8:
+                    eighth_digit = coil_no[7]  # 第8位
+                    if eighth_digit.isdigit():
+                        row = int(eighth_digit)  # 0-9 → 行0-9
+                        groups[prefix][row] = coil_no
+        
+        # 按前缀排序
+        sorted_prefixes = sorted(groups.keys())
+        cols = len(sorted_prefixes)
+        rows = 10  # 固定10行
+        
+        # 创建表格
+        table = QTableWidget()
+        table.setRowCount(rows)
+        table.setColumnCount(cols)
+        
+        # 设置单元格不可编辑、不可点击
+        table.setEditTriggers(QTableWidget.NoEditTriggers)
+        table.setSelectionMode(QTableWidget.NoSelection)
+        
+        # 设置字体（与主程序计划号列表一致）
+        font = QFont("宋体", 28, QFont.Bold)
+        table.setFont(font)
+        
+        # 设置列宽（8位钢卷号宽度 + 间距）
+        coil_width = 170    # 8位钢卷号宽度
+        gap_width = 80      # 增大间距（约两个数字宽度）
+        
+        # 所有列都使用相同的宽度（包含间距），确保列之间间距一致
+        for col in range(cols):
+            table.setColumnWidth(col, coil_width + gap_width)
+        
+        # 添加网格线样式
+        table.setStyleSheet("""
+            QTableWidget {
+                gridline-color: #CCCCCC;
+                border: 1px solid #CCCCCC;
+            }
+            QTableWidget::item {
+                border: 1px solid #CCCCCC;
+                padding: 2px;
+            }
+        """)
+        
+        # 设置行高
+        table.verticalHeader().setDefaultSectionSize(50)
+        
+        # 填充数据（第8位数字设置背景色）
+        for col, prefix in enumerate(sorted_prefixes):
+            coil_map = groups[prefix]
+            for row in range(10):
+                if row in coil_map:
+                    coil_no = coil_map[row]
+                    # 对第8位数字设置背景色（黄色）
+                    if len(coil_no) >= 8:
+                        # 使用QLabel显示HTML内容
+                        label = QLabel()
+                        first_seven = coil_no[:7]
+                        eighth = coil_no[7]
+                        rest = coil_no[8:]
+                        html_text = f"<span style='font-family: 宋体; font-size: 28pt; font-weight: bold;'>{first_seven}<span style='background-color: yellow;'>{eighth}</span>{rest}</span>"
+                        label.setText(html_text)
+                        label.setAlignment(Qt.AlignCenter)
+                        table.setCellWidget(row, col, label)
+                    else:
+                        item = QTableWidgetItem(coil_no)
+                        table.setItem(row, col, item)
+        
+        # 隐藏垂直表头
+        table.verticalHeader().setVisible(False)
+        table.horizontalHeader().setVisible(False)
+        
+        # 创建布局
+        layout = QVBoxLayout()
+        
+        # 在表格上方添加计划号标题（与列表中字符大小一致）
+        plan_title = QLabel(f"计划号：{plan_no}")
+        plan_title_font = QFont("宋体", 28, QFont.Bold)
+        plan_title.setFont(plan_title_font)
+        plan_title.setAlignment(Qt.AlignCenter)
+        plan_title.setContentsMargins(0, 20, 0, 20)  # 上下间距
+        layout.addWidget(plan_title)
+        
+        layout.addWidget(table)
+        
+        # 添加按钮（居中）
+        button_widget = QWidget()
+        button_layout = QHBoxLayout(button_widget)
+        button_layout.setContentsMargins(0, 10, 0, 10)
+        button_layout.addStretch()  # 左侧拉伸
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok)
+        button_box.accepted.connect(dialog.accept)
+        button_layout.addWidget(button_box)
+        button_layout.addStretch()  # 右侧拉伸
+        layout.addWidget(button_widget, alignment=Qt.AlignCenter)
+        
+        dialog.setLayout(layout)
+        
+        # 增大窗体高度
+        dialog.resize(self.width(), 750)
+        
+        dialog.exec_()
     
     def show_context_menu(self, pos):
         """显示上下文菜单"""
@@ -4387,6 +6458,26 @@ class MainWindow(QMainWindow):
                 if plan_data['plan_no'] in selected_plans:
                     self.table_widget.selectRow(i)
             
+            # 清除选中计划号的已处理和已打印记录，强制重新处理和打印
+            print("清除已处理和已打印记录，强制重新处理...")
+            if hasattr(self, 'processed_plans') and isinstance(self.processed_plans, dict):
+                for plan_no in selected_plans:
+                    if plan_no in self.processed_plans:
+                        print(f"  清除 {plan_no} 的已处理记录")
+                        del self.processed_plans[plan_no]
+            
+            # 清除已打印记录
+            if hasattr(self, 'printed_plans') and isinstance(self.printed_plans, dict):
+                for plan_no in selected_plans:
+                    if plan_no in self.printed_plans:
+                        print(f"  清除 {plan_no} 的已打印记录")
+                        del self.printed_plans[plan_no]
+            
+            # 立即保存状态到文件（防止process_plans重新加载旧记录）
+            print("保存清除后的状态...")
+            self.save_processed_plans()
+            self.save_printed_plans()
+            
             # 调用处理计划方法，设置auto_print=True和force_process=True，强制处理并自动打印
             self.process_plans(auto_print=True, show_result=False, force_process=True)
             
@@ -4410,7 +6501,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "错误", f"重新导出打印失败: {str(e)}")
     
     def activate_target_window(self, window_title, add_debug_log=None):
-        """激活目标窗口
+        """激活目标窗口 - 使用与自动导出相同的方法
         
         参数:
             window_title: 目标窗口标题
@@ -4424,30 +6515,209 @@ class MainWindow(QMainWindow):
             def add_debug_log(msg):
                 pass
         
-        try:
-            import win32gui
-            import win32con
-            
-            add_debug_log(f"  目标窗口: {window_title}")
-            
-            # 查找窗口
-            hwnd = win32gui.FindWindow(None, window_title)
-            if hwnd:
-                # 直接激活窗口，不改变其大小和状态（保持最大化）
-                win32gui.SetForegroundWindow(hwnd)
-                # 额外尝试：使用SetWindowPos确保窗口在最前面
-                win32gui.SetWindowPos(hwnd, win32con.HWND_TOP, 0, 0, 0, 0, win32con.SWP_NOMOVE | win32con.SWP_NOSIZE | win32con.SWP_SHOWWINDOW)
-                add_debug_log("  ✓ 成功激活目标窗口")
-                return True
-            else:
-                add_debug_log("  ✗ 未找到目标窗口")
-                return False
-                
-        except Exception as e:
-            add_debug_log(f"  ✗ 激活窗口失败: {str(e)}")
-            return False
+        add_debug_log(f"  目标窗口: {window_title}")
+        
+        # 直接调用 activate_window 方法，与自动导出保持一致
+        result = self.activate_window(window_title)
+        
+        if result:
+            add_debug_log("  ✓ 成功激活目标窗口")
+        else:
+            add_debug_log("  ✗ 激活目标窗口失败")
+        
+        return result
     
-
+    def cleanup_extra_plan_files(self):
+        """清理计划号目录中多余的计划号文件
+        
+        保留：
+        1. 装炉顺序*.xls（装炉顺序相关文件）
+        2. 总计划号列表*.xls（总计划号列表相关文件）
+        3. 装炉顺序_显示.xls
+        4. 合并文件.xls
+        5. temp_*.xls（临时文件）
+        6. 计划号列表中实际存在的计划号文件
+        """
+        try:
+            import os
+            from PyQt5.QtWidgets import QMessageBox
+            
+            plan_dir = os.path.join(self.plan_dir, "计划号")
+            if not os.path.exists(plan_dir):
+                QMessageBox.information(self, "提示", "计划号目录不存在")
+                return
+            
+            # 先刷新计划号列表，确保获取最新数据
+            self.load_data()
+            
+            valid_plan_numbers = set()
+            # 从表格中获取当前显示的计划号（计划号在第0列）
+            print(f"调试信息: table_widget 属性存在: {hasattr(self, 'table_widget')}")
+            if hasattr(self, 'table_widget'):
+                print(f"调试信息: 表格行数: {self.table_widget.rowCount()}")
+                print(f"调试信息: 表格列数: {self.table_widget.columnCount()}")
+                for row in range(self.table_widget.rowCount()):
+                    item = self.table_widget.item(row, 0)  # 计划号在第0列（第一列）
+                    print(f"调试信息: 行 {row} 的计划号单元格: {item}")
+                    if item:
+                        plan_no = str(item.text()).strip()
+                        print(f"调试信息: 行 {row} 的计划号: '{plan_no}'")
+                        if plan_no:
+                            valid_plan_numbers.add(plan_no)
+            
+            print(f"调试信息: 从表格获取的有效计划号列表 = {valid_plan_numbers}")
+            print(f"调试信息: zhizhi_plan_list 属性存在: {hasattr(self, 'zhizhi_plan_list')}")
+            if hasattr(self, 'zhizhi_plan_list'):
+                print(f"调试信息: zhizhi_plan_list 内容: {self.zhizhi_plan_list}")
+            
+            must_keep_prefixes = [
+                "装炉顺序",
+                "总计划号列表"
+            ]
+            must_keep_files = [
+                "装炉顺序_显示.xls",
+                "合并文件.xls"
+            ]
+            
+            files_to_delete = []
+            files_to_keep = []
+            
+            for file in os.listdir(plan_dir):
+                file_path = os.path.join(plan_dir, file)
+                if os.path.isdir(file_path):
+                    continue
+                
+                if not file.endswith(".xls") and not file.endswith(".xlsx"):
+                    continue
+                
+                should_keep = False
+                
+                # temp_ 开头的临时文件需要删除
+                if file.startswith("temp_"):
+                    print(f"调试信息: 文件 {file} 以 temp_ 开头，准备删除")
+                    files_to_delete.append((file, file_path))
+                    continue
+                
+                for prefix in must_keep_prefixes:
+                    if file.startswith(prefix):
+                        should_keep = True
+                        print(f"调试信息: 文件 {file} 以 {prefix} 开头，保留")
+                        break
+                
+                if file in must_keep_files:
+                    should_keep = True
+                    print(f"调试信息: 文件 {file} 在必须保留列表中，保留")
+                
+                if not should_keep:
+                    file_no_ext = file.replace(".xls", "").replace(".xlsx", "")
+                    print(f"调试信息: 文件 {file} -> 去除扩展名后: '{file_no_ext}'")
+                    
+                    # 检查是否匹配计划号
+                    matched_plan = None
+                    # 方式1: 完全匹配
+                    if file_no_ext in valid_plan_numbers:
+                        matched_plan = file_no_ext
+                    else:
+                        # 方式2: 文件以计划号开头（处理带后缀的文件，如 H1552_fixed.xls）
+                        for plan_no in valid_plan_numbers:
+                            if file_no_ext.startswith(plan_no + "_") or file_no_ext.startswith(plan_no + "-"):
+                                matched_plan = plan_no
+                                break
+                    
+                    if matched_plan:
+                        should_keep = True
+                        print(f"调试信息: 文件 {file} 匹配计划号 '{matched_plan}'，保留")
+                    else:
+                        print(f"调试信息: 文件 {file} 不匹配任何有效计划号，准备删除")
+                
+                if should_keep:
+                    files_to_keep.append(file)
+                else:
+                    files_to_delete.append((file, file_path))
+            
+            print(f"调试信息: 保留文件 = {files_to_keep}")
+            print(f"调试信息: 删除文件 = {[f[0] for f in files_to_delete]}")
+            
+            if not files_to_delete:
+                QMessageBox.information(self, "提示", "没有需要清理的多余文件")
+                return
+            
+            reply = QMessageBox.question(
+                self, 
+                "确认清理", 
+                f"即将删除 {len(files_to_delete)} 个多余文件：\n\n" + 
+                "\n".join([f[0] for f in files_to_delete[:10]]) + 
+                ("..." if len(files_to_delete) > 10 else ""),
+                QMessageBox.Yes | QMessageBox.No
+            )
+            
+            if reply != QMessageBox.Yes:
+                print("调试信息: 用户点击了 No，取消删除")
+                return
+            
+            print(f"调试信息: 开始删除 {len(files_to_delete)} 个文件")
+            deleted_count = 0
+            failed_files = []
+            
+            import stat
+            for file_name, file_path in files_to_delete:
+                print(f"调试信息: 尝试删除 {file_path}")
+                print(f"调试信息: 文件存在: {os.path.exists(file_path)}")
+                if os.path.exists(file_path):
+                    print(f"调试信息: 文件大小: {os.path.getsize(file_path)} 字节")
+                    try:
+                        # 检查文件属性
+                        file_stat = os.stat(file_path)
+                        print(f"调试信息: 文件权限: {oct(stat.S_IMODE(file_stat.st_mode))}")
+                        # 尝试移除只读属性
+                        if file_stat.st_mode & stat.S_IREAD and not file_stat.st_mode & stat.S_IWRITE:
+                            print(f"调试信息: 文件是只读的，尝试修改权限")
+                            os.chmod(file_path, stat.S_IWRITE | stat.S_IREAD)
+                    except Exception as e:
+                        print(f"调试信息: 检查/修改文件属性失败: {str(e)}")
+                
+                try:
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                        deleted_count += 1
+                        print(f"调试信息: 成功删除: {file_name}")
+                        # 再次验证是否真的删除了
+                        if os.path.exists(file_path):
+                            print(f"调试信息: 警告：文件删除后仍然存在!")
+                        else:
+                            print(f"调试信息: 文件确实已删除")
+                    else:
+                        print(f"调试信息: 文件不存在: {file_path}")
+                        failed_files.append(f"{file_name} (文件不存在)")
+                except Exception as e:
+                    import traceback
+                    error_msg = f"{file_name} ({str(e)})"
+                    print(f"调试信息: 删除失败 {error_msg}")
+                    print(f"调试信息: 完整错误堆栈:")
+                    traceback.print_exc()
+                    failed_files.append(error_msg)
+            
+            if failed_files:
+                error_details = "\n".join(failed_files)
+                message = f"已清理 {deleted_count} 个多余文件\n\n有 {len(failed_files)} 个文件删除失败：\n{error_details}\n\n保留 {len(files_to_keep)} 个有效文件\n\n提示：删除失败通常是因为文件正在被其他程序使用（如Excel）。请关闭相关程序后重试，或手动到以下目录删除：\nG:\\newplan\\计划号\\"
+                QMessageBox.warning(
+                    self, 
+                    "清理完成", 
+                    message
+                )
+            else:
+                QMessageBox.information(
+                    self, 
+                    "清理完成", 
+                    f"已清理 {deleted_count} 个多余文件\n\n保留 {len(files_to_keep)} 个有效文件"
+                )
+            
+        except Exception as e:
+            from PyQt5.QtWidgets import QMessageBox
+            import traceback
+            QMessageBox.critical(self, "错误", f"清理失败：{str(e)}")
+            print(f"清理多余文件失败：{str(e)}")
+            print(traceback.format_exc())
     
     def open_settings_window(self):
         """打开设置窗口"""
@@ -4511,6 +6781,31 @@ class MainWindow(QMainWindow):
             self.furnace_details_window = FurnaceDetailsWindow(self)
             self.furnace_details_window.show()
             print("创建新的装炉明细窗口")
+
+    def open_rm_main_window(self):
+        """打开粗轧主画面窗口"""
+        from PyQt5.QtWidgets import QApplication
+        
+        # 检查是否已有粗轧主画面窗口
+        for widget in QApplication.topLevelWidgets():
+            if hasattr(widget, 'windowTitle') and '粗轧主画面' in widget.windowTitle():
+                widget.activateWindow()
+                widget.raise_()
+                widget.show()
+                print("已激活现有的粗轧主画面窗口")
+                return
+        
+        # 如果没有，创建新窗口（使用 Qt Designer 设计的 UI）
+        try:
+            from rm_main_window import RMMainWindow
+            self.rm_main_window = RMMainWindow(self)
+            self.rm_main_window.show()
+            print("创建新的粗轧主画面窗口（使用 Qt Designer UI）")
+        except Exception as e:
+            print(f"打开粗轧主画面出错: {e}")
+            import traceback
+            traceback.print_exc()
+            QMessageBox.critical(self, "错误", f"打开粗轧主画面失败: {str(e)}")
 
     def go_to_furnace_details(self):
         """进入装炉明细画面 - 被定时器调用"""
@@ -5205,6 +7500,16 @@ class MainWindow(QMainWindow):
                 # 设置打印标题行为从第二行到字段名行
                 worksheet.PageSetup.PrintTitleRows = f"$2:${field_name_row}"
                 
+                # 去掉页眉页脚设置值
+                worksheet.PageSetup.LeftHeader = ""
+                worksheet.PageSetup.CenterHeader = ""
+                worksheet.PageSetup.RightHeader = ""
+                worksheet.PageSetup.LeftFooter = ""
+                worksheet.PageSetup.CenterFooter = ""
+                worksheet.PageSetup.RightFooter = ""
+                worksheet.PageSetup.CenterHorizontally = False
+                worksheet.PageSetup.CenterVertically = False
+                
                 # 设置打印时间字体大小为10号
                 # 查找打印时间所在的单元格
                 for row_idx in range(sheet.nrows):
@@ -5655,7 +7960,7 @@ class MainWindow(QMainWindow):
                                     self.table_widget.selectRow(i)
                             print(f"已选中 {len(event.exported_plans)} 个导出的计划号")
                             
-                            # 调用处理计划方法，不检查是否已处理过
+                            # 调用处理计划方法，验证会在处理过程中进行
                             print("开始自动处理计划...")
                             try:
                                 # 获取设置中的自动打印设置
@@ -5663,7 +7968,6 @@ class MainWindow(QMainWindow):
                                 auto_print = settings.get("autoPrint", True)
                                 
                                 # 调用处理计划方法，传入auto_print参数
-                                # 注意：这里需要修改process_plans方法，使其不检查是否已处理过
                                 self.process_plans(auto_print=auto_print, show_result=False)
                             except Exception as e:
                                 print(f"自动处理计划失败: {e}")
@@ -6632,7 +8936,7 @@ class MainWindow(QMainWindow):
                 add_debug_log(f"    [×] 按键操作失败: {e}")
             
             # 模拟操作执行完成,直接标记为成功
-            # 不检查文件是否存在,只按照模拟操作导出了哪些计划号
+            # 验证操作将在所有计划号导出完成后统一执行
             print(f"[√] 计划号 {plan_no} 的明细文件已导出")
             result = True
             
@@ -7335,7 +9639,7 @@ class FurnaceDetailsWindow(QMainWindow):
         """
         self.table_widget.horizontalHeader().setStyleSheet(header_style)
         
-        # 设置表格样式，添加鼠标悬停效果
+        # 设置表格样式，添加鼠标悬停效果和tooltip字体大小
         table_style = """
             QTableWidget {
                 background-color: white;
@@ -7351,6 +9655,14 @@ class FurnaceDetailsWindow(QMainWindow):
             QTableWidget::item:selected:!focus {
                 background-color: #0078D7;
                 color: white;
+            }
+            QToolTip {
+                font-size: 20px;
+                font-family: "微软雅黑";
+                color: #000000;
+                background-color: #FFFFCC;
+                border: 2px solid #000000;
+                padding: 5px;
             }
         """
         self.table_widget.setStyleSheet(table_style)
@@ -7411,8 +9723,13 @@ class FurnaceDetailsWindow(QMainWindow):
         def print_btn_clicked():
             # 保存当前选中行
             current_row = self.table_widget.currentRow()
-            # 执行打印操作
-            self.print_furnace_details()
+            # 检查是否全部打印
+            is_all_print = self.all_print_checkbox.isChecked()
+            # 执行打印操作（增量打印或全部打印）
+            # 由于 print_furnace_details 方法在 MainWindow 类中，需要通过 parent 调用
+            # 传入装炉明细窗口的表格，以便打印正确的内容
+            if hasattr(self.parent, 'print_furnace_details'):
+                self.parent.print_furnace_details(is_incremental=not is_all_print, table_widget=self.table_widget)
             # 恢复选中行
             if current_row >= 0:
                 self.table_widget.selectRow(current_row)
@@ -8961,6 +11278,8 @@ class FurnaceDetailsWindow(QMainWindow):
             from PyQt5.QtWidgets import QTableWidgetItem
             from PyQt5.QtGui import QColor, QBrush
             
+            print("\n=== 开始加载装炉明细数据 ===")
+            
             # 读取装炉顺序.xls
             # 使用与主程序相同的plan_dir路径
             if hasattr(self, 'parent') and self.parent and hasattr(self.parent, 'plan_dir'):
@@ -8975,9 +11294,17 @@ class FurnaceDetailsWindow(QMainWindow):
             print(f"查找装炉顺序文件: {excel_file}")
             
             if not os.path.exists(excel_file):
-                print(f"文件不存在: {excel_file}")
+                print(f"[×] 文件不存在: {excel_file}")
                 self.block_count_label.setText("0/0")
                 return
+            
+            # 验证装炉顺序文件
+            if hasattr(self.parent, 'ensure_zhuanglu_shunxu_file'):
+                success, msg = self.parent.ensure_zhuanglu_shunxu_file(force_reload=True)
+                if not success:
+                    print(f"[×] 装炉顺序文件验证失败: {msg}")
+                    self.block_count_label.setText("0/0")
+                    return
             
             # 创建临时副本
             temp_file_name = f"temp_装炉顺序_{int(time.time())}.xls"
@@ -9064,6 +11391,10 @@ class FurnaceDetailsWindow(QMainWindow):
             self.table_widget.setRowCount(0)
 
             # 加载计划号数据
+            displayed_count = 0
+            skipped_count = 0
+            missing_file_count = 0
+            
             for item in furnace_data:
                 plan_no = item['plan_no']
                 coil_no = item['coil_no']
@@ -9071,22 +11402,46 @@ class FurnaceDetailsWindow(QMainWindow):
 
                 # 获取计划号文件
                 plan_file = self.get_plan_file(plan_no)
+                
                 if plan_file:
-                    # 读取计划号文件数据，使用纯净钢卷号进行匹配
-                    plan_data = self.read_plan_file(plan_file, coil_no_clean)
-                    if plan_data:
-                        # 使用原始钢卷号（带标注）显示
+                    try:
+                        # 读取计划号文件数据，使用纯净钢卷号进行匹配
+                        plan_data = self.read_plan_file(plan_file, coil_no_clean)
+                        if plan_data:
+                            # 使用原始钢卷号（带标注）显示
+                            self.add_plan_data_to_table(plan_data, plan_no, coil_no)
+                            displayed_count += 1
+                        else:
+                            # 计划号文件存在但找不到匹配的钢卷号，显示基本信息
+                            print(f"计划号文件存在但未找到匹配的钢卷号: {plan_no}, 钢卷号: {coil_no}")
+                            plan_data = {
+                                'coil_no': coil_no
+                            }
+                            self.add_plan_data_to_table(plan_data, plan_no, coil_no)
+                            displayed_count += 1
+                    except Exception as e:
+                        # 读取文件失败，显示基本信息
+                        print(f"读取计划号文件失败: {plan_no}, 错误: {e}")
+                        plan_data = {
+                            'coil_no': coil_no
+                        }
                         self.add_plan_data_to_table(plan_data, plan_no, coil_no)
+                        displayed_count += 1
                 else:
                     # 即使没有计划号文件，也要显示钢卷号
                     print(f"未找到计划号文件: {plan_no}，但仍显示钢卷号: {coil_no}")
-                    # 创建一个基本的计划数据，只包含钢卷号和计划号
+                    missing_file_count += 1
                     plan_data = {
-                        'coil_no': coil_no,
-                        'plan_no': plan_no
+                        'coil_no': coil_no
                     }
-                    # 添加到表格
                     self.add_plan_data_to_table(plan_data, plan_no, coil_no)
+                    displayed_count += 1
+            
+            print(f"\n装炉明细数据加载完成:")
+            print(f"  - 总钢卷号数: {len(furnace_data)}")
+            print(f"  - 已显示: {displayed_count}")
+            print(f"  - 未找到文件: {missing_file_count}")
+            print(f"  - 跳过: {skipped_count}")
             
             # 保存表格数据
             self.save_current_table_data()
@@ -9094,19 +11449,12 @@ class FurnaceDetailsWindow(QMainWindow):
             # 更新块数显示
             self.update_block_count()
             
-            # 默认将光标条定位到第一行
-            print(f"表格行数: {self.table_widget.rowCount()}")
-            if self.table_widget.rowCount() > 0:
-                print(f"默认选择第一行")
-                self.table_widget.selectRow(0)
-                self.current_row = 0
-                print(f"当前行: {self.current_row}")
-                # 强制刷新表格
-                self.table_widget.repaint()
-                self.table_widget.update()
+            # 查找最后离开时的钢卷号并定位光标
+            self.locate_cursor_by_saved_coil()
             
-            # 加载窗口状态
-            self.load_window_state()
+            # 自动启动自动滚动功能
+            self.start_auto_scroll()
+            
             # 应用保存的标注条件
             self.apply_saved_annotation_conditions()
             # 加载自定义信息和换辊信息
@@ -9122,9 +11470,11 @@ class FurnaceDetailsWindow(QMainWindow):
         super().showEvent(event)
         # 窗口显示时加载窗口状态
         if hasattr(self, 'table_widget') and self.table_widget.rowCount() > 0:
-            print(f"窗口显示时加载窗口状态")
-            # 加载窗口状态（包括自动滚动状态和光标条位置）
-            self.load_window_state()
+            print(f"窗口显示时应用光标和滚动设置")
+            # 查找最后离开时的钢卷号并定位光标
+            self.locate_cursor_by_saved_coil()
+            # 自动启动自动滚动功能
+            self.start_auto_scroll()
             # 强制刷新表格
             self.table_widget.repaint()
             self.table_widget.update()
@@ -9739,15 +12089,23 @@ class FurnaceDetailsWindow(QMainWindow):
                     item.setBackground(QBrush(QColor('#FF0000')))
                     # 添加annotation属性，用于样式表识别
                     item.setData(Qt.UserRole, True)
+                    # 生成tooltip信息
+                    tooltip = self.generate_tooltip(col_name, value_str, 标注信息)
+                    if tooltip:
+                        item.setToolTip(tooltip)
                 # 除鳞字段中包含"回"和"无APS"的单元格也改背景色为红色
                 elif col_name == "除鳞" and ('回' in value_str or '无APS' in value_str):
                     # 设置红色背景
                     item.setBackground(QBrush(QColor('#FF0000')))
                     # 添加annotation属性，用于样式表识别
                     item.setData(Qt.UserRole, True)
+                    # 生成tooltip信息
+                    tooltip = self.generate_tooltip(col_name, value_str, 标注信息)
+                    if tooltip:
+                        item.setToolTip(tooltip)
                 # 其他高亮处理
                 else:
-                    self.process_cell_highlight(item, col_name, value_str)
+                    self.process_cell_highlight(item, col_name, value_str, 标注信息)
                 
                 # 设置对齐方式
                 if col_idx == 2:  # 牌号列（索引2）
@@ -9776,24 +12134,113 @@ class FurnaceDetailsWindow(QMainWindow):
         except Exception as e:
             print(f"添加计划数据到表格失败: {str(e)}")
     
-    def process_cell_highlight(self, item, col_name, value):
+    def generate_tooltip(self, col_name, value_str, 标注信息列表):
+        """生成单元格的tooltip提示信息"""
+        tooltip_lines = []
+        
+        # 列标题
+        tooltip_lines.append(f"【{col_name}】")
+        
+        # 根据列名添加对应的预警条件
+        if col_name == "除鳞":
+            if '回' in value_str:
+                tooltip_lines.append("• 回炉坯")
+            if '无APS' in value_str:
+                tooltip_lines.append("• 无APS钢种")
+        elif col_name == "坯厚":
+            try:
+                value_clean = value_str.replace('Δ', '').replace('*', '').strip()
+                if value_clean:
+                    blank_thickness = float(value_clean)
+                    if blank_thickness > 230:
+                        tooltip_lines.append(f"• 坯厚超标 (当前值: {blank_thickness})")
+            except:
+                pass
+        elif col_name == "牌号（钢级）":
+            if 'Δ' in value_str:
+                tooltip_lines.append("• 无APS钢种")
+        elif col_name == "减宽":
+            try:
+                value_clean = value_str.replace('Δ', '').replace('*', '').strip()
+                if value_clean:
+                    width_reduction = float(value_clean)
+                    if width_reduction >= 240:
+                        tooltip_lines.append(f"• 减宽量超标 (当前值: {width_reduction})")
+                    elif width_reduction < 0:
+                        tooltip_lines.append("• 逆宽轧制板坯")
+            except:
+                pass
+        elif col_name == "调宽":
+            if 'Δ' in value_str:
+                tooltip_lines.append("• 板坯最小宽度低于轧宽")
+                tooltip_lines.append("  (相当于逆宽轧制)")
+                tooltip_lines.append(f"  当前值: {value_str}")
+        elif col_name == "轧宽":
+            try:
+                value_clean = value_str.replace('Δ', '').replace('*', '').strip()
+                if value_clean:
+                    roll_width = float(value_clean)
+                    if roll_width < 860:
+                        tooltip_lines.append(f"• 轧宽过低 (当前值: {roll_width})")
+                    elif roll_width < 930:
+                        tooltip_lines.append(f"• 轧宽偏低 (当前值: {roll_width})")
+            except:
+                pass
+        elif col_name == "钢卷号":
+            if '*' in value_str:
+                tooltip_lines.append("• 正公差 ≤ 15")
+            if 'Δ' in value_str:
+                tooltip_lines.append("• 需注意的钢卷")
+        
+        # 如果有通用标注信息，也添加进去
+        if 标注信息列表:
+            tooltip_lines.append("")
+            tooltip_lines.append("【预警详情】")
+            for info in 标注信息列表:
+                tooltip_lines.append(f"• {info}")
+        
+        return "\n".join(tooltip_lines) if tooltip_lines else None
+    
+    def process_cell_highlight(self, item, col_name, value, 标注信息列表=None):
         """处理单元格高亮"""
         from PyQt5.QtGui import QColor, QBrush
         
         # 检查是否有标识（三角符号Δ或星号*）
         value_str = str(value)
+        tooltip = None
+        
         if 'Δ' in value_str or '*' in value_str:
             # 设置红色背景
             item.setBackground(QBrush(QColor('#FF0000')))
             # 添加annotation属性，用于样式表识别
             item.setData(Qt.UserRole, True)
+            # 生成tooltip
+            if 标注信息列表 is not None:
+                tooltip = self.generate_tooltip(col_name, value_str, 标注信息列表)
+                if tooltip:
+                    item.setToolTip(tooltip)
         # 除鳞字段中包含"回"和"无APS"的单元格也改背景色为红色
         elif col_name == "除鳞" and ('回' in value_str or '无APS' in value_str):
             # 设置红色背景
             item.setBackground(QBrush(QColor('#FF0000')))
             # 添加annotation属性，用于样式表识别
             item.setData(Qt.UserRole, True)
+            # 生成tooltip
+            if 标注信息列表 is not None:
+                tooltip = self.generate_tooltip(col_name, value_str, 标注信息列表)
+                if tooltip:
+                    item.setToolTip(tooltip)
         # 原程序没有区分减宽、轧宽、坯厚的阈值判断，这些是额外的验证逻辑
+        elif col_name == "调宽":
+            # 调宽列，包含Δ符号时显示黄底黑字
+            if 'Δ' in value_str:
+                item.setBackground(QBrush(QColor('#FFFF00')))  # 黄色背景
+                item.setForeground(QBrush(QColor('#000000')))  # 黑色字体
+                # 生成tooltip
+                if 标注信息列表 is not None:
+                    tooltip = self.generate_tooltip(col_name, value_str, 标注信息列表)
+                    if tooltip:
+                        item.setToolTip(tooltip)
         elif col_name == "减宽":
             try:
                 if value_str.replace('.', '').replace('-', '').isdigit():
@@ -9801,9 +12248,19 @@ class FurnaceDetailsWindow(QMainWindow):
                     if width_reduction >= 240:
                         item.setBackground(QBrush(QColor('#FF0000')))
                         item.setForeground(QBrush(QColor('#FFFFFF')))
+                        # 生成tooltip
+                        if 标注信息列表 is not None:
+                            tooltip = self.generate_tooltip(col_name, value_str, 标注信息列表)
+                            if tooltip:
+                                item.setToolTip(tooltip)
                     elif width_reduction < 0:
                         item.setBackground(QBrush(QColor('#FF0000')))
                         item.setForeground(QBrush(QColor('#FFFFFF')))
+                        # 生成tooltip
+                        if 标注信息列表 is not None:
+                            tooltip = self.generate_tooltip(col_name, value_str, 标注信息列表)
+                            if tooltip:
+                                item.setToolTip(tooltip)
             except:
                 pass
         
@@ -9814,9 +12271,19 @@ class FurnaceDetailsWindow(QMainWindow):
                     if roll_width < 860:
                         item.setBackground(QBrush(QColor('#FF0000')))
                         item.setForeground(QBrush(QColor('#FFFFFF')))
+                        # 生成tooltip
+                        if 标注信息列表 is not None:
+                            tooltip = self.generate_tooltip(col_name, value_str, 标注信息列表)
+                            if tooltip:
+                                item.setToolTip(tooltip)
                     elif roll_width < 930:
                         item.setBackground(QBrush(QColor('#FFFF00')))
                         item.setForeground(QBrush(QColor('#000000')))
+                        # 生成tooltip
+                        if 标注信息列表 is not None:
+                            tooltip = self.generate_tooltip(col_name, value_str, 标注信息列表)
+                            if tooltip:
+                                item.setToolTip(tooltip)
             except:
                 pass
         
@@ -9827,6 +12294,11 @@ class FurnaceDetailsWindow(QMainWindow):
                     if blank_thickness > 230:
                         item.setBackground(QBrush(QColor('#FF0000')))
                         item.setForeground(QBrush(QColor('#FFFFFF')))
+                        # 生成tooltip
+                        if 标注信息列表 is not None:
+                            tooltip = self.generate_tooltip(col_name, value_str, 标注信息列表)
+                            if tooltip:
+                                item.setToolTip(tooltip)
             except:
                 pass
     
@@ -10142,822 +12614,111 @@ class FurnaceDetailsWindow(QMainWindow):
         except:
             pass
     
-    def print_furnace_details(self):
-        """打印装炉明细 - 直接使用Excel打印，不生成临时文件"""
+    def locate_cursor_by_saved_coil(self):
+        """查找最后离开时光标所在行的钢卷号，并定位光标"""
         try:
-            import os
-            import time
             import json
-            from PyQt5.QtWidgets import QMessageBox
+            import os
             
-            # 收集当前表格数据
-            current_coils = []
-            seq_num = 1
-            rows = []
-            for row_idx in range(self.table_widget.rowCount()):
-                # 检查是否是换辊行或自定义信息行
-                first_item = self.table_widget.item(row_idx, 0)
-                is_special_row = False
-                if first_item:
-                    bg_color = first_item.background().color().name()
-                    if bg_color == '#ffff00':
-                        is_special_row = True
-
-                if not is_special_row:
-                    # 正常数据行，获取钢卷号
-                    coil_item = self.table_widget.item(row_idx, 1)  # 钢卷号列（索引1）
-                    if coil_item:
-                        coil_number = coil_item.text().strip()
-                        if coil_number:
-                            current_coils.append({
-                                "coil_number": coil_number,
-                                "sequence": seq_num
-                            })
-                            seq_num += 1
-                
-                # 收集所有行数据（包括特殊行）
-                row_data = []
-                for col_idx in range(self.table_widget.columnCount()):
-                    item = self.table_widget.item(row_idx, col_idx)
-                    if item:
-                        row_data.append(item.text())
-                    else:
-                        row_data.append('')
-                rows.append(row_data)
+            print("\n=== 定位光标到保存的钢卷号 ===")
             
-            if not rows:
-                QMessageBox.information(self, "提示", "没有数据可打印")
+            if self.table_widget.rowCount() == 0:
+                print("表格为空，无法定位光标")
                 return
             
-            # 读取之前的表格数据
+            # 构建保存文件路径
             plan_dir = os.path.join(os.getcwd(), "计划号")
-            os.makedirs(plan_dir, exist_ok=True)
-            table_data_file = os.path.join(plan_dir, "furnace_table_data.json")
-            previous_coils = []
-            if os.path.exists(table_data_file):
+            state_file = os.path.join(plan_dir, "furnace_window_state.json")
+            
+            # 读取保存的钢卷号
+            saved_coil_number = None
+            if os.path.exists(state_file):
                 try:
-                    with open(table_data_file, 'r', encoding='utf-8') as f:
-                        combined_data = json.load(f)
-                        if combined_data and isinstance(combined_data, list):
-                            # combined_data[0] 是当前数据，combined_data[1] 是上一次数据
-                            previous_coils = combined_data[1] if len(combined_data) > 1 else []
-                except:
-                    previous_coils = []
+                    with open(state_file, 'r', encoding='utf-8') as f:
+                        state_data = json.load(f)
+                    saved_coil_number = state_data.get("current_coil_number", "")
+                    print(f"最后离开时的钢卷号: {saved_coil_number}")
+                except Exception as e:
+                    print(f"读取窗口状态文件失败: {e}")
             
-            # 识别新增的钢卷号
-            def identify_new_coils(current_coils, previous_coils):
-                previous_coil_set = set(item['coil_number'] for item in previous_coils)
-                new_coils = []
-                for item in current_coils:
-                    if item['coil_number'] not in previous_coil_set:
-                        new_coils.append(item)
-                return new_coils
-            
-            # 确定钢卷号的插入位置并生成序号
-            def determine_insert_position_and_sequence(coils, current_coils, previous_coils, is_all_print):
-                if is_all_print:
-                    for coil in coils:
-                        coil['display_sequence'] = str(coil['sequence'])
-                        coil['insert_position'] = '全部打印'
-                else:
-                    coil_positions = []
-                    for coil in coils:
-                        current_index = None
-                        for i, item in enumerate(current_coils):
-                            if item['coil_number'] == coil['coil_number']:
-                                current_index = i
-                                break
-                        if current_index is not None:
-                            coil_positions.append({'coil': coil, 'current_index': current_index})
-                    
-                    position_groups = {}
-                    for item in coil_positions:
-                        current_index = item['current_index']
-                        if current_index not in position_groups:
-                            position_groups[current_index] = []
-                        position_groups[current_index].append(item['coil'])
-                    
-                    for current_index, position_coils in position_groups.items():
-                        if current_index >= len(previous_coils):
-                            if previous_coils:
-                                last_sequence = previous_coils[-1]['sequence']
-                                for i, coil in enumerate(position_coils):
-                                    coil['display_sequence'] = str(last_sequence + i + 1)
-                                    coil['insert_position'] = '末尾添加'
-                            else:
-                                for coil in position_coils:
-                                    coil['display_sequence'] = str(coil['sequence'])
-                                    coil['insert_position'] = '末尾添加'
-                        else:
-                            previous_sequence = previous_coils[current_index]['sequence'] if current_index < len(previous_coils) else (previous_coils[-1]['sequence'] if previous_coils else 0)
-                            sequence_format = f"{previous_sequence}>"
-                            for coil in position_coils:
-                                coil['display_sequence'] = sequence_format
-                                coil['insert_position'] = '中间插入'
-                return coils
-            
-            # 检查是否有新增的钢卷号
-            is_all_print = self.all_print_checkbox.isChecked()
-            new_coils = identify_new_coils(current_coils, previous_coils)
-            
-            # 如果没有新增的钢卷号且未选择全部打印，提示并返回
-            if not new_coils and not is_all_print:
-                QMessageBox.information(self, "提示", "没有新增的钢卷号")
-                return
-            
-            # 确定要打印的钢卷号
-            if is_all_print:
-                coils_to_print = current_coils
-            else:
-                coils_to_print = new_coils
-            
-            # 确定插入位置和序号
-            coils_to_print = determine_insert_position_and_sequence(coils_to_print, current_coils, previous_coils, is_all_print)
-            
-            # 收集标注信息
-            无APS钢种数 = 0
-            无APS块数 = 0
-            已添加无APS的钢种 = set()
-            减宽超标块数 = 0
-            逆宽轧制板坯数 = 0
-            低轧宽板坯数 = 0
-            极低轧宽板坯数 = 0
-            
-            for row_idx, row_data in enumerate(rows):
-                # 检查是否是换辊行或自定义信息行
-                first_item = self.table_widget.item(row_idx, 0)
-                is_special_row = False
-                if first_item:
-                    bg_color = first_item.background().color().name()
-                    if bg_color == '#ffff00':
-                        is_special_row = True
-                
-                if not is_special_row:
-                    # 正常数据行
-                    # 检查是否有标注信息（从QTableWidgetItem中获取）
-                    plan_item = self.table_widget.item(row_idx, 0)  # 计划号列
-                    if plan_item:
-                        标注信息 = plan_item.data(Qt.UserRole + 1)
-                        if 标注信息:
-                            for info in 标注信息:
-                                if "无APS钢种" in info:
-                                    无APS块数 += 1
-                                    # 获取牌号
-                                    grade_item = self.table_widget.item(row_idx, 3)  # 牌号列
-                                    if grade_item:
-                                        grade = grade_item.text().strip()
-                                        if grade:
-                                            已添加无APS的钢种.add(grade)
-                                elif "减宽量超标" in info:
-                                    减宽超标块数 += 1
-                                elif "逆宽轧制板坯" in info:
-                                    逆宽轧制板坯数 += 1
-                                elif "轧宽低于930" in info:
-                                    低轧宽板坯数 += 1
-                                elif "轧宽低于860" in info:
-                                    极低轧宽板坯数 += 1
-                    else:
-                        # 兼容旧方法：检查钢卷号是否标注（无APS）
-                        coil_item = self.table_widget.item(row_idx, 1)  # 钢卷号列
-                        if coil_item:
-                            coil_text = coil_item.text().strip()
-                            if 'Δ' in coil_text:
-                                无APS块数 += 1
-                                # 获取牌号
-                                grade_item = self.table_widget.item(row_idx, 3)  # 牌号列
-                                if grade_item:
-                                    grade = grade_item.text().strip()
-                                    if grade:
-                                        已添加无APS的钢种.add(grade)
-                        
-                        # 检查减宽是否超标
-                        if len(row_data) > 5:
-                            reduce_width = row_data[5]
-                            try:
-                                reduce_width_num = float(str(reduce_width).replace('Δ', '').replace('*', '').strip())
-                                if abs(reduce_width_num) > 150:
-                                    减宽超标块数 += 1
-                            except:
-                                pass
-                        
-                        # 检查是否逆宽轧制
-                        if len(row_data) > 4 and len(row_data) > 7:
-                            blank_width = row_data[4]
-                            roll_width = row_data[7]
-                            try:
-                                blank_width_num = float(str(blank_width).replace('Δ', '').replace('*', '').strip())
-                                roll_width_num = float(str(roll_width).replace('Δ', '').replace('*', '').strip())
-                                if blank_width_num < roll_width_num:
-                                    逆宽轧制板坯数 += 1
-                            except:
-                                pass
-                        
-                        # 检查轧宽是否低于930
-                        if len(row_data) > 7:
-                            roll_width = row_data[7]
-                            try:
-                                roll_width_num = float(str(roll_width).replace('Δ', '').replace('*', '').strip())
-                                if roll_width_num < 930:
-                                    低轧宽板坯数 += 1
-                                    if roll_width_num < 860:
-                                        极低轧宽板坯数 += 1
-                            except:
-                                pass
-            
-            无APS钢种数 = len(已添加无APS的钢种)
-            
-            # 准备提示信息列表
-            提示信息列表 = []
-            序号 = 1
-            
-            if 无APS钢种数 > 0:
-                无APS钢种列表 = ", ".join(sorted(已添加无APS的钢种))
-                提示信息列表.append(f"{序号}.无APS钢种{无APS钢种数}个{无APS块数}块({无APS钢种列表})")
-                序号 += 1
-            if 减宽超标块数 > 0:
-                提示信息列表.append(f"{序号}.减宽量超标{减宽超标块数}块")
-                序号 += 1
-            if 逆宽轧制板坯数 > 0:
-                提示信息列表.append(f"{序号}.逆宽轧制板坯{逆宽轧制板坯数}块")
-                序号 += 1
-            if 低轧宽板坯数 > 0:
-                提示信息列表.append(f"{序号}.有轧宽低于930板坯{低轧宽板坯数}块,注意定宽最小辊缝要求")
-                序号 += 1
-            if 极低轧宽板坯数 > 0:
-                提示信息列表.append(f"{序号}.有低于860的板坯{极低轧宽板坯数}块,注意E2设定值")
-                序号 += 1
-            
-            # 计算提示信息行数（每行显示3条）
-            if len(提示信息列表) == 0:
-                提示信息行数 = 0  # 没有提示信息时不添加空行
-            else:
-                提示信息行数 = (len(提示信息列表) + 2) // 3  # 向上取整,每行3条
-            
-            # 字段列名行号 = 提示信息起始行(1) + 提示信息行数
-            字段列名行号 = 1 + 提示信息行数
-            
-            # 直接使用win32com创建Excel对象，不生成临时文件
-            import win32com.client as win32
-            excel = win32.Dispatch("Excel.Application")
-            excel.Visible = False
-            
-            # 创建工作簿和工作表
-            workbook = excel.Workbooks.Add()
-            sheet = workbook.Worksheets(1)
-            sheet.Name = '装炉明细'
-            
-            # 设置列名
-            提示行 = ["装炉明细打印"]
-            headers = ["序号", "计划号", "钢卷号", "牌号（钢级）", "坯宽", "减宽", "调宽", "轧宽", "公差带",
-                "粗轧报信", "除鳞", "坯厚", "坯长", "轧厚", "中厚", "RT2", "强度"]
-            
-            # 定义样式辅助函数（win32com方式）
-            def set_cell_style(cell, font_name='仿宋', font_size=12, bold=False, 
-                              align_horz='center', align_vert='center', 
-                              border_all=False, wrap_text=False):
-                """设置单元格样式"""
-                # 设置字体
-                cell.Font.Name = font_name
-                cell.Font.Size = font_size
-                cell.Font.Bold = bold
-                
-                # 设置对齐
-                if align_horz == 'center':
-                    cell.HorizontalAlignment = -4108  # xlCenter
-                elif align_horz == 'left':
-                    cell.HorizontalAlignment = -4131  # xlLeft
-                elif align_horz == 'right':
-                    cell.HorizontalAlignment = -4152  # xlRight
-                
-                if align_vert == 'center':
-                    cell.VerticalAlignment = -4108  # xlCenter
-                
-                # 设置自动换行
-                cell.WrapText = wrap_text
-                
-                # 设置边框
-                if border_all:
-                    cell.Borders(1).LineStyle = 1  # 左边框
-                    cell.Borders(2).LineStyle = 1  # 右边框
-                    cell.Borders(3).LineStyle = 1  # 上边框
-                    cell.Borders(4).LineStyle = 1  # 下边框
-            
-            # 12pt 样式 - 左对齐（用于粗轧报信）
-            def set_cell_style_simple(cell, font_size=12, align_horz='center', border_left=False, border_right=False):
-                """简化的单元格样式设置"""
-                cell.Font.Name = '仿宋'
-                cell.Font.Size = font_size
-                cell.Font.Bold = True
-                
-                if align_horz == 'center':
-                    cell.HorizontalAlignment = -4108  # xlCenter
-                elif align_horz == 'left':
-                    cell.HorizontalAlignment = -4131  # xlLeft
-                
-                cell.VerticalAlignment = -4108  # xlCenter
-                
-                # 设置上下边框
-                cell.Borders(3).LineStyle = 1  # 上边框
-                cell.Borders(4).LineStyle = 1  # 下边框
-                
-                if border_left:
-                    cell.Borders(1).LineStyle = 1  # 左边框
-                else:
-                    cell.Borders(1).LineStyle = -4142  # xlNone
-                
-                if border_right:
-                    cell.Borders(2).LineStyle = 1  # 右边框
-                else:
-                    cell.Borders(2).LineStyle = -4142  # xlNone
-            
-            # 设置列宽
-            col_widths = [
-                int(5.5 * 256 * 1.2),       # 1. 序号
-                int(7.0 * 256 * 1.04),       # 2. 计划号
-                int(19 * 256 * 1.04),        # 3. 钢卷号
-                int(18 * 256 * 1.04),       # 4. 牌号（钢级）
-                int(7 * 256 * 1.04),         # 5. 坯宽
-                int(7 * 256 * 1.05),         # 6. 减宽（侧压量）
-                int(6 * 256 * 1.2),          # 7. 调宽
-                int(7 * 256 * 1.13),         # 8. 轧宽
-                int(10.21 * 256),            # 9. 公差带（修改为9.5）
-                int(33 * 256 * 1.04),        # 10. 粗轧报信
-                int(7 * 256 * 1.08),         # 11. 除鳞
-                int(6.16 * 256),             # 12. 坯厚（修改为5.5）
-                int(6.2 * 256 * 1.13),       # 13. 坯长
-                int(6 * 256 * 1.04),         # 14. 轧厚
-                int(5 * 256 * 1.04),         # 15. 中厚
-                int(6.57 * 256 * 1.04),      # 16. RT2
-                int(4.5 * 256 * 1.2)         # 17. 强度（修改为4.5）
-            ]
-            
-            # 设置列宽（win32com方式）
-            for col_idx, width in enumerate(col_widths):
-                if col_idx < len(headers):
-                    sheet.Columns(col_idx + 1).ColumnWidth = width / 256  # win32com从1开始
-            
-            # 写入提示行（第一行）并合并单元格（win32com方式）
-            title_range = sheet.Range(sheet.Cells(1, 1), sheet.Cells(1, len(headers)))
-            title_range.Merge()
-            title_range.Value = 提示行[0]
-            set_cell_style(title_range.Cells(1, 1), font_name='仿宋', font_size=14, bold=True, 
-                          align_horz='center', align_vert='center')
-            sheet.Rows(1).RowHeight = 23  # 23pt
-            
-            # 提示信息和打印时间在同一行
-            if len(提示信息列表) > 0:
-                # 左区域（序号到牌号）
-                左区域起始 = 1  # 序号列（win32com从1开始）
-                左区域结束 = 4  # 牌号列
-                # 中间区域（坯宽到公差带）：显示提示信息
-                中间区域起始 = 5  # 坯宽列
-                中间区域结束 = 9  # 公差带列
-                # 右区域（粗轧报信到除鳞）：显示提示信息
-                右区域起始 = 10  # 粗轧报信列
-                右区域结束 = 11  # 除鳞列
-                # 打印时间区域（坯厚到强度）
-                打印时间起始 = 12  # 坯厚列
-                打印时间结束 = len(headers)  # 强度列
-                
-                # 显示提示信息
-                提示信息总行数 = (len(提示信息列表) + 2) // 3  # 向上取整，每行显示3条
-                for i in range(提示信息总行数):
-                    row_num = 2 + i  # 从第二行开始
-                    
-                    # 左列（序号到牌号）：显示第 i*3 条提示信息
-                    左列索引 = i * 3
-                    if 左列索引 < len(提示信息列表):
-                        left_range = sheet.Range(sheet.Cells(row_num, 左区域起始), sheet.Cells(row_num, 左区域结束))
-                        left_range.Merge()
-                        left_range.Value = 提示信息列表[左列索引]
-                        set_cell_style(left_range.Cells(1, 1), font_name='仿宋', font_size=14, bold=True, 
-                                      align_horz='center', align_vert='center')
-                    
-                    # 中间列（坯宽到公差带）：显示第 i*3+1 条提示信息
-                    中间列索引 = i * 3 + 1
-                    if 中间列索引 < len(提示信息列表):
-                        mid_range = sheet.Range(sheet.Cells(row_num, 中间区域起始), sheet.Cells(row_num, 中间区域结束))
-                        mid_range.Merge()
-                        mid_range.Value = 提示信息列表[中间列索引]
-                        set_cell_style(mid_range.Cells(1, 1), font_name='仿宋', font_size=14, bold=True, 
-                                      align_horz='center', align_vert='center')
-                    
-                    # 右列（粗轧报信到除鳞）：显示第 i*3+2 条提示信息
-                    右列索引 = i * 3 + 2
-                    if 右列索引 < len(提示信息列表):
-                        right_range = sheet.Range(sheet.Cells(row_num, 右区域起始), sheet.Cells(row_num, 右区域结束))
-                        right_range.Merge()
-                        right_range.Value = 提示信息列表[右列索引]
-                        set_cell_style(right_range.Cells(1, 1), font_name='仿宋', font_size=14, bold=True, 
-                                      align_horz='center', align_vert='center')
-                    
-                    # 在同一行显示打印时间（坯厚到强度）
-                    if i == 0:  # 只在第一行显示打印时间
-                        print_time = time.strftime("%Y-%m-%d %H:%M:%S")
-                        time_range = sheet.Range(sheet.Cells(row_num, 打印时间起始), sheet.Cells(row_num, 打印时间结束))
-                        time_range.Merge()
-                        time_range.Value = f"打印时间：{print_time}"
-                        set_cell_style(time_range.Cells(1, 1), font_name='仿宋', font_size=10, bold=True, 
-                                      align_horz='right', align_vert='center')
-                    
-                    # 设置提示信息行的行高
-                    sheet.Rows(row_num).RowHeight = 25  # 25pt
-            else:
-                # 没有提示信息时，单独显示打印时间
-                print_time_row = 2
-                print_time = time.strftime("%Y-%m-%d %H:%M:%S")
-                打印时间起始 = 12  # 坯厚列
-                打印时间结束 = len(headers)  # 强度列
-                time_range = sheet.Range(sheet.Cells(print_time_row, 打印时间起始), sheet.Cells(print_time_row, 打印时间结束))
-                time_range.Merge()
-                time_range.Value = f"打印时间：{print_time}"
-                set_cell_style(time_range.Cells(1, 1), font_name='仿宋', font_size=10, bold=True, 
-                              align_horz='right', align_vert='center')
-                sheet.Rows(print_time_row).RowHeight = 23  # 23pt
-            
-            # 写入字段名行（win32com方式，行号从1开始）
-            if len(提示信息列表) > 0:
-                field_name_row = 1 + 提示信息行数
-            else:
-                field_name_row = print_time_row + 1
-            
-            for col, header in enumerate(headers):
-                cell = sheet.Cells(field_name_row, col + 1)  # win32com列号从1开始
-                cell.Value = header
-                if col == len(headers) - 1:  # 强度字段（12pt）
-                    set_cell_style(cell, font_name='仿宋', font_size=12, bold=True, 
-                                  align_horz='center', align_vert='center', border_all=True)
-                else:  # 其他字段（14pt）
-                    set_cell_style(cell, font_name='仿宋', font_size=14, bold=True, 
-                                  align_horz='center', align_vert='center', border_all=True)
-            
-            sheet.Rows(field_name_row).RowHeight = 25  # 25pt
-            
-            # 创建钢卷号到显示序号的映射
-            coil_sequence_map = {}
-            for coil in coils_to_print:
-                coil_sequence_map[coil['coil_number']] = coil['display_sequence']
-            
-            # 写入数据行（win32com方式）
-            print_row_idx = field_name_row + 1
-            print(f"准备写入 {len(rows)} 行数据")
-            for row_idx, row_data in enumerate(rows):
-                # 检查是否是换辊行或自定义信息行
-                first_item = self.table_widget.item(row_idx, 0)
-                is_special_row = False
-                if first_item:
-                    bg_color = first_item.background().color().name()
-                    if bg_color == '#ffff00':
-                        is_special_row = True
-                
-                if not is_special_row:
-                    # 正常数据行，获取钢卷号
+            # 定位光标
+            if saved_coil_number:
+                # 查找该钢卷号在表格中的位置
+                found = False
+                for row_idx in range(self.table_widget.rowCount()):
                     coil_item = self.table_widget.item(row_idx, 1)  # 钢卷号列（索引1）
-                    if coil_item:
-                        coil_number = coil_item.text().strip()
-                        if coil_number:
-                            # 检查是否需要打印该行
-                            if is_all_print or coil_number in coil_sequence_map:
-                                print(f"写入第 {print_row_idx - 2} 行: {row_data}")
-                                
-                                # 写入序号（第1列，左边框实线）
-                                seq_cell = sheet.Cells(print_row_idx, 1)
-                                if coil_number in coil_sequence_map:
-                                    seq_cell.Value = coil_sequence_map[coil_number]
-                                else:
-                                    seq_cell.Value = ""
-                                set_cell_style_simple(seq_cell, font_size=14, align_horz='center', border_left=True)
-                                
-                                # 写入其他字段（只写入到强度列，即第17列）
-                                for col_idx, value in enumerate(row_data, 1):  # 从row_data的第一个元素开始写入
-                                    if col_idx > 16:  # 只写入到强度列（第16列）
-                                        break
-                                    
-                                    cell = sheet.Cells(print_row_idx, col_idx + 1)  # win32com列号从1开始
-                                    cell.Value = value
-                                    
-                                    if col_idx == 2:  # 钢卷号列（16pt，左对齐）
-                                        set_cell_style_simple(cell, font_size=16, align_horz='left')
-                                    elif col_idx == 3:  # 牌号列（14pt，左对齐）
-                                        set_cell_style_simple(cell, font_size=14, align_horz='left')
-                                    elif col_idx == 9:  # 粗轧报信列（12pt，左对齐）
-                                        set_cell_style_simple(cell, font_size=12, align_horz='left')
-                                    elif col_idx == 16:  # 强度列（12pt，右边框实线，居中）
-                                        set_cell_style_simple(cell, font_size=12, align_horz='center', border_right=True)
-                                    else:  # 其他所有列（14pt或12pt，居中对齐）
-                                        if col_idx in [4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]:
-                                            set_cell_style_simple(cell, font_size=14, align_horz='center')
-                                        else:
-                                            set_cell_style_simple(cell, font_size=12, align_horz='center')
-                                
-                                # 自动调整行高（根据粗轧报信字段）
-                                rough_rolling_msg = row_data[9] if len(row_data) > 9 else ""
-                                if rough_rolling_msg:
-                                    # 计算需要的行数
-                                    lines = rough_rolling_msg.count('\n') + 1
-                                    # 设置行高（根据行数）
-                                    row_height = 25 * lines  # 基础行高 * 行数
-                                    sheet.Rows(print_row_idx).RowHeight = row_height
-                                
-                                print_row_idx += 1
-                else:
-                    # 特殊行（换辊行或自定义信息行），不保存到文件中
-                    pass
+                    if coil_item and coil_item.text().strip() == saved_coil_number:
+                        self.current_row = row_idx
+                        self.table_widget.selectRow(row_idx)
+                        self.table_widget.scrollToItem(coil_item, QTableWidget.PositionAtCenter)
+                        print(f"已定位光标到钢卷号: {saved_coil_number}（行: {row_idx + 1}/{self.table_widget.rowCount()}）")
+                        found = True
+                        break
+                
+                if not found:
+                    # 没有找到，定位到第一行
+                    print(f"未找到钢卷号 {saved_coil_number}，定位到第一行")
+                    self.current_row = 0
+                    self.table_widget.selectRow(0)
+                    self.table_widget.scrollToItem(self.table_widget.item(0, 0), QTableWidget.PositionAtTop)
+                    print("已定位光标到第一行")
+            else:
+                # 没有保存的钢卷号，定位到第一行
+                print("没有保存的钢卷号，定位到第一行")
+                self.current_row = 0
+                self.table_widget.selectRow(0)
+                self.table_widget.scrollToItem(self.table_widget.item(0, 0), QTableWidget.PositionAtTop)
+                print("已定位光标到第一行")
             
-            print(f"共写入 {print_row_idx - 3} 行数据")
-            
-            # 保存当前表格数据
-            self.save_current_table_data()
-            
-            # 设置打印区域（第一列到强度列）
-            last_col_letter = chr(64 + len(headers))  # 列字母从A开始
-            print_area = f"A1:{last_col_letter}{print_row_idx - 1}"
-            sheet.PageSetup.PrintArea = print_area
-            
-            # 设置每页打印表头（从第2行到字段名行）
-            field_name_row_excel = field_name_row
-            sheet.PageSetup.PrintTitleRows = f"$2:${field_name_row_excel}"
-            
-            # 设置纸张大小为美国Fanfold
-            try:
-                sheet.PageSetup.PaperSize = 137  # xlPaperFanfoldUS
-                print("[纸张设置] ✓ 成功设置纸张: FanfoldUS")
-            except Exception as e:
-                print(f"[纸张设置] ✗ 设置纸张失败: {str(e)}")
-            
-            # 直接打印（不保存文件）
-            print("开始直接打印...")
-            try:
-                sheet.PrintOut()
-                print("打印成功")
-                self.custom_messagebox("完成", "打印成功", msg_type='info', auto_close=3)
-            except Exception as e:
-                print(f"打印失败: {str(e)}")
-                self.custom_messagebox("提示", f"打印失败，请检查打印机连接\n\n错误信息：{str(e)}", msg_type='warning', auto_close=3)
-            
-            # 关闭工作簿（不保存）
-            workbook.Close(False)
-            excel.Quit()
-            
-            print("打印操作完成")
+            # 强制刷新表格
+            self.table_widget.repaint()
+            self.table_widget.update()
             
         except Exception as e:
-            self.custom_messagebox("错误", f"打印失败：{str(e)}", msg_type='error', auto_close=3)
-            print(f"打印失败：{str(e)}")
+            print(f"定位光标失败: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            # 失败时定位到第一行
+            if self.table_widget.rowCount() > 0:
+                self.current_row = 0
+                self.table_widget.selectRow(0)
+    
+    def start_auto_scroll(self):
+        """自动启动自动滚动功能"""
+        try:
+            print("\n=== 启动自动滚动 ===")
+            
+            # 获取滚动时间设置
+            try:
+                scroll_time = int(self.scroll_time_edit.text())
+                if scroll_time < 1:
+                    scroll_time = 1
+            except:
+                scroll_time = 5
+            
+            # 启动定时器
+            self.scroll_timer.setInterval(scroll_time * 1000)
+            # 先断开之前的连接，避免重复连接
+            try:
+                self.scroll_timer.timeout.disconnect()
+            except:
+                pass
+            self.scroll_timer.timeout.connect(self.auto_scroll)
+            self.scroll_timer.start()
+            
+            # 更新状态
+            self.is_scrolling = True
+            self.scroll_toggle_btn.setText("■")  # 停止图标
+            self.scroll_status_label.setText("自动滚动中")
+            
+            print(f"已启动自动滚动，间隔: {scroll_time} 秒")
+            
+        except Exception as e:
+            print(f"启动自动滚动失败: {str(e)}")
             import traceback
             traceback.print_exc()
     
-    def print_excel_file(self, file_path):
-        """打印Excel文件 - 打印第一列到强度列，包括表头
-        
-        Args:
-            file_path: Excel文件路径
-            
-        Returns:
-            bool: 是否成功打印
-        """
-        try:
-            import xlrd
-            
-            # 读取Excel文件
-            # 定义safe_read_excel方法
-            def safe_read_excel(file_path, max_retries=3, retry_delay=0.5):
-                """安全读取Excel文件，支持重试
-                
-                Args:
-                    file_path: 文件路径
-                    max_retries: 最大重试次数
-                    retry_delay: 重试延迟（秒）
-                    
-                Returns:
-                    tuple: (成功标志, 结果或错误信息)
-                """
-                import time
-                for retry in range(max_retries):
-                    try:
-                        workbook = xlrd.open_workbook(file_path)
-                        return True, workbook
-                    except Exception as e:
-                        print(f"读取文件失败 (尝试 {retry + 1}/{max_retries}): {str(e)}")
-                        if retry < max_retries - 1:
-                            time.sleep(retry_delay)
-                        else:
-                            return False, str(e)
-            
-            success, result = safe_read_excel(file_path, max_retries=3, retry_delay=0.5)
-            if not success:
-                raise Exception(f"读取文件失败: {result}")
-            
-            workbook = result
-            sheet = workbook.sheet_by_index(0)
-            
-            # 先查找字段列名行（包含"序号"、"钢卷号"等字段名的行）
-            字段列名行号 = -1
-            for row_idx in range(min(10, sheet.nrows)):  # 检查前10行
-                row_has_field_names = False
-                for col_idx in range(sheet.ncols):
-                    cell_value = str(sheet.cell_value(row_idx, col_idx))
-                    # 检查是否包含常见字段名
-                    if any(field in cell_value for field in ["序号", "钢卷号", "牌号", "坯厚", "轧厚", "轧宽"]):
-                        row_has_field_names = True
-                        break
-                if row_has_field_names:
-                    字段列名行号 = row_idx
-                    break
-            
-            if 字段列名行号 == -1:
-                print("未找到字段列名行，假设为第2行")
-                字段列名行号 = 2
-            
-            print(f"字段列名行号: {字段列名行号}")
-            
-            # 从字段列名行获取所有列名
-            current_columns = []
-            for i in range(sheet.ncols):
-                current_columns.append(sheet.cell_value(字段列名行号, i))
-            
-            print(f"列名: {current_columns}")
-            
-            # 字段名映射
-            字段名映射 = {
-                "序号": "序号",
-                "计划号": "计划号",
-                "钢卷号": "钢卷号",
-                "牌号（钢级）": "牌号",
-                "牌号": "牌号",
-                "坯宽": "坯宽",
-                "减宽": "减宽",
-                "调宽": "调宽",
-                "轧宽": "轧宽",
-                "公差带": "公差带",
-                "粗轧报信": "粗轧报信",
-                "除鳞": "除鳞",
-                "坯厚": "坯厚",
-                "坯长": "坯长",
-                "轧厚": "轧厚",
-                "中厚": "中厚",
-                "RT2": "RT2",
-                "强度": "强度"
-            }
-            
-            # 找到强度列的索引
-            强度列索引 = -1
-            for col_idx, col_name in enumerate(current_columns):
-                映射后的列名 = 字段名映射.get(col_name, col_name)
-                if 映射后的列名 == "强度":
-                    强度列索引 = col_idx
-                    break
-            
-            # 即使找不到强度列，也强制设置打印范围为前16列（根据标准列顺序）
-            if 强度列索引 == -1:
-                print("未找到强度列，使用默认打印范围：前16列")
-                强度列索引 = 15  # 默认第16列（索引15）为强度列
-            else:
-                print(f"找到强度列，索引: {强度列索引}")
-            
-            # 计算打印范围：第一列(0)到强度列
-            print_col_start = 0
-            print_col_end = 强度列索引
-            
-            # 表头总行数 = 字段列名行号 + 1（包括字段列名行）
-            header_row_count = 字段列名行号 + 1
-            
-            print(f"字段列名行号: {字段列名行号}, 表头总行数: {header_row_count}")
-            
-            # 使用win32com调用Excel打印
-            try:
-                import win32com.client as win32
-                excel = win32.Dispatch("Excel.Application")
-                
-                # 尝试设置Visible属性为False（原程序的方法）
-                try:
-                    excel.Visible = False
-                except Exception as vis_error:
-                    print(f"设置Visible属性失败: {str(vis_error)}")
-                    # 即使设置失败也继续执行
-                
-                # 打开工作簿
-                workbook_obj = excel.Workbooks.Open(file_path)
-                worksheet = workbook_obj.Worksheets(1)
-                
-                # 设置打印区域：第一列到强度列，包括表头和数据行
-                def get_column_letter(col_idx):
-                    """将列索引转换为Excel列字母（A, B, ..., Z, AA, AB, ...）"""
-                    if col_idx < 26:
-                        return chr(65 + col_idx)
-                    else:
-                        first_letter = chr(65 + (col_idx // 26) - 1)
-                        second_letter = chr(65 + (col_idx % 26))
-                        return first_letter + second_letter
-                
-                col_start_letter = get_column_letter(print_col_start)  # 第一列
-                col_end_letter = get_column_letter(print_col_end)  # 强度列对应的字母
-                # 打印所有行：从第1行到最后一行（包括表头和数据）
-                print_area = f"{col_start_letter}1:{col_end_letter}{sheet.nrows}"
-                worksheet.PageSetup.PrintArea = print_area
-                
-                # 设置每页打印表头：首页表头为$1:$n，后续页面表头为$2:$n
-                # 计算字段名行号对应的Excel行号（Excel行号从1开始）
-                field_name_row = 字段列名行号 + 1  # 转换为Excel行号
-                # 设置打印标题行为从第二行到字段名行
-                worksheet.PageSetup.PrintTitleRows = f"$2:${field_name_row}"
-                
-                # 设置打印时间字体大小为10号
-                # 查找打印时间所在的单元格
-                for row_idx in range(sheet.nrows):
-                    for col_idx in range(sheet.ncols):
-                        cell_value = str(sheet.cell_value(row_idx, col_idx))
-                        if "打印时间" in cell_value:
-                            # 找到打印时间单元格，设置字体大小为10号
-                            excel_range = worksheet.Cells(row_idx + 1, col_idx + 1)
-                            excel_range.Font.Size = 10
-                            break
-                    else:
-                        continue
-                    break
-                
-                # 设置纸张大小为美国Fanfold
-                try:
-                    # 强制使用 xlPaperFanfoldUS (137) - 美国连续折叠纸
-                    preferred_size = 137  # xlPaperFanfoldUS
-                    
-                    # 尝试设置首选纸张
-                    worksheet.PageSetup.PaperSize = preferred_size
-                    try:
-                        print("[纸张设置] ✓ 成功设置纸张: FanfoldUS (14.875 x 11 inch)")
-                    except UnicodeEncodeError:
-                        print("[纸张设置] 成功设置纸张: FanfoldUS (14.875 x 11 inch)")
-                except Exception as e:
-                    try:
-                        print(f"[纸张设置] ✗ 首选纸张设置失败: {str(e)}")
-                    except UnicodeEncodeError:
-                        print(f"[纸张设置] 首选纸张设置失败: {str(e)}")
-                    # 尝试备选纸张
-                    fallback_papers = [39, 118, 119, 1, 9]
-                    for paper_code in fallback_papers:
-                        if paper_code == preferred_size:
-                            continue  # 跳过已经尝试过的
-                        try:
-                            worksheet.PageSetup.PaperSize = paper_code
-                            try:
-                                print(f"[纸张设置] ✓ 成功设置备选纸张: {paper_code}")
-                            except UnicodeEncodeError:
-                                print(f"[纸张设置] 成功设置备选纸张: {paper_code}")
-                            break
-                        except Exception as e:
-                            try:
-                                print(f"[纸张设置] ✗ 备选纸张 {paper_code} 设置失败: {str(e)}")
-                            except UnicodeEncodeError:
-                                print(f"[纸张设置] 备选纸张 {paper_code} 设置失败: {str(e)}")
-                            continue
-                
-                print(f"打印区域: {print_area} (共{sheet.nrows}行)")
-                
-                # 打印
-                worksheet.PrintOut()
-                
-                # 关闭工作簿
-                workbook_obj.Close(False)
-                excel.Quit()
-                
-                # 释放资源
-                # 只有xlrd的Workbook对象才有release_resources方法
-                if hasattr(workbook, 'release_resources'):
-                    workbook.release_resources()
-                
-                # 打印成功后，保存当前数据，确保下次打印能正确识别新增的钢卷号
-                self.save_current_table_data()
-                return True
-                
-            except ImportError:
-                print("win32com未安装，使用默认打印方式")
-                # 释放资源
-                # 只有xlrd的Workbook对象才有release_resources方法
-                if hasattr(workbook, 'release_resources'):
-                    workbook.release_resources()
-                
-                # 尝试使用默认打印方式
-                try:
-                    import os
-                    if os.name == 'nt':  # Windows系统
-                        os.startfile(file_path, 'print')
-                        return True
-                    else:
-                        print("非Windows系统，无法使用默认打印方式")
-                        return False
-                except Exception as e:
-                    print(f"使用默认打印方式失败: {str(e)}")
-                    return False
-            except Exception as e:
-                print(f"调用Excel打印失败: {str(e)}")
-                # 释放资源
-                # 只有xlrd的Workbook对象才有release_resources方法
-                if hasattr(workbook, 'release_resources'):
-                    workbook.release_resources()
-                return False
-        except Exception as e:
-            print(f"打印文件失败: {str(e)}")
-            return False
+
 
 class SettingsWindow(QDialog):
     """设置窗口"""
@@ -11023,6 +12784,11 @@ class SettingsWindow(QDialog):
         
         # 恢复默认值按钮（不需要等待加载）
         self.ui.restoreDefaultsBtn.clicked.connect(self.restore_defaults)
+        
+        # 清理多余文件按钮
+        self.ui.cleanupFilesBtn.clicked.connect(self.cleanup_extra_files)
+        self.ui.cleanupFilesBtn.setAutoDefault(False)
+        self.ui.cleanupFilesBtn.setDefault(False)
         
         # 加载设置（必须在信号连接之前，避免加载时触发保存）
         self.load_settings()
@@ -11236,6 +13002,9 @@ class SettingsWindow(QDialog):
                 # 自动导出设置
                 "autoPrint": True,
                 
+                # 装炉明细打印设置
+                "savePrintFile": True,
+                
                 # 自动执行设置
                 "autoExec": False,
                 "execMode": "interval",  # interval 或 time
@@ -11358,6 +13127,10 @@ class SettingsWindow(QDialog):
         if "autoPrint" in settings:
             self.ui.autoPrintCheckBox.setChecked(settings["autoPrint"])
         
+        # 应用装炉明细打印设置
+        if "savePrintFile" in settings:
+            self.ui.savePrintFileCheckBox.setChecked(settings["savePrintFile"])
+        
         # 应用自动执行设置
         if "execMode" in settings:
             if settings["execMode"] == "interval":
@@ -11432,6 +13205,9 @@ class SettingsWindow(QDialog):
                 
                 # 自动导出设置
                 "autoPrint": self.ui.autoPrintCheckBox.isChecked(),
+                
+                # 装炉明细打印设置
+                "savePrintFile": self.ui.savePrintFileCheckBox.isChecked(),
                 
                 # 自动执行设置 - 保留当前的autoExec设置
                 "autoExec": auto_exec,
@@ -11605,6 +13381,11 @@ class SettingsWindow(QDialog):
         
         # 显示提示
         QMessageBox.information(self, "提示", "已恢复默认设置")
+    
+    def cleanup_extra_files(self):
+        """清理计划号目录中多余的计划号文件"""
+        if self.parent and hasattr(self.parent, 'cleanup_extra_plan_files'):
+            self.parent.cleanup_extra_plan_files()
     
     def get_window_coordinates(self, window_type):
         """获取窗口坐标 - 激活选择的窗口，移动鼠标，以鼠标左键点击作为最终获取的坐标值"""

@@ -29,6 +29,7 @@
   },
   "selectedWindow": "Doc1.docx - Word",
   "autoPrint": true,
+  "savePrintFile": true,
   "autoExec": false,
   "execMode": "interval",
   "intervalMinutes": 1,
