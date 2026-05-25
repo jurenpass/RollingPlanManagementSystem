@@ -2703,7 +2703,7 @@ class MainWindow(QMainWindow):
                 # 获取当前计划号
                 plan_number = ""
                 if rows:
-                    plan_number = rows[0][1] if len(rows[0]) > 1 else ""  # 计划号在第1列
+                    plan_number = rows[0][0] if len(rows[0]) > 0 else ""  # 计划号在第0列
                 
                 # 调试信息
                 print(f"调试信息: is_incremental = {is_incremental}")
@@ -2911,7 +2911,7 @@ class MainWindow(QMainWindow):
                 # 获取当前计划号
                 plan_number = ""
                 if rows:
-                    plan_number = rows[0][1] if len(rows[0]) > 1 else ""  # 计划号在第1列
+                    plan_number = rows[0][0] if len(rows[0]) > 0 else ""  # 计划号在第0列
                 
                 # 连接数据库
                 import sqlite3
