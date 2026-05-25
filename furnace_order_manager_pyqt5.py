@@ -8327,6 +8327,38 @@ class MainWindow(QMainWindow):
                 print(f"  跳过的计划号(有文件且非D开头): {skipped_plans}")
                 print(f"  计划号列表: {valid_export_plans}")
                 
+                # 清除D开头计划号的已处理/已打印状态
+                cleared_d_plans = []
+                for plan_no in valid_export_plans:
+                    if plan_no.startswith('D') or plan_no.startswith('d'):
+                        # 清除已处理状态
+                        if hasattr(self, 'processed_plans'):
+                            if isinstance(self.processed_plans, set):
+                                if plan_no in self.processed_plans:
+                                    self.processed_plans.remove(plan_no)
+                                    cleared_d_plans.append(plan_no)
+                            elif isinstance(self.processed_plans, dict):
+                                if plan_no in self.processed_plans:
+                                    del self.processed_plans[plan_no]
+                                    cleared_d_plans.append(plan_no)
+                        
+                        # 清除已打印状态
+                        if hasattr(self, 'printed_plans'):
+                            if isinstance(self.printed_plans, set):
+                                if plan_no in self.printed_plans:
+                                    self.printed_plans.remove(plan_no)
+                            elif isinstance(self.printed_plans, dict):
+                                if plan_no in self.printed_plans:
+                                    del self.printed_plans[plan_no]
+                
+                if cleared_d_plans:
+                    print(f"  已清除 {len(cleared_d_plans)} 个D开头计划号的状态: {cleared_d_plans}")
+                    # 保存状态文件
+                    if hasattr(self, 'save_processed_plans'):
+                        self.save_processed_plans()
+                    if hasattr(self, 'save_printed_plans'):
+                        self.save_printed_plans()
+                
                 if not valid_export_plans:
                     print(f"[×] 没有需要导出的计划号")
                     export_finished(True, "没有需要导出的计划号\n\n所有计划号都已满足条件或被排除", [], [], {})
