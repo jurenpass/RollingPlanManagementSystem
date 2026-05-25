@@ -2708,6 +2708,7 @@ class MainWindow(QMainWindow):
                 # 调试信息
                 print(f"调试信息: is_incremental = {is_incremental}")
                 print(f"调试信息: plan_number = '{plan_number}'")
+                print(f"调试信息: db_path = '{self.db_path}'")
                 
                 # 查询已打印的钢卷号
                 cursor.execute('''
@@ -2718,6 +2719,7 @@ class MainWindow(QMainWindow):
                 
                 # 调试信息
                 print(f"调试信息: previous_data = {previous_data}")
+                print(f"调试信息: previous_data count = {len(previous_data)}")
                 
                 # 关闭连接
                 conn.close()
@@ -2759,10 +2761,9 @@ class MainWindow(QMainWindow):
                 
                 # 判断是否需要打印全部
                 # 情况1：数据库中没有记录（首次打印）
-                # 情况2：有数据库记录，但当前表格中没有已打印的钢卷号（可能数据完全更新了）
-                # 情况3：用户勾选了"全部打印"
-                if not previous_data or not has_printed_coil or not is_incremental:
-                    print(f"打印全部数据：首次打印={not previous_data}，无已打印记录={not has_printed_coil}，用户选择全部打印={not is_incremental}")
+                # 情况2：用户勾选了"全部打印"
+                if not previous_data or not is_incremental:
+                    print(f"打印全部数据：首次打印={not previous_data}，用户选择全部打印={not is_incremental}")
                     is_incremental = False
                 else:
                     # 增量打印模式，检查是否有新增钢卷号
@@ -2902,6 +2903,8 @@ class MainWindow(QMainWindow):
                     conn = sqlite3.connect(self.db_path)
                     cursor = conn.cursor()
                     
+                    print(f"调试信息[增量保存]: plan_number = '{plan_number}', 新增 {len(new_seq_info)} 个钢卷号")
+                    
                     for info in new_seq_info:
                         # 提取新序号的数字部分
                         seq_str = info['new_sequence']
@@ -2917,7 +2920,7 @@ class MainWindow(QMainWindow):
                     conn.commit()
                     conn.close()
                     
-                    print(f"已将 {len(new_seq_info)} 个新增钢卷号保存到数据库")
+                    print(f"已将 {len(new_seq_info)} 个新增钢卷号保存到数据库, plan_number = '{plan_number}'")
                     
                     # 提示信息
                     提示行 = [f"装炉明细打印-新增({len(new_seq_info)}块)"]
@@ -2933,9 +2936,14 @@ class MainWindow(QMainWindow):
                 conn = sqlite3.connect(self.db_path)
                 cursor = conn.cursor()
                 
+                # 调试信息
+                print(f"调试信息[全部打印]: plan_number = '{plan_number}', is_incremental = {is_incremental}")
+                
                 # 如果是全部打印，先删除该计划号的所有打印记录
                 if not is_incremental:
+                    print(f"调试信息[全部打印]: 删除旧记录...")
                     cursor.execute('DELETE FROM furnace_printed_coils WHERE plan_number = ?', (plan_number,))
+                    print(f"调试信息[全部打印]: 已删除 {cursor.rowcount} 条旧记录")
                 
                 # 收集当前所有钢卷号并保存到数据库
                 seq_num = 1
@@ -2958,7 +2966,7 @@ class MainWindow(QMainWindow):
                 conn.commit()
                 conn.close()
                 
-                print(f"已保存打印数据到数据库: {count} 个钢卷号")
+                print(f"已保存打印数据到数据库: {count} 个钢卷号, plan_number = '{plan_number}'")
                 
                 # 过滤掉特殊行
                 filtered_rows = []
