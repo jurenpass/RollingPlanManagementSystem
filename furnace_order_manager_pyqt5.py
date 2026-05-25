@@ -2728,11 +2728,6 @@ class MainWindow(QMainWindow):
                 # 调试信息
                 print(f"调试信息: previous_coils = {previous_coils}")
                 
-                # 如果没有已打印数据，视为首次打印
-                if not previous_data:
-                    print(f"调试信息: 没有已打印数据，设置 is_incremental = False")
-                    is_incremental = False
-                
                 # 获取当前所有钢卷号（过滤掉特殊行如换辊行、自定义信息行）
                 current_coils_ordered = []  # 按顺序保存钢卷号和对应行索引
                 for row_idx, row_data in enumerate(rows):
@@ -2755,26 +2750,36 @@ class MainWindow(QMainWindow):
                     if item['coil_number'] not in previous_coils:
                         new_coils.append(item)
                 
-                if not new_coils:
-                    # 调试信息
-                    print(f"调试信息: previous_coils = {previous_coils}")
-                    print(f"调试信息: current_coils_ordered = {[item['coil_number'] for item in current_coils_ordered]}")
-                    print(f"调试信息: new_coils = {[item['coil_number'] for item in new_coils]}")
-                    from PyQt5.QtWidgets import QMessageBox
-                    QMessageBox.information(self, "提示", "没有新增的钢卷号，无需打印")
-                    return
-                
-                print(f"增量打印：上次打印 {len(previous_coils)} 个钢卷号，当前 {len(current_coils_ordered)} 个，新增 {len(new_coils)} 个")
-                
-                # 检查新增钢卷号是否在表格最前面（前面没有已打印钢卷号）
-                # 找出所有新增钢卷号中最小的 row_idx
-                min_new_row_idx = min(item['row_idx'] for item in new_coils)
-                
-                # 找出所有已打印钢卷号中最大的 row_idx
-                max_printed_row_idx = -1
-                for i, item in enumerate(current_coils_ordered):
+                # 检查当前表格中是否还有已打印的钢卷号
+                has_printed_coil = False
+                for item in current_coils_ordered:
                     if item['coil_number'] in previous_coils:
-                        max_printed_row_idx = i
+                        has_printed_coil = True
+                        break
+                
+                # 判断是否需要打印全部
+                # 情况1：数据库中没有记录（首次打印）
+                # 情况2：有数据库记录，但当前表格中没有已打印的钢卷号（可能数据完全更新了）
+                # 情况3：用户勾选了"全部打印"
+                if not previous_data or not has_printed_coil or not is_incremental:
+                    print(f"打印全部数据：首次打印={not previous_data}，无已打印记录={not has_printed_coil}，用户选择全部打印={not is_incremental}")
+                    is_incremental = False
+                else:
+                    # 增量打印模式，检查是否有新增钢卷号
+                    if not new_coils:
+                        # 调试信息
+                        print(f"调试信息: previous_coils = {previous_coils}")
+                        print(f"调试信息: current_coils_ordered = {[item['coil_number'] for item in current_coils_ordered]}")
+                        print(f"调试信息: new_coils = {[item['coil_number'] for item in new_coils]}")
+                        from PyQt5.QtWidgets import QMessageBox
+                        QMessageBox.information(self, "提示", "没有新增的钢卷号，无需打印")
+                        return
+                
+                # 输出打印信息
+                if is_incremental:
+                    print(f"增量打印：上次打印 {len(previous_coils)} 个钢卷号，当前 {len(current_coils_ordered)} 个，新增 {len(new_coils)} 个")
+                else:
+                    print(f"全部打印：共 {len(current_coils_ordered)} 个钢卷号")
                 
                 # 检查当前表格中是否还有已打印的钢卷号
                 has_printed_coil = False
@@ -2794,92 +2799,102 @@ class MainWindow(QMainWindow):
                 else:
                     print(f"执行全部打印（用户选择了全部打印）")
                 
-                # 确定新增钢卷号的位置（尾部增加还是中间插入）
-                # 找出最后一个已打印钢卷号的位置
-                last_printed_idx = -1
-                for i, item in enumerate(current_coils_ordered):
-                    if item['coil_number'] in previous_coils:
-                        last_printed_idx = i
-                
-                # 分类新增钢卷号
-                tail_new_coils = []  # 尾部新增
-                insert_new_coils = []  # 中间插入新增
-                
-                for item in new_coils:
-                    if item['row_idx'] > last_printed_idx:
-                        # 在最后一个已打印钢卷号之后，为尾部新增
-                        tail_new_coils.append(item)
-                    else:
-                        # 在中间插入
-                        insert_new_coils.append(item)
-                
-                # 计算新增钢卷号的新序号
-                # 获取原数据最后一块的序号（数据库返回的是元组 (coil_number, sequence)）
-                last_seq_num = 1
-                for item in previous_data:
-                    seq_str = str(item[1])  # sequence 在索引1位置
-                    # 提取纯数字序号（可能带后缀）
-                    import re
-                    match = re.match(r'^(\d+)', seq_str)
-                    if match:
-                        seq_num = int(match.group(1))
-                        if seq_num > last_seq_num:
-                            last_seq_num = seq_num
-                
-                # 计算新增序号
-                new_seq_info = []  # 保存新序号信息
-                
-                # 将所有新增钢卷号按位置排序
-                all_new_coils_sorted = sorted(new_coils, key=lambda x: x['row_idx'])
-                
-                # 找出第一个已打印钢卷号的序号（作为中间插入的基准）
-                first_printed_seq = "1"
-                for item in current_coils_ordered:
-                    if item['coil_number'] in previous_coils:
-                        # 从数据库中获取该钢卷号的序号
-                        for prev_item in previous_data:
-                            if prev_item[0] == item['coil_number']:
-                                first_printed_seq = str(prev_item[1])
-                                break
-                        break
-                
-                # 分别统计中间插入和尾部新增的数量
-                insert_count = 0
-                tail_count = 0
-                
-                # 逐个处理每个新增钢卷号，按位置排序
-                for item in all_new_coils_sorted:
-                    # 判断是中间插入还是尾部新增
-                    if item['row_idx'] > last_printed_idx:
-                        # 尾部新增
-                        tail_count += 1
-                        new_seq = last_seq_num + tail_count
-                    else:
-                        # 中间插入
-                        insert_count += 1
-                        # 使用 "第一个已打印序号-1>" 格式
-                        import re
-                        match = re.match(r'^(\d+)', first_printed_seq)
-                        if match:
-                            base_seq = match.group(1)
-                            new_seq = f"{base_seq}-{insert_count}>"
-                        else:
-                            new_seq = f"?-{insert_count}>"
-                    
-                    # 添加到 new_seq_info
-                    new_seq_info.append({
-                        'coil_number': item['coil_number'],
-                        'row_data': item['row_data'],
-                        'new_sequence': new_seq
-                    })
-                
-                print(f"尾部新增: {len(tail_new_coils)} 个")
-                print(f"中间插入新增: {len(insert_new_coils)} 个")
-                for info in new_seq_info:
-                    print(f"  {info['coil_number']} -> 序号: {info['new_sequence']}")
-                
                 # 只有真正执行增量打印时才执行以下逻辑
                 if 真正增量打印:
+                    # 检查新增钢卷号是否在表格最前面（前面没有已打印钢卷号）
+                    # 找出所有新增钢卷号中最小的 row_idx
+                    min_new_row_idx = min(item['row_idx'] for item in new_coils)
+                    
+                    # 找出所有已打印钢卷号中最大的 row_idx
+                    max_printed_row_idx = -1
+                    for i, item in enumerate(current_coils_ordered):
+                        if item['coil_number'] in previous_coils:
+                            max_printed_row_idx = i
+                    
+                    # 确定新增钢卷号的位置（尾部增加还是中间插入）
+                    # 找出最后一个已打印钢卷号的位置
+                    last_printed_idx = -1
+                    for i, item in enumerate(current_coils_ordered):
+                        if item['coil_number'] in previous_coils:
+                            last_printed_idx = i
+                    
+                    # 分类新增钢卷号
+                    tail_new_coils = []  # 尾部新增
+                    insert_new_coils = []  # 中间插入新增
+                    
+                    for item in new_coils:
+                        if item['row_idx'] > last_printed_idx:
+                            # 在最后一个已打印钢卷号之后，为尾部新增
+                            tail_new_coils.append(item)
+                        else:
+                            # 在中间插入
+                            insert_new_coils.append(item)
+                    
+                    # 计算新增钢卷号的新序号
+                    # 获取原数据最后一块的序号（数据库返回的是元组 (coil_number, sequence)）
+                    last_seq_num = 1
+                    for item in previous_data:
+                        seq_str = str(item[1])  # sequence 在索引1位置
+                        # 提取纯数字序号（可能带后缀）
+                        import re
+                        match = re.match(r'^(\d+)', seq_str)
+                        if match:
+                            seq_num = int(match.group(1))
+                            if seq_num > last_seq_num:
+                                last_seq_num = seq_num
+                    
+                    # 计算新增序号
+                    new_seq_info = []  # 保存新序号信息
+                    
+                    # 将所有新增钢卷号按位置排序
+                    all_new_coils_sorted = sorted(new_coils, key=lambda x: x['row_idx'])
+                    
+                    # 找出第一个已打印钢卷号的序号（作为中间插入的基准）
+                    first_printed_seq = "1"
+                    for item in current_coils_ordered:
+                        if item['coil_number'] in previous_coils:
+                            # 从数据库中获取该钢卷号的序号
+                            for prev_item in previous_data:
+                                if prev_item[0] == item['coil_number']:
+                                    first_printed_seq = str(prev_item[1])
+                                    break
+                            break
+                    
+                    # 分别统计中间插入和尾部新增的数量
+                    insert_count = 0
+                    tail_count = 0
+                    
+                    # 逐个处理每个新增钢卷号，按位置排序
+                    for item in all_new_coils_sorted:
+                        # 判断是中间插入还是尾部新增
+                        if item['row_idx'] > last_printed_idx:
+                            # 尾部新增
+                            tail_count += 1
+                            new_seq = last_seq_num + tail_count
+                        else:
+                            # 中间插入
+                            insert_count += 1
+                            # 使用 "第一个已打印序号-1>" 格式
+                            import re
+                            match = re.match(r'^(\d+)', first_printed_seq)
+                            if match:
+                                base_seq = match.group(1)
+                                new_seq = f"{base_seq}-{insert_count}>"
+                            else:
+                                new_seq = f"?-{insert_count}>"
+                        
+                        # 添加到 new_seq_info
+                        new_seq_info.append({
+                            'coil_number': item['coil_number'],
+                            'row_data': item['row_data'],
+                            'new_sequence': new_seq
+                        })
+                    
+                    print(f"尾部新增: {len(tail_new_coils)} 个")
+                    print(f"中间插入新增: {len(insert_new_coils)} 个")
+                    for info in new_seq_info:
+                        print(f"  {info['coil_number']} -> 序号: {info['new_sequence']}")
+                    
                     # 更新rows为只包含新增数据
                     rows = [info['row_data'] for info in new_seq_info]
                     
