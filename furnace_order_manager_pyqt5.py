@@ -4957,15 +4957,17 @@ class MainWindow(QMainWindow):
                 if 最后一行宽度 > 每行宽度 * 0.8:
                     需要行数 = 需要行数 + 1
                 if 需要行数 > 1:
-                    # 多行时使用计算的行高
+                    # 多行时使用计算的行高，不启用height_mismatch，让Excel自动调整
                     计算行高 = 500 + (需要行数 - 1) * 360
                     new_sheet.row(row_idx).height = 计算行高
                 else:
-                    # 单行时强制设置为25pt（500 twips）
+                    # 单行时强制设置为25pt（500 twips），启用height_mismatch强制使用设置的行高
                     new_sheet.row(row_idx).height = 500
+                    new_sheet.row(row_idx).height_mismatch = True
             else:
-                # 无内容时强制设置为25pt（500 twips）
+                # 无内容时强制设置为25pt（500 twips），启用height_mismatch强制使用设置的行高
                 new_sheet.row(row_idx).height = 500
+                new_sheet.row(row_idx).height_mismatch = True
         
         # 10. 保存新文件
         new_file_path = file_path  # 覆盖原文件
