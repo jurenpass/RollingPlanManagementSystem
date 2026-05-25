@@ -1497,27 +1497,56 @@ class MainWindow(QMainWindow):
         try:
             self.processed_plans = {}  # {plan_no: {coil_no, ...}}
             processed_plans_file = os.path.join(self.plan_dir, "processed_plans.txt")
+            print(f"load_processed_plans: 尝试加载文件: {processed_plans_file}")
+            
             if os.path.exists(processed_plans_file):
-                with open(processed_plans_file, 'r', encoding='utf-8') as f:
-                    for line in f:
-                        line = line.strip()
-                        if line:
-                            if '\t' in line:
-                            # 新格式：计划号\t钢卷号
-                                plan_no, coil_no = line.split('\t', 1)
-                                plan_no = plan_no.strip()
-                                coil_no = coil_no.strip()
-                                if plan_no not in self.processed_plans:
+                try:
+                    with open(processed_plans_file, 'r', encoding='utf-8') as f:
+                        for line in f:
+                            line = line.strip()
+                            if line:
+                                if '\t' in line:
+                                # 新格式：计划号\t钢卷号
+                                    plan_no, coil_no = line.split('\t', 1)
+                                    plan_no = plan_no.strip()
+                                    coil_no = coil_no.strip()
+                                    if plan_no not in self.processed_plans:
+                                        self.processed_plans[plan_no] = set()
+                                    self.processed_plans[plan_no].add(coil_no)
+                                else:
+                                # 旧格式：只有计划号（向后兼容
+                                    plan_no = line
                                     self.processed_plans[plan_no] = set()
-                                self.processed_plans[plan_no].add(coil_no)
-                            else:
-                            # 旧格式：只有计划号（向后兼容
-                                plan_no = line
-                                self.processed_plans[plan_no] = set()
-            total_coil_count = sum(len(coils) for coils in self.processed_plans.values())
-            print(f"已加载 {len(self.processed_plans)} 个计划号，共 {total_coil_count} 个已处理钢卷号")
+                    total_coil_count = sum(len(coils) for coils in self.processed_plans.values())
+                    print(f"load_processed_plans: 成功加载 {len(self.processed_plans)} 个计划号，共 {total_coil_count} 个已处理钢卷号")
+                except Exception as e:
+                    print(f"load_processed_plans: 读取文件失败: {str(e)}")
+                    print(f"load_processed_plans: 尝试使用gbk编码...")
+                    try:
+                        with open(processed_plans_file, 'r', encoding='gbk') as f:
+                            for line in f:
+                                line = line.strip()
+                                if line:
+                                    if '\t' in line:
+                                        plan_no, coil_no = line.split('\t', 1)
+                                        plan_no = plan_no.strip()
+                                        coil_no = coil_no.strip()
+                                        if plan_no not in self.processed_plans:
+                                            self.processed_plans[plan_no] = set()
+                                        self.processed_plans[plan_no].add(coil_no)
+                                    else:
+                                        plan_no = line
+                                        self.processed_plans[plan_no] = set()
+                        total_coil_count = sum(len(coils) for coils in self.processed_plans.values())
+                        print(f"load_processed_plans: 使用gbk编码成功加载 {len(self.processed_plans)} 个计划号")
+                    except Exception as e2:
+                        print(f"load_processed_plans: 使用gbk编码也失败: {str(e2)}")
+                        self.processed_plans = {}
+            else:
+                print(f"load_processed_plans: 文件不存在，初始化空字典")
+                self.processed_plans = {}
         except Exception as e:
-            print(f"加载已处理计划失败: {str(e)}")
+            print(f"load_processed_plans: 发生未知错误: {str(e)}")
             self.processed_plans = {}
     
     def load_printed_plans(self):
@@ -2381,7 +2410,7 @@ class MainWindow(QMainWindow):
                         if plan_no in self.processed_plans:
                             already_processed.append(plan_no)
                     elif isinstance(self.processed_plans, dict):
-                        # 对于非D开头的，只要有记录且集合为空（表示已处理过）
+                        # 对于非D开头的，只要有记录（表示已处理过）
                         if plan_no in self.processed_plans:
                             already_processed.append(plan_no)
                 else:
