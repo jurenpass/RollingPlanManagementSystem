@@ -2904,7 +2904,7 @@ class MainWindow(QMainWindow):
             # 设置列名
             提示行 = ["装炉明细打印"]
             headers = ["序号", "计划号", "钢卷号", "牌号（钢级）", "坯宽", "减宽", "调宽", "轧宽", "公差带",
-                "粗轧报信", "除鳞", "坯厚", "坯长", "轧厚", "中厚", "RT2", "强度"]
+                "粗轧报信", "除鳞", "坯厚", "坯长", "轧厚", "中厚", "RT2", "强度", "订宽"]
             
             # 获取各列的索引（使用列名）
             粗轧报信列索引 = headers.index("粗轧报信")
@@ -3190,15 +3190,15 @@ class MainWindow(QMainWindow):
                 return int((excel_width + 0.7109375) * 256)
             
             col_widths = [
-                xlwt_col_width(5.6),           # 1. 序号
+                xlwt_col_width(7.0),           # 1. 序号
                 xlwt_col_width(7.0),           # 2. 计划号
-                xlwt_col_width(16.0),          # 3. 钢卷号
-                xlwt_col_width(16.0),          # 4. 牌号（钢级）
-                xlwt_col_width(6.0),           # 5. 坯宽
-                xlwt_col_width(6.0),           # 6. 减宽
+                xlwt_col_width(17.0),          # 3. 钢卷号
+                xlwt_col_width(17.0),          # 4. 牌号（钢级）
+                xlwt_col_width(7.0),           # 5. 坯宽
+                xlwt_col_width(7.0),           # 6. 减宽
                 xlwt_col_width(6.0),           # 7. 调宽
-                xlwt_col_width(6.0),           # 8. 轧宽
-                xlwt_col_width(9.5),           # 9. 公差带
+                xlwt_col_width(7.0),           # 8. 轧宽
+                xlwt_col_width(10.0),          # 9. 公差带
                 xlwt_col_width(30.0),          # 10. 粗轧报信
                 xlwt_col_width(6.0),           # 11. 除鳞
                 xlwt_col_width(6.0),           # 12. 坯厚
@@ -3206,7 +3206,8 @@ class MainWindow(QMainWindow):
                 xlwt_col_width(6.0),           # 14. 轧厚
                 xlwt_col_width(4.0),           # 15. 中厚
                 xlwt_col_width(6.0),           # 16. RT2
-                xlwt_col_width(4.5)            # 17. 强度
+                xlwt_col_width(4.5),           # 17. 强度
+                xlwt_col_width(7.0)            # 18. 订宽
             ]
             
             for col_idx, width in enumerate(col_widths):
@@ -3228,7 +3229,7 @@ class MainWindow(QMainWindow):
             
             # 写入字段名行（第三行）
             for col, header in enumerate(headers):
-                if col == len(headers) - 1:  # 强度字段
+                if col >= len(headers) - 2:  # 强度和订宽字段（最后两列使用12pt样式）
                     sheet.write(2, col, header, style_header_strength)
                 else:
                     sheet.write(2, col, header, style_header_border)
@@ -3289,6 +3290,8 @@ class MainWindow(QMainWindow):
                     elif data_idx == 轧厚列索引:  # 轧厚列（13pt，居中对齐，左右虚线）
                         sheet.write(row_idx + 3, data_idx, value, style_data_roll_thickness)
                     elif data_idx == 强度列索引:  # 强度列（14pt，左边框虚线，右边框实线）
+                        sheet.write(row_idx + 3, data_idx, value, style_data_12pt_strength)
+                    elif data_idx == len(headers) - 1:  # 订宽列（最后一列）
                         sheet.write(row_idx + 3, data_idx, value, style_data_12pt_strength)
                     elif 5 <= data_idx <= 8 or 10 <= data_idx <= 11 or 14 <= data_idx <= 15:  # 坯宽到强度之间的列（左右虚线）
                         sheet.write(row_idx + 3, data_idx, value, style_data_dashed)
@@ -7446,16 +7449,19 @@ class MainWindow(QMainWindow):
                     强度列索引 = col_idx
                     break
             
-            # 即使找不到强度列，也强制设置打印范围为前16列（根据标准列顺序）
-            if 强度列索引 == -1:
-                print("未找到强度列，使用默认打印范围：前16列")
-                强度列索引 = 15  # 默认第16列（索引15）为强度列
-            else:
-                print(f"找到强度列，索引: {强度列索引}")
+            # 找到订宽列的索引（最后一列）
+            订宽列索引 = len(current_columns) - 1
             
-            # 计算打印范围：第一列(0)到强度列
+            # 即使找不到强度列，也强制设置打印范围为前17列（根据标准列顺序）
+            if 订宽列索引 < 0:
+                print("未找到订宽列，使用默认打印范围：前17列")
+                订宽列索引 = 16  # 默认第17列（索引16）为订宽列
+            else:
+                print(f"找到订宽列，索引: {订宽列索引}")
+            
+            # 计算打印范围：第一列(0)到订宽列
             print_col_start = 0
-            print_col_end = 强度列索引
+            print_col_end = 订宽列索引
             
             # 表头总行数 = 字段列名行号 + 1（包括字段列名行）
             header_row_count = 字段列名行号 + 1
