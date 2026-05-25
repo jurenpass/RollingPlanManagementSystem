@@ -8298,35 +8298,33 @@ class MainWindow(QMainWindow):
                 print("===========================================================")
                 
                 # 筛选需要导出的计划号
-                # 条件：1. 不是D开头 2. 没有"无文件"标识
+                # 条件：1. 状态为"无文件"，或者 2. D开头的计划号（即使有文件也导出）
                 print(f"")
-                print(f"[筛选计划号] 状态!='无文件' 且 不是D开头")
+                print(f"[筛选计划号] 状态='无文件' 或 是D开头")
                 
                 # 从plan_data中获取符合条件的计划号
                 valid_export_plans = []
-                skipped_d_plans = []
-                skipped_no_file_plans = []
+                skipped_plans = []
                 
                 for item in self.plan_data:
                     plan_no = item['plan_no']
                     status = item.get('status', '')
                     
-                    # 排除D开头的计划号
+                    # 条件1：D开头的计划号，即使有文件也导出
                     if plan_no.startswith('D') or plan_no.startswith('d'):
-                        skipped_d_plans.append(plan_no)
+                        valid_export_plans.append(plan_no)
                         continue
                     
-                    # 排除无文件标识的计划号
+                    # 条件2：无文件状态的计划号
                     if status == '无文件':
-                        skipped_no_file_plans.append(plan_no)
+                        valid_export_plans.append(plan_no)
                         continue
                     
-                    # 符合条件，可以导出
-                    valid_export_plans.append(plan_no)
+                    # 不符合条件，跳过（有文件且非D开头）
+                    skipped_plans.append(plan_no)
                 
                 print(f"  找到 {len(valid_export_plans)} 个需要导出的计划号")
-                print(f"  跳过D开头计划号: {skipped_d_plans}")
-                print(f"  跳过无文件计划号: {skipped_no_file_plans}")
+                print(f"  跳过的计划号(有文件且非D开头): {skipped_plans}")
                 print(f"  计划号列表: {valid_export_plans}")
                 
                 if not valid_export_plans:
