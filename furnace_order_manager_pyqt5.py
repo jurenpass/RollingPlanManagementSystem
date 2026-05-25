@@ -2371,81 +2371,91 @@ class MainWindow(QMainWindow):
             selected_plans = [self.plan_data[index.row()]['plan_no'] for index in selected_items]
             print(f"process_plans: 选中的计划号: {selected_plans}")
             
-            # 筛选可处理的计划号
-            # 条件：1. 不是D开头 2. 没有"无文件"标识 3. A1单元格不是"轧制计划明细表"
-            valid_plans = []
-            skipped_plans = []
-            no_file_plans = []
-            already_processed_plans = []
+            # 判断是否是自动导出后的处理（检查是否有预设的计划号列表）
+            is_auto_export_process = hasattr(self, 'plans_to_process') and self.plans_to_process
             
-            for plan_no in selected_plans:
-                # 条件1：排除D开头的计划号
-                if plan_no.startswith('D') or plan_no.startswith('d'):
-                    skipped_plans.append(plan_no)
-                    continue
+            if is_auto_export_process:
+                # 自动导出后的处理：直接使用导出的计划号，不判断状态
+                valid_plans = self.plans_to_process.copy()
+                print(f"process_plans: 自动导出后的处理，直接使用计划号: {valid_plans}")
+                # 清除临时变量
+                del self.plans_to_process
+            else:
+                # 手动点击处理计划：检查条件
+                # 条件：1. 不是D开头 2. 没有"无文件"标识 3. A1单元格不是"轧制计划明细表"
+                valid_plans = []
+                skipped_plans = []
+                no_file_plans = []
+                already_processed_plans = []
                 
-                # 条件2：检查是否有"无文件"标识
-                plan_status = None
-                for data in self.plan_data:
-                    if data['plan_no'] == plan_no:
-                        plan_status = data.get('status', '')
-                        break
+                for plan_no in selected_plans:
+                    # 条件1：排除D开头的计划号
+                    if plan_no.startswith('D') or plan_no.startswith('d'):
+                        skipped_plans.append(plan_no)
+                        continue
+                    
+                    # 条件2：检查是否有"无文件"标识
+                    plan_status = None
+                    for data in self.plan_data:
+                        if data['plan_no'] == plan_no:
+                            plan_status = data.get('status', '')
+                            break
+                    
+                    if plan_status == '无文件':
+                        no_file_plans.append(plan_no)
+                        continue
+                    
+                    # 条件3：检查A1单元格是否为"轧制计划明细表"
+                    file_path = os.path.join(plan_dir, f"{plan_no}.xls")
+                    if os.path.exists(file_path):
+                        try:
+                            import xlrd
+                            workbook = xlrd.open_workbook(file_path)
+                            sheet = workbook.sheet_by_index(0)
+                            if sheet.nrows > 0 and sheet.ncols > 0:
+                                a1_value = str(sheet.cell_value(0, 0)).strip()
+                                if a1_value == "轧制计划明细表":
+                                    already_processed_plans.append(plan_no)
+                                    continue
+                        except Exception as e:
+                            print(f"检查计划号 {plan_no} 文件失败: {str(e)}")
+                    
+                    # 所有条件都满足，可以处理
+                    valid_plans.append(plan_no)
                 
-                if plan_status == '无文件':
-                    no_file_plans.append(plan_no)
-                    continue
-                
-                # 条件3：检查A1单元格是否为"轧制计划明细表"
-                file_path = os.path.join(plan_dir, f"{plan_no}.xls")
-                if os.path.exists(file_path):
-                    try:
-                        import xlrd
-                        workbook = xlrd.open_workbook(file_path)
-                        sheet = workbook.sheet_by_index(0)
-                        if sheet.nrows > 0 and sheet.ncols > 0:
-                            a1_value = str(sheet.cell_value(0, 0)).strip()
-                            if a1_value == "轧制计划明细表":
-                                already_processed_plans.append(plan_no)
-                                continue
-                    except Exception as e:
-                        print(f"检查计划号 {plan_no} 文件失败: {str(e)}")
-                
-                # 所有条件都满足，可以处理
-                valid_plans.append(plan_no)
-            
-            # 输出筛选结果
-            if skipped_plans:
-                print(f"跳过D开头计划号: {skipped_plans}")
-            if no_file_plans:
-                print(f"跳过无文件计划号: {no_file_plans}")
-            if already_processed_plans:
-                print(f"跳过已处理计划号(A1=轧制计划明细表): {already_processed_plans}")
-            print(f"可处理计划号: {valid_plans}")
-            
-            # 如果没有可处理的计划号，显示提示
-            if not valid_plans and show_result:
-                self.activateWindow()
-                self.raise_()
-                self.show()
-                msg_box = QMessageBox(self)
-                msg_box.setWindowTitle("提示")
-                msg_text = "没有符合条件的计划号可处理\n\n"
+                # 输出筛选结果
                 if skipped_plans:
-                    msg_text += f"D开头计划号已跳过: {', '.join(skipped_plans)}\n"
+                    print(f"跳过D开头计划号: {skipped_plans}")
                 if no_file_plans:
-                    msg_text += f"无文件计划号已跳过: {', '.join(no_file_plans)}\n"
+                    print(f"跳过无文件计划号: {no_file_plans}")
                 if already_processed_plans:
-                    msg_text += f"已处理计划号已跳过: {', '.join(already_processed_plans)}\n"
-                msg_box.setText(msg_text)
-                msg_box.setStandardButtons(QMessageBox.Ok)
-                msg_box.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Dialog | Qt.MSWindowsFixedSizeDialogHint)
-                msg_box.setModal(True)
-                QApplication.setActiveWindow(msg_box)
-                msg_box.exec_()
-                self.activateWindow()
-                self.raise_()
-                self.show()
-                return
+                    print(f"跳过已处理计划号(A1=轧制计划明细表): {already_processed_plans}")
+                print(f"可处理计划号: {valid_plans}")
+                
+                # 如果没有可处理的计划号，显示提示
+                if not valid_plans and show_result:
+                    self.activateWindow()
+                    self.raise_()
+                    self.show()
+                    msg_box = QMessageBox(self)
+                    msg_box.setWindowTitle("提示")
+                    msg_text = "没有符合条件的计划号可处理\n\n"
+                    if skipped_plans:
+                        msg_text += f"D开头计划号已跳过: {', '.join(skipped_plans)}\n"
+                    if no_file_plans:
+                        msg_text += f"无文件计划号已跳过: {', '.join(no_file_plans)}\n"
+                    if already_processed_plans:
+                        msg_text += f"已处理计划号已跳过: {', '.join(already_processed_plans)}\n"
+                    msg_box.setText(msg_text)
+                    msg_box.setStandardButtons(QMessageBox.Ok)
+                    msg_box.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Dialog | Qt.MSWindowsFixedSizeDialogHint)
+                    msg_box.setModal(True)
+                    QApplication.setActiveWindow(msg_box)
+                    msg_box.exec_()
+                    self.activateWindow()
+                    self.raise_()
+                    self.show()
+                    return
             
             # 如果不是强制处理，检查已处理状态（原有逻辑保持不变）
             if not force_process:
@@ -8369,6 +8379,9 @@ class MainWindow(QMainWindow):
                 # 发送事件到主线程
                 event = ExportPlanDetailEvent(valid_export_plans, plan_detail_export_btn, test_window, delay_time, coord_map)
                 QCoreApplication.postEvent(self, event)
+                
+                # 保存需要处理的计划号列表，供后续处理计划使用
+                self.plans_to_process = valid_export_plans
                 
                 
             except Exception as e:
