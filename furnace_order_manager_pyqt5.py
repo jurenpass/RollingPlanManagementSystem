@@ -8292,28 +8292,46 @@ class MainWindow(QMainWindow):
 
                 
                 # 步骤4：导出无文件计划号的明细
-                update_progress("【步骤4/4】正在导出无文件计划号明细...")
+                update_progress("【步骤4/4】正在导出计划号明细...")
                 print("\n===========================================================")
-                print(" 【步骤4/4】导出无文件计划号明细")
+                print(" 【步骤4/4】导出计划号明细")
                 print("===========================================================")
                 
-                # 筛选无文件计划号
+                # 筛选需要导出的计划号
+                # 条件：1. 不是D开头 2. 没有"无文件"标识
                 print(f"")
-                print(f"[筛选计划号] 状态='无文件'")
+                print(f"[筛选计划号] 状态!='无文件' 且 不是D开头")
                 
-                # 从plan_data中获取无文件计划号
-                no_file_plans = [item['plan_no'] for item in self.plan_data if item['status'] == '无文件']
+                # 从plan_data中获取符合条件的计划号
+                valid_export_plans = []
+                skipped_d_plans = []
+                skipped_no_file_plans = []
                 
-                # 对于无文件计划号,直接导出明细,不依赖坐标映射
-                valid_no_file_plans = no_file_plans
-                invalid_no_file_plans = []
+                for item in self.plan_data:
+                    plan_no = item['plan_no']
+                    status = item.get('status', '')
+                    
+                    # 排除D开头的计划号
+                    if plan_no.startswith('D') or plan_no.startswith('d'):
+                        skipped_d_plans.append(plan_no)
+                        continue
+                    
+                    # 排除无文件标识的计划号
+                    if status == '无文件':
+                        skipped_no_file_plans.append(plan_no)
+                        continue
+                    
+                    # 符合条件，可以导出
+                    valid_export_plans.append(plan_no)
                 
-                print(f"  找到 {len(no_file_plans)} 个无文件的计划号")
-                print(f"  计划号列表: {valid_no_file_plans}")
+                print(f"  找到 {len(valid_export_plans)} 个需要导出的计划号")
+                print(f"  跳过D开头计划号: {skipped_d_plans}")
+                print(f"  跳过无文件计划号: {skipped_no_file_plans}")
+                print(f"  计划号列表: {valid_export_plans}")
                 
-                if not valid_no_file_plans:
+                if not valid_export_plans:
                     print(f"[×] 没有需要导出的计划号")
-                    export_finished(True, "没有需要导出的计划号\n\n所有计划号都已有文件,无需导出", [], [], {})
+                    export_finished(True, "没有需要导出的计划号\n\n所有计划号都已满足条件或被排除", [], [], {})
                     return
                 
                 # 获取设置中的窗口标题
@@ -8338,20 +8356,20 @@ class MainWindow(QMainWindow):
                 print(f"开始导出计划号明细")
                 print(f"===========================================================")
                 
-                # 导出无文件计划号明细（在主线程中执行）
+                # 导出计划号明细（在主线程中执行）
                 from PyQt5.QtCore import QEvent, QCoreApplication
                 
                 class ExportPlanDetailEvent(QEvent):
-                    def __init__(self, valid_no_file_plans, plan_detail_export_btn, test_window, delay_time, coord_map):
+                    def __init__(self, valid_export_plans, plan_detail_export_btn, test_window, delay_time, coord_map):
                         super().__init__(QEvent.User)
-                        self.valid_no_file_plans = valid_no_file_plans
+                        self.valid_no_file_plans = valid_export_plans  # 保持属性名不变，兼容现有处理逻辑
                         self.plan_detail_export_btn = plan_detail_export_btn
                         self.test_window = test_window
                         self.delay_time = delay_time
                         self.coord_map = coord_map
                 
                 # 发送事件到主线程
-                event = ExportPlanDetailEvent(valid_no_file_plans, plan_detail_export_btn, test_window, delay_time, coord_map)
+                event = ExportPlanDetailEvent(valid_export_plans, plan_detail_export_btn, test_window, delay_time, coord_map)
                 QCoreApplication.postEvent(self, event)
                 
                 
