@@ -1497,56 +1497,27 @@ class MainWindow(QMainWindow):
         try:
             self.processed_plans = {}  # {plan_no: {coil_no, ...}}
             processed_plans_file = os.path.join(self.plan_dir, "processed_plans.txt")
-            print(f"load_processed_plans: 尝试加载文件: {processed_plans_file}")
-            
             if os.path.exists(processed_plans_file):
-                try:
-                    with open(processed_plans_file, 'r', encoding='utf-8') as f:
-                        for line in f:
-                            line = line.strip()
-                            if line:
-                                if '\t' in line:
-                                # 新格式：计划号\t钢卷号
-                                    plan_no, coil_no = line.split('\t', 1)
-                                    plan_no = plan_no.strip()
-                                    coil_no = coil_no.strip()
-                                    if plan_no not in self.processed_plans:
-                                        self.processed_plans[plan_no] = set()
-                                    self.processed_plans[plan_no].add(coil_no)
-                                else:
-                                # 旧格式：只有计划号（向后兼容
-                                    plan_no = line
+                with open(processed_plans_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line:
+                            if '\t' in line:
+                            # 新格式：计划号\t钢卷号
+                                plan_no, coil_no = line.split('\t', 1)
+                                plan_no = plan_no.strip()
+                                coil_no = coil_no.strip()
+                                if plan_no not in self.processed_plans:
                                     self.processed_plans[plan_no] = set()
-                    total_coil_count = sum(len(coils) for coils in self.processed_plans.values())
-                    print(f"load_processed_plans: 成功加载 {len(self.processed_plans)} 个计划号，共 {total_coil_count} 个已处理钢卷号")
-                except Exception as e:
-                    print(f"load_processed_plans: 读取文件失败: {str(e)}")
-                    print(f"load_processed_plans: 尝试使用gbk编码...")
-                    try:
-                        with open(processed_plans_file, 'r', encoding='gbk') as f:
-                            for line in f:
-                                line = line.strip()
-                                if line:
-                                    if '\t' in line:
-                                        plan_no, coil_no = line.split('\t', 1)
-                                        plan_no = plan_no.strip()
-                                        coil_no = coil_no.strip()
-                                        if plan_no not in self.processed_plans:
-                                            self.processed_plans[plan_no] = set()
-                                        self.processed_plans[plan_no].add(coil_no)
-                                    else:
-                                        plan_no = line
-                                        self.processed_plans[plan_no] = set()
-                        total_coil_count = sum(len(coils) for coils in self.processed_plans.values())
-                        print(f"load_processed_plans: 使用gbk编码成功加载 {len(self.processed_plans)} 个计划号")
-                    except Exception as e2:
-                        print(f"load_processed_plans: 使用gbk编码也失败: {str(e2)}")
-                        self.processed_plans = {}
-            else:
-                print(f"load_processed_plans: 文件不存在，初始化空字典")
-                self.processed_plans = {}
+                                self.processed_plans[plan_no].add(coil_no)
+                            else:
+                            # 旧格式：只有计划号（向后兼容
+                                plan_no = line
+                                self.processed_plans[plan_no] = set()
+            total_coil_count = sum(len(coils) for coils in self.processed_plans.values())
+            print(f"已加载 {len(self.processed_plans)} 个计划号，共 {total_coil_count} 个已处理钢卷号")
         except Exception as e:
-            print(f"load_processed_plans: 发生未知错误: {str(e)}")
+            print(f"加载已处理计划失败: {str(e)}")
             self.processed_plans = {}
     
     def load_printed_plans(self):
@@ -2400,47 +2371,113 @@ class MainWindow(QMainWindow):
             selected_plans = [self.plan_data[index.row()]['plan_no'] for index in selected_items]
             print(f"process_plans: 选中的计划号: {selected_plans}")
             
-            # 检查选中的计划号中是否有已处理的（根据计划号类型判断）
-            already_processed = []
-            for plan_no in selected_plans:
-                # 对于非D开头的计划号，保持原有判断
-                if not plan_no.startswith('D') and not plan_no.startswith('d'):
-                    # 兼容旧格式
-                    if isinstance(self.processed_plans, set):
-                        if plan_no in self.processed_plans:
-                            already_processed.append(plan_no)
-                    elif isinstance(self.processed_plans, dict):
-                        # 对于非D开头的，只要有记录（表示已处理过）
-                        if plan_no in self.processed_plans:
-                            already_processed.append(plan_no)
-                else:
-                    # D开头的计划号，我们总是允许重新处理（因为可能新增了钢卷号）
-                    # 所以不加入already_processed列表
-                    pass
+            # 筛选可处理的计划号
+            # 条件：1. 不是D开头 2. 没有"无文件"标识 3. A1单元格不是"轧制计划明细表"
+            valid_plans = []
+            skipped_plans = []
+            no_file_plans = []
+            already_processed_plans = []
             
-            # 如果不是强制处理，检查已处理状态
-            if already_processed and show_result and not force_process:
-                # 确保主程序窗口在前面
+            for plan_no in selected_plans:
+                # 条件1：排除D开头的计划号
+                if plan_no.startswith('D') or plan_no.startswith('d'):
+                    skipped_plans.append(plan_no)
+                    continue
+                
+                # 条件2：检查是否有"无文件"标识
+                plan_status = None
+                for data in self.plan_data:
+                    if data['plan_no'] == plan_no:
+                        plan_status = data.get('status', '')
+                        break
+                
+                if plan_status == '无文件':
+                    no_file_plans.append(plan_no)
+                    continue
+                
+                # 条件3：检查A1单元格是否为"轧制计划明细表"
+                file_path = os.path.join(plan_dir, f"{plan_no}.xls")
+                if os.path.exists(file_path):
+                    try:
+                        import xlrd
+                        workbook = xlrd.open_workbook(file_path)
+                        sheet = workbook.sheet_by_index(0)
+                        if sheet.nrows > 0 and sheet.ncols > 0:
+                            a1_value = str(sheet.cell_value(0, 0)).strip()
+                            if a1_value == "轧制计划明细表":
+                                already_processed_plans.append(plan_no)
+                                continue
+                    except Exception as e:
+                        print(f"检查计划号 {plan_no} 文件失败: {str(e)}")
+                
+                # 所有条件都满足，可以处理
+                valid_plans.append(plan_no)
+            
+            # 输出筛选结果
+            if skipped_plans:
+                print(f"跳过D开头计划号: {skipped_plans}")
+            if no_file_plans:
+                print(f"跳过无文件计划号: {no_file_plans}")
+            if already_processed_plans:
+                print(f"跳过已处理计划号(A1=轧制计划明细表): {already_processed_plans}")
+            print(f"可处理计划号: {valid_plans}")
+            
+            # 如果没有可处理的计划号，显示提示
+            if not valid_plans and show_result:
                 self.activateWindow()
                 self.raise_()
                 self.show()
                 msg_box = QMessageBox(self)
                 msg_box.setWindowTitle("提示")
-                msg_box.setText(f"以下计划号已处理过,无需重复处理：\n\n{', '.join(already_processed)}")
+                msg_text = "没有符合条件的计划号可处理\n\n"
+                if skipped_plans:
+                    msg_text += f"D开头计划号已跳过: {', '.join(skipped_plans)}\n"
+                if no_file_plans:
+                    msg_text += f"无文件计划号已跳过: {', '.join(no_file_plans)}\n"
+                if already_processed_plans:
+                    msg_text += f"已处理计划号已跳过: {', '.join(already_processed_plans)}\n"
+                msg_box.setText(msg_text)
                 msg_box.setStandardButtons(QMessageBox.Ok)
                 msg_box.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Dialog | Qt.MSWindowsFixedSizeDialogHint)
                 msg_box.setModal(True)
                 QApplication.setActiveWindow(msg_box)
                 msg_box.exec_()
-                # 弹窗关闭后再次激活主程序窗口
                 self.activateWindow()
                 self.raise_()
                 self.show()
                 return
             
-            # 构建选中计划号的文件路径列表
+            # 如果不是强制处理，检查已处理状态（原有逻辑保持不变）
+            if not force_process:
+                already_processed = []
+                for plan_no in valid_plans:
+                    if isinstance(self.processed_plans, set):
+                        if plan_no in self.processed_plans:
+                            already_processed.append(plan_no)
+                    elif isinstance(self.processed_plans, dict):
+                        if plan_no in self.processed_plans:
+                            already_processed.append(plan_no)
+                
+                if already_processed and show_result:
+                    self.activateWindow()
+                    self.raise_()
+                    self.show()
+                    msg_box = QMessageBox(self)
+                    msg_box.setWindowTitle("提示")
+                    msg_box.setText(f"以下计划号已处理过,无需重复处理：\n\n{', '.join(already_processed)}")
+                    msg_box.setStandardButtons(QMessageBox.Ok)
+                    msg_box.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Dialog | Qt.MSWindowsFixedSizeDialogHint)
+                    msg_box.setModal(True)
+                    QApplication.setActiveWindow(msg_box)
+                    msg_box.exec_()
+                    self.activateWindow()
+                    self.raise_()
+                    self.show()
+                    return
+            
+            # 构建选中计划号的文件路径列表（只处理valid_plans）
             selected_files = []
-            for plan_no in selected_plans:
+            for plan_no in valid_plans:
                 file_path = os.path.join(plan_dir, f"{plan_no}.xls")
                 if os.path.exists(file_path):
                     selected_files.append((plan_no, file_path))
