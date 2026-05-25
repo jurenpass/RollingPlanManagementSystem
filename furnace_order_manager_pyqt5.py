@@ -3292,7 +3292,9 @@ class MainWindow(QMainWindow):
                     elif data_idx == 强度列索引:  # 强度列（14pt，左边框虚线，右边框实线）
                         sheet.write(row_idx + 3, data_idx, value, style_data_12pt_strength)
                     elif data_idx == len(headers) - 1:  # 订宽列（最后一列）
-                        sheet.write(row_idx + 3, data_idx, value, style_data_12pt_strength)
+                        # 订宽在表格控件中是第19列（索引18）
+                        订宽值 = row_data[18] if len(row_data) > 18 else ""
+                        sheet.write(row_idx + 3, data_idx, 订宽值, style_data_12pt_strength)
                     elif 5 <= data_idx <= 8 or 10 <= data_idx <= 11 or 14 <= data_idx <= 15:  # 坯宽到强度之间的列（左右虚线）
                         sheet.write(row_idx + 3, data_idx, value, style_data_dashed)
                     else:  # 其他所有列（14pt，居中对齐）
@@ -5142,7 +5144,35 @@ class MainWindow(QMainWindow):
     
     def load_remove_phosphorus_list(self):
         """加载除鳞钢种列表"""
-        return []  # 简化实现,实际应该从文件或配置中加载
+        remove_phosphorus_list = []
+        try:
+            import os
+            # 尝试从计划号目录加载除鳞钢种文件
+            phosphorus_file_path = os.path.join(self.plan_dir, "除鳞钢种.txt")
+            if not os.path.exists(phosphorus_file_path):
+                # 如果不存在，尝试从项目目录加载
+                if getattr(sys, 'frozen', False):
+                    project_phos_file = os.path.join(sys._MEIPASS, "除鳞钢种.txt")
+                else:
+                    project_phos_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "除鳞钢种.txt")
+                if os.path.exists(project_phos_file):
+                    phosphorus_file_path = project_phos_file
+                else:
+                    # 如果都不存在，返回空列表
+                    return []
+        
+            # 读取除鳞钢种文件
+            with open(phosphorus_file_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    grade = line.strip()
+                    if grade:
+                        remove_phosphorus_list.append(grade)
+        
+            print(f"[✓] 成功加载除鳞钢种列表: {remove_phosphorus_list}")
+        except Exception as e:
+            print(f"[×] 加载除鳞钢种列表失败: {str(e)}")
+        
+        return remove_phosphorus_list
     
     def load_aps_grades(self):
         """加载APS钢种列表"""
