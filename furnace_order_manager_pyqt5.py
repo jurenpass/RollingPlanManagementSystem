@@ -2382,19 +2382,13 @@ class MainWindow(QMainWindow):
                 del self.plans_to_process
             else:
                 # 手动点击处理计划：检查条件
-                # 条件：1. 不是D开头 2. 没有"无文件"标识 3. A1单元格不是"轧制计划明细表"
+                # 条件：1. 没有"无文件"标识 2. A1单元格不是"轧制计划明细表"
                 valid_plans = []
-                skipped_plans = []
                 no_file_plans = []
                 already_processed_plans = []
                 
                 for plan_no in selected_plans:
-                    # 条件1：排除D开头的计划号
-                    if plan_no.startswith('D') or plan_no.startswith('d'):
-                        skipped_plans.append(plan_no)
-                        continue
-                    
-                    # 条件2：检查是否有"无文件"标识
+                    # 条件1：检查是否有"无文件"标识
                     plan_status = None
                     for data in self.plan_data:
                         if data['plan_no'] == plan_no:
@@ -2405,7 +2399,7 @@ class MainWindow(QMainWindow):
                         no_file_plans.append(plan_no)
                         continue
                     
-                    # 条件3：检查A1单元格是否为"轧制计划明细表"
+                    # 条件2：检查A1单元格是否为"轧制计划明细表"
                     file_path = os.path.join(plan_dir, f"{plan_no}.xls")
                     if os.path.exists(file_path):
                         try:
@@ -2424,8 +2418,6 @@ class MainWindow(QMainWindow):
                     valid_plans.append(plan_no)
                 
                 # 输出筛选结果
-                if skipped_plans:
-                    print(f"跳过D开头计划号: {skipped_plans}")
                 if no_file_plans:
                     print(f"跳过无文件计划号: {no_file_plans}")
                 if already_processed_plans:
@@ -2440,8 +2432,6 @@ class MainWindow(QMainWindow):
                     msg_box = QMessageBox(self)
                     msg_box.setWindowTitle("提示")
                     msg_text = "没有符合条件的计划号可处理\n\n"
-                    if skipped_plans:
-                        msg_text += f"D开头计划号已跳过: {', '.join(skipped_plans)}\n"
                     if no_file_plans:
                         msg_text += f"无文件计划号已跳过: {', '.join(no_file_plans)}\n"
                     if already_processed_plans:
