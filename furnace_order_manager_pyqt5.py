@@ -1777,7 +1777,7 @@ class MainWindow(QMainWindow):
             print(f"保存低轧宽计划号失败: {str(e)}")
     
     def 匹配除鳞钢种(self, 牌号, removePhosphorusList):
-        """检查牌号是否匹配除鳞钢种列表"""
+        """检查牌号是否匹配除鳞钢种列表（支持%通配符）"""
         if not 牌号:
             return False
         
@@ -1802,6 +1802,14 @@ class MainWindow(QMainWindow):
             # 通配符匹配：以"-P"结尾
             if 钢种字符串 == "-P" and 牌号字符串.endswith("-P"):
                 return True
+            
+            # 支持%通配符匹配（%表示任意字符序列，包括空序列）
+            if '%' in 钢种字符串:
+                # 将%通配符转换为正则表达式
+                pattern = 钢种字符串.replace('%', '.*')
+                import re
+                if re.match(pattern, 牌号字符串):
+                    return True
         
         return False
         
